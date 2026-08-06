@@ -1,15 +1,17 @@
 {
   "expo": {
-    "name": "anchor",
-    "slug": "anchor",
+    "name": "moondial",
+    "slug": "moondial",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kaibrabo.moondial"
     },
     "android": {
+      "package": "com.kaibrabo.moondial",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",

@@ -1,0 +1,159 @@
+// App state: locations, alarms, and the home workday. Local-first, persisted via
+// AsyncStorage (which is backed by localStorage on web). Default state IS the
+// seed, so a fresh install starts with San Francisco + a standard workday.
+
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { Alarm, Location, Recurrence, Workday } from './types';
+
+const OLD_STORE_KEY = 'anchor-store-v2';
+const NEW_STORE_KEY = 'moondial-store-v1';
+
+// Migration: convert old 'anchorZone' field to 'pinnedZone' for existing user data
+function migrateAlarms(alarms: unknown[]): Alarm[] {
+  return alarms.map((a: unknown) => {
+    const alarm = a as Record<string, unknown>;
+    if ('anchorZone' in alarm && !('pinnedZone' in alarm)) {
+      const { anchorZone, ...rest } = alarm;
+      return { ...rest, pinnedZone: anchorZone } as Alarm;
+    }
+    return alarm as Alarm;
+  });
+}
+
+// One-time migration from old storage key to new one (runs before store hydrates)
+export async function migrateFromAnchorStore(): Promise<void> {
+  try {
+    const newData = await AsyncStorage.getItem(NEW_STORE_KEY);
+    if (newData) return; // Already migrated or fresh install
+
+    const oldData = await AsyncStorage.getItem(OLD_STORE_KEY);
+    if (!oldData) return; // No old data to migrate
+
+    // Parse and migrate the old data
+    const parsed = JSON.parse(oldData);
+    if (parsed?.state?.alarms) {
+      parsed.state.alarms = migrateAlarms(parsed.state.alarms);
+    }
+    parsed.version = 1; // Set version for new store format
+
+    // Write to new key and remove old key
+    await AsyncStorage.setItem(NEW_STORE_KEY, JSON.stringify(parsed));
+    await AsyncStorage.removeItem(OLD_STORE_KEY);
+  } catch {
+    // Migration failed silently - user will get fresh seed data
+  }
+}
+
+function uid(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+const HOME_ZONE = 'America/Los_Angeles';
+
+const SEED_WORKDAY: Workday = {
+  zone: HOME_ZONE,
+  start: '09:00',
+  lunchStart: '12:00',
+  lunchEnd: '13:00',
+  end: '17:00',
+};
+
+const SEED_LOCATIONS: Location[] = [
+  { id: 'home', name: 'San Francisco, CA, USA', ianaZone: HOME_ZONE, isHome: true, order: 0 },
+];
+
+const weekdays: Recurrence = { type: 'weekdays' };
+
+const SEED_ALARMS: Alarm[] = [
+  { id: 'seed-start', locationId: 'home', label: 'Start work', time: '09:00', pinnedZone: HOME_ZONE, recurrence: weekdays, enabled: true },
+  { id: 'seed-lunch', locationId: 'home', label: 'Lunch', time: '12:00', pinnedZone: HOME_ZONE, recurrence: weekdays, enabled: true },
+  { id: 'seed-back', locationId: 'home', label: 'Back from lunch', time: '13:00', pinnedZone: HOME_ZONE, recurrence: weekdays, enabled: true },
+  { id: 'seed-end', locationId: 'home', label: 'End work', time: '17:00', pinnedZone: HOME_ZONE, recurrence: weekdays, enabled: true },
+];
+
+export type ThemePref = 'light' | 'dark' | 'system';
+
+type State = {
+  hasHydrated: boolean;
+  themePref: ThemePref;
+  locations: Location[];
+  alarms: Alarm[];
+  workday: Workday;
+
+  setThemePref: (pref: ThemePref) => void;
+
+  addLocation: (name: string, ianaZone: string) => void;
+  removeLocation: (id: string) => void;
+
+  addAlarm: (alarm: Omit<Alarm, 'id'>) => void;
+  updateAlarm: (id: string, patch: Partial<Omit<Alarm, 'id'>>) => void;
+  toggleAlarm: (id: string) => void;
+  removeAlarm: (id: string) => void;
+
+  setWorkday: (patch: Partial<Workday>) => void;
+};
+
+export const useStore = create<State>()(
+  persist(
+    (set) => ({
+      hasHydrated: false,
+      themePref: 'system',
+      locations: SEED_LOCATIONS,
+      alarms: SEED_ALARMS,
+      workday: SEED_WORKDAY,
+
+      setThemePref: (pref) => set({ themePref: pref }),
+
+      addLocation: (name, ianaZone) =>
+        set((s) => {
+          if (s.locations.some((l) => l.name === name)) return s; // no duplicate city
+          const order = s.locations.reduce((m, l) => Math.max(m, l.order), -1) + 1;
+          return {
+            locations: [...s.locations, { id: uid(), name, ianaZone, isHome: false, order }],
+          };
+        }),
+
+      removeLocation: (id) =>
+        set((s) => {
+          const loc = s.locations.find((l) => l.id === id);
+          if (!loc || loc.isHome) return s; // never remove home
+          return {
+            locations: s.locations.filter((l) => l.id !== id),
+            alarms: s.alarms.filter((a) => a.locationId !== id), // drop its alarms too
+          };
+        }),
+
+      addAlarm: (alarm) => set((s) => ({ alarms: [...s.alarms, { ...alarm, id: uid() }] })),
+
+      updateAlarm: (id, patch) =>
+        set((s) => ({ alarms: s.alarms.map((a) => (a.id === id ? { ...a, ...patch } : a)) })),
+
+      toggleAlarm: (id) =>
+        set((s) => ({ alarms: s.alarms.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a)) })),
+
+      removeAlarm: (id) => set((s) => ({ alarms: s.alarms.filter((a) => a.id !== id) })),
+
+      setWorkday: (patch) => set((s) => ({ workday: { ...s.workday, ...patch } })),
+    }),
+    {
+      name: NEW_STORE_KEY,
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: ({ locations, alarms, workday, themePref }) => ({ locations, alarms, workday, themePref }),
+      migrate: (persisted: unknown, version: number) => {
+        // Migrate from anchor-store-v2 format (anchorZone -> pinnedZone)
+        const data = persisted as { alarms?: unknown[] } | null;
+        if (data?.alarms) {
+          data.alarms = migrateAlarms(data.alarms);
+        }
+        return data as State;
+      },
+      version: 1,
+      onRehydrateStorage: () => (state) => {
+        useStore.setState({ hasHydrated: true });
+        void state;
+      },
+    },
+  ),
+);
