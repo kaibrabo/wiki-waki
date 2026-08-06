@@ -1,13 +1,24 @@
-import { XStack, Text } from 'tamagui';
+import { XStack } from 'tamagui';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, type ThemePref } from '../store';
+import { useEffectiveTheme } from '../hooks/useEffectiveTheme';
 
-// Cycles system → light → dark → system. The glyph shows the current preference.
-const NEXT: Record<ThemePref, ThemePref> = { system: 'light', light: 'dark', dark: 'system' };
-const GLYPH: Record<ThemePref, string> = { system: '🖥', light: '☀️', dark: '🌙' };
+// Toggles between light and dark only
+const ICON: Record<'light' | 'dark', keyof typeof MaterialCommunityIcons.glyphMap> = {
+  light: 'white-balance-sunny',
+  dark: 'moon-waning-crescent',
+};
 
 export function ThemeToggle() {
   const pref = useStore((s) => s.themePref);
   const setThemePref = useStore((s) => s.setThemePref);
+  const theme = useEffectiveTheme();
+  const iconColor = theme === 'dark' ? '#aaa' : '#666';
+
+  // Treat 'system' as 'light' for display, toggle between light/dark only
+  const current = pref === 'system' ? 'light' : pref;
+  const next: ThemePref = current === 'light' ? 'dark' : 'light';
+
   return (
     <XStack
       width={38}
@@ -18,12 +29,10 @@ export function ThemeToggle() {
       bg="$color3"
       pressStyle={{ bg: '$color5' }}
       cursor="pointer"
-      onPress={() => setThemePref(NEXT[pref])}
-      aria-label={`Theme: ${pref}`}
+      onPress={() => setThemePref(next)}
+      aria-label={`Theme: ${current}`}
     >
-      <Text fontSize={17} lineHeight={20}>
-        {GLYPH[pref]}
-      </Text>
+      <MaterialCommunityIcons name={ICON[current]} size={20} color={iconColor} />
     </XStack>
   );
 }
