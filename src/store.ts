@@ -73,12 +73,14 @@ type State = {
   hasHydrated: boolean;
   themePref: ThemePref;
   use24Hour: boolean;
+  notificationPromptDismissed: boolean;
   locations: Location[];
   alarms: Alarm[];
   labelOptions: string[];
 
   setThemePref: (pref: ThemePref) => void;
   setUse24Hour: (use24: boolean) => void;
+  dismissNotificationPrompt: () => void;
 
   addLocation: (name: string, ianaZone: string) => void;
   removeLocation: (id: string) => void;
@@ -99,12 +101,14 @@ export const useStore = create<State>()(
       hasHydrated: false,
       themePref: 'system',
       use24Hour: false,
+      notificationPromptDismissed: false,
       locations: SEED_LOCATIONS,
       alarms: SEED_ALARMS,
       labelOptions: DEFAULT_LABEL_OPTIONS,
 
       setThemePref: (pref) => set({ themePref: pref }),
       setUse24Hour: (use24) => set({ use24Hour: use24 }),
+      dismissNotificationPrompt: () => set({ notificationPromptDismissed: true }),
 
       addLocation: (name, ianaZone) =>
         set((s) => {
@@ -158,7 +162,7 @@ export const useStore = create<State>()(
     {
       name: NEW_STORE_KEY,
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ locations, alarms, themePref, use24Hour, labelOptions }) => ({ locations, alarms, themePref, use24Hour, labelOptions }),
+      partialize: ({ locations, alarms, themePref, use24Hour, labelOptions, notificationPromptDismissed }) => ({ locations, alarms, themePref, use24Hour, labelOptions, notificationPromptDismissed }),
       migrate: (persisted: unknown, version: number) => {
         // Migrate from anchor-store-v2 format (anchorZone -> pinnedZone)
         const data = persisted as { alarms?: unknown[] } | null;

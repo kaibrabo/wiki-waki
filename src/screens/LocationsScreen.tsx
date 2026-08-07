@@ -26,6 +26,8 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
   const addLocation = useStore((s) => s.addLocation);
   const removeLocation = useStore((s) => s.removeLocation);
   const toggleLocationDisabled = useStore((s) => s.toggleLocationDisabled);
+  const notificationPromptDismissed = useStore((s) => s.notificationPromptDismissed);
+  const dismissNotificationPrompt = useStore((s) => s.dismissNotificationPrompt);
   const [adding, setAdding] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [perm, setPerm] = useState(scheduler.permission());
@@ -110,31 +112,53 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
         </XStack>
       )}
 
-      {alarmQueueText && (
+      {alarmQueueText ? (
         <XStack items="center" gap="$1.5" px="$4" pb="$3">
           <MaterialCommunityIcons name="alarm" size={14} color="#888" />
           <Text color="$color10" fontSize={13} numberOfLines={2}>
             Next: {alarmQueueText}
           </Text>
         </XStack>
+      ) : (
+        <XStack items="center" gap="$1.5" px="$4" pb="$3">
+          <MaterialCommunityIcons name="alarm-off" size={14} color="#888" />
+          <Text color="$color10" fontSize={13}>
+            No upcoming alarms
+          </Text>
+        </XStack>
       )}
 
-      {perm === 'default' && (
+      {perm === 'default' && !notificationPromptDismissed && (
         <Card
           mx="$4"
           mb="$2"
           bg="$blue4"
           px="$3.5"
           py="$2.5"
-          pressStyle={{ opacity: 0.85 }}
-          onPress={async () => {
-            await scheduler.requestPermission();
-            setPerm(scheduler.permission());
-          }}
         >
-          <Text color="$blue11" fontSize={13} fontWeight="600" text="center">
-            Enable reminders — tap to allow notifications
-          </Text>
+          <XStack items="center" justify="space-between">
+            <Text 
+              color="$blue11" 
+              fontSize={13} 
+              fontWeight="600" 
+              flex={1}
+              onPress={async () => {
+                await scheduler.requestPermission();
+                setPerm(scheduler.permission());
+              }}
+            >
+              Enable reminders — tap to allow notifications
+            </Text>
+            <Text
+              color="$blue10"
+              fontSize={16}
+              fontWeight="600"
+              px="$2"
+              onPress={dismissNotificationPrompt}
+            >
+              ✕
+            </Text>
+          </XStack>
         </Card>
       )}
 
