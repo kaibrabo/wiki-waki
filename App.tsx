@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { TamaguiProvider, Theme, YStack, Text } from 'tamagui';
 import { tamaguiConfig } from './tamagui.config';
@@ -22,31 +22,40 @@ export default function App() {
   }, []);
 
   // Start the reminder loop once; it reads live alarms from the store each tick.
+  // Filter out alarms from disabled locations.
   useEffect(() => {
-    const stop = scheduler.start(() => useStore.getState().alarms);
+    const stop = scheduler.start(() => {
+      const { alarms, locations } = useStore.getState();
+      const disabledLocationIds = new Set(
+        locations.filter((l) => l.disabled).map((l) => l.id)
+      );
+      return alarms.filter((a) => !disabledLocationIds.has(a.locationId));
+    });
     return stop;
   }, []);
 
   return (
-    <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
-      <Theme name={theme}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme === 'dark' ? '#000' : '#fff' }}>
-          <YStack flex={1} bg="$background">
-            {!hasHydrated ? (
-              <YStack flex={1} items="center" justify="center">
-                <Text color="$color10" fontSize={22}>
-                  Moondial
-                </Text>
-              </YStack>
-            ) : route.name === 'locations' ? (
-              <LocationsScreen onOpen={(id) => setRoute({ name: 'detail', id })} />
-            ) : (
-              <LocationDetailScreen id={route.id} onBack={() => setRoute({ name: 'locations' })} />
-            )}
-          </YStack>
-          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        </SafeAreaView>
-      </Theme>
-    </TamaguiProvider>
+    <SafeAreaProvider>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme={theme}>
+        <Theme name={theme}>
+          <SafeAreaView style={{ flex: 1, backgroundColor: theme === 'dark' ? '#000' : '#fff' }}>
+            <YStack flex={1} bg="$background">
+              {!hasHydrated ? (
+                <YStack flex={1} items="center" justify="center">
+                  <Text color="$color10" fontSize={22}>
+                    Moondial
+                  </Text>
+                </YStack>
+              ) : route.name === 'locations' ? (
+                <LocationsScreen onOpen={(id) => setRoute({ name: 'detail', id })} />
+              ) : (
+                <LocationDetailScreen id={route.id} onBack={() => setRoute({ name: 'locations' })} />
+              )}
+            </YStack>
+            <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+          </SafeAreaView>
+        </Theme>
+      </TamaguiProvider>
+    </SafeAreaProvider>
   );
 }

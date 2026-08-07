@@ -3,7 +3,7 @@ import { Modal } from 'react-native';
 import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { DateTime } from 'luxon';
 import { useStore } from '../store';
-import { COMMON_ZONES, zoneHaystack } from '../lib/zones';
+import { searchZones } from '../lib/zones';
 
 export function AddLocationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const locations = useStore((s) => s.locations);
@@ -12,9 +12,8 @@ export function AddLocationModal({ visible, onClose }: { visible: boolean; onClo
 
   const taken = new Set(locations.map((l) => l.name));
   const options = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return COMMON_ZONES.filter((z) => !taken.has(z.label) && (q === '' || zoneHaystack(z).includes(q)));
-  }, [query, locations]);
+    return searchZones(query).filter((z) => !taken.has(z.label));
+  }, [query, taken]);
 
   const now = DateTime.now();
 
@@ -39,7 +38,7 @@ export function AddLocationModal({ visible, onClose }: { visible: boolean; onClo
             size="$4"
             value={query}
             onChangeText={setQuery}
-            placeholder="Search city, timezone, or airport (SFO, HNL…)"
+            placeholder="Search city, zipcode, or airport code..."
             autoFocus
           />
 

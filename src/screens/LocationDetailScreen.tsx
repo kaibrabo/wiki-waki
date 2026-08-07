@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { ScrollView, YStack, XStack, Text, Card, Button } from 'tamagui';
+import { Alert } from 'react-native';
+import { ScrollView, YStack, XStack, Text, Card, Button, Switch } from 'tamagui';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import { useNow } from '../hooks/useNow';
 import { AppSwitch } from '../components/AppSwitch';
 import { AlarmEditor } from '../components/AlarmEditor';
 import { nextFireInstant, displayInZone, recurrenceLabel } from '../lib/schedule';
+import { formatLocationName } from '../lib/zones';
 import type { Alarm } from '../types';
 
 export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () => void }) {
@@ -12,6 +15,8 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
   const location = useStore((s) => s.locations.find((l) => l.id === id));
   const alarms = useStore((s) => s.alarms);
   const removeLocation = useStore((s) => s.removeLocation);
+  const toggleHome = useStore((s) => s.toggleHome);
+  const use24Hour = useStore((s) => s.use24Hour);
   const [editing, setEditing] = useState<Alarm | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
 
@@ -46,11 +51,14 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
     setEditorOpen(true);
   };
 
+  const displayName = formatLocationName(location.name, location.ianaZone);
+  const timeFormat = use24Hour ? 'HH:mm' : 'h:mm';
+
   return (
     <YStack flex={1}>
       <TopBar
         onBack={onBack}
-        title={location.name}
+        title={displayName}
         right={
           <Button size="$3" circular chromeless onPress={openNew} aria-label="Add alarm">
             <Text fontSize={24} color="$blue10">
@@ -64,23 +72,89 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
         <YStack px="$4" pb={40}>
         <XStack items="flex-end" justify="center" mt="$4" gap="$2">
           <Text fontSize={76} lineHeight={84} fontWeight="200" color="$color12">
-            {local.toFormat('h:mm')}
+            {local.toFormat(timeFormat)}
           </Text>
-          <Text fontSize={22} lineHeight={40} color="$color10">
-            {local.toFormat('a')}
-          </Text>
+          {!use24Hour && (
+            <Text fontSize={22} lineHeight={40} color="$color10">
+              {local.toFormat('a')}
+            </Text>
+          )}
         </XStack>
         <Text color="$color10" fontSize={14} lineHeight={20} text="center" mt="$2" mb="$6">
           {local.toFormat('cccc, LLLL d')} · {local.toFormat('ZZZZ')}
         </Text>
 
+        <XStack gap="$3" mb="$6">
+          <Card 
+            width="48%"
+            borderWidth={1} 
+            borderColor="$borderColor" 
+            bg="$color2" 
+            rounded="$6" 
+            px="$4" 
+            py="$3"
+            pressStyle={{ bg: '$color3' }}
+            onPress={() => toggleHome(location.id)}
+          >
+            <XStack items="center" justify="center" gap="$2">
+              <MaterialCommunityIcons
+                name={location.isHome ? 'home' : 'home-outline'}
+                size={20}
+                color={location.isHome ? '#3b82f6' : '#888'}
+              />
+              <Text fontSize={15} color={location.isHome ? '$blue10' : '$color12'}>
+                {location.isHome ? 'Home' : 'Set Home'}
+              </Text>
+            </XStack>
+          </Card>
+
+          <Card 
+            width="48%"
+            borderWidth={1} 
+            borderColor="$borderColor" 
+            bg="$color2" 
+            rounded="$6" 
+            px="$4" 
+            py="$3"
+            pressStyle={{ bg: '$color3' }}
+            onPress={() => {
+              Alert.alert(
+                'Remove Location',
+                `Are you sure you want to remove ${displayName}?`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Remove', 
+                    style: 'destructive',
+                    onPress: () => {
+                      removeLocation(location.id);
+                      onBack();
+                    }
+                  },
+                ]
+              );
+            }}
+          >
+            <XStack items="center" justify="center" gap="$2">
+              <MaterialCommunityIcons
+                name="trash-can-outline"
+                size={20}
+                color="#ef4444"
+              />
+              <Text fontSize={15} color="$red10">
+                Remove
+              </Text>
+            </XStack>
+          </Card>
+        </XStack>
+
         <Text color="$color10" fontSize={12} fontWeight="700" mb="$2" ml="$1">
-          ALARMS · {location.name.toUpperCase()} TIME
+          ALARMS
         </Text>
 
         {owned.length === 0 && (
           <Text color="$color10" fontSize={14} py="$5" text="center">
-            No alarms here yet. Tap ＋ to add one for {location.name}.
+            Tap + to add alarm
           </Text>
         )}
 
@@ -94,22 +168,6 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             />
           ))}
         </YStack>
-
-        {!location.isHome && (
-          <Button
-            mt="$6"
-            size="$4"
-            chromeless
-            onPress={() => {
-              removeLocation(location.id);
-              onBack();
-            }}
-          >
-            <Text color="$red10" fontSize={16} fontWeight="600">
-              Remove Location
-            </Text>
-          </Button>
-        )}
         </YStack>
       </ScrollView>
 

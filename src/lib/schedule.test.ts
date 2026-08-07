@@ -2,10 +2,9 @@ import { DateTime } from 'luxon';
 import {
   nextFireInstant,
   displayInZone,
-  workStatus,
   countdownTo,
 } from './schedule';
-import type { Alarm, Workday } from '../types';
+import type { Alarm } from '../types';
 
 const SF = 'America/Los_Angeles';
 const RIO = 'America/Sao_Paulo';
@@ -78,21 +77,6 @@ describe('recurrence', () => {
       recurrence: { type: 'once', date: '2020-01-01' }, enabled: true,
     };
     expect(nextFireInstant(alarm, now)).toBeNull();
-  });
-});
-
-describe('workStatus', () => {
-  const wd: Workday = { zone: SF, start: '09:00', lunchStart: '12:00', lunchEnd: '13:00', end: '17:00' };
-  const wed = (hhmm: string) =>
-    DateTime.fromISO(`2026-07-15T${hhmm}`, { zone: SF }).set({ weekday: 3 }); // Wednesday
-
-  test('working mid-morning', () => expect(workStatus(wd, wed('10:00'))).toBe('working'));
-  test('lunch at 12:30', () => expect(workStatus(wd, wed('12:30'))).toBe('lunch'));
-  test('off in the evening', () => expect(workStatus(wd, wed('19:00'))).toBe('off'));
-  test('off before work', () => expect(workStatus(wd, wed('07:00'))).toBe('off'));
-  test('off on weekend', () => {
-    const sat = DateTime.fromISO('2026-07-15T10:00', { zone: SF }).set({ weekday: 6 });
-    expect(workStatus(wd, sat)).toBe('off');
   });
 });
 

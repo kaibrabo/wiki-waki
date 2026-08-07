@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Alarm, Location, Recurrence, Workday } from './types';
+import type { Alarm, Location, Recurrence } from './types';
 
 const OLD_STORE_KEY = 'anchor-store-v2';
 const NEW_STORE_KEY = 'moondial-store-v1';
@@ -52,13 +52,7 @@ function uid(): string {
 
 const HOME_ZONE = 'America/Los_Angeles';
 
-const SEED_WORKDAY: Workday = {
-  zone: HOME_ZONE,
-  start: '09:00',
-  lunchStart: '12:00',
-  lunchEnd: '13:00',
-  end: '17:00',
-};
+const DEFAULT_LABEL_OPTIONS = ['Wake', 'Work', 'Appt'];
 
 const SEED_LOCATIONS: Location[] = [
   { id: 'home', name: 'San Francisco, CA, USA', ianaZone: HOME_ZONE, isHome: true, order: 0 },
@@ -78,21 +72,25 @@ export type ThemePref = 'light' | 'dark' | 'system';
 type State = {
   hasHydrated: boolean;
   themePref: ThemePref;
+  use24Hour: boolean;
   locations: Location[];
   alarms: Alarm[];
-  workday: Workday;
+  labelOptions: string[];
 
   setThemePref: (pref: ThemePref) => void;
+  setUse24Hour: (use24: boolean) => void;
 
   addLocation: (name: string, ianaZone: string) => void;
   removeLocation: (id: string) => void;
+  toggleLocationDisabled: (id: string) => void;
+  toggleHome: (id: string) => void;
 
   addAlarm: (alarm: Omit<Alarm, 'id'>) => void;
   updateAlarm: (id: string, patch: Partial<Omit<Alarm, 'id'>>) => void;
   toggleAlarm: (id: string) => void;
   removeAlarm: (id: string) => void;
 
-  setWorkday: (patch: Partial<Workday>) => void;
+  addLabelOption: (label: string) => void;
 };
 
 export const useStore = create<State>()(
@@ -100,11 +98,13 @@ export const useStore = create<State>()(
     (set) => ({
       hasHydrated: false,
       themePref: 'system',
+      use24Hour: false,
       locations: SEED_LOCATIONS,
       alarms: SEED_ALARMS,
-      workday: SEED_WORKDAY,
+      labelOptions: DEFAULT_LABEL_OPTIONS,
 
       setThemePref: (pref) => set({ themePref: pref }),
+      setUse24Hour: (use24) => set({ use24Hour: use24 }),
 
       addLocation: (name, ianaZone) =>
         set((s) => {
@@ -125,6 +125,20 @@ export const useStore = create<State>()(
           };
         }),
 
+      toggleLocationDisabled: (id) =>
+        set((s) => ({
+          locations: s.locations.map((l) =>
+            l.id === id ? { ...l, disabled: !l.disabled } : l
+          ),
+        })),
+
+      toggleHome: (id) =>
+        set((s) => ({
+          locations: s.locations.map((l) =>
+            l.id === id ? { ...l, isHome: !l.isHome } : l
+          ),
+        })),
+
       addAlarm: (alarm) => set((s) => ({ alarms: [...s.alarms, { ...alarm, id: uid() }] })),
 
       updateAlarm: (id, patch) =>
@@ -135,12 +149,16 @@ export const useStore = create<State>()(
 
       removeAlarm: (id) => set((s) => ({ alarms: s.alarms.filter((a) => a.id !== id) })),
 
-      setWorkday: (patch) => set((s) => ({ workday: { ...s.workday, ...patch } })),
+      addLabelOption: (label) =>
+        set((s) => {
+          if (s.labelOptions.includes(label)) return s;
+          return { labelOptions: [...s.labelOptions, label] };
+        }),
     }),
     {
       name: NEW_STORE_KEY,
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ locations, alarms, workday, themePref }) => ({ locations, alarms, workday, themePref }),
+      partialize: ({ locations, alarms, themePref, use24Hour, labelOptions }) => ({ locations, alarms, themePref, use24Hour, labelOptions }),
       migrate: (persisted: unknown, version: number) => {
         // Migrate from anchor-store-v2 format (anchorZone -> pinnedZone)
         const data = persisted as { alarms?: unknown[] } | null;

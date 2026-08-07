@@ -28,17 +28,5 @@ export type Location = {
   ianaZone: string; // IANA zone, e.g. "America/Sao_Paulo"
   isHome: boolean;
   order: number;
-};
-
-export type WorkStatus = 'working' | 'lunch' | 'off';
-
-// The home workday, used to drive the status chip ("Working" / "Lunch" / "Off").
-// All boundary times are "HH:mm" wall-clock in `zone`. The seed derives the four
-// home alarms from this same definition.
-export type Workday = {
-  zone: string; // IANA zone of the home schedule
-  start: string; // "09:00"
-  lunchStart: string; // "12:00"
-  lunchEnd: string; // "13:00"
-  end: string; // "17:00"
+  disabled?: boolean; // if true, all alarms for this location are silenced
 };

@@ -6,7 +6,7 @@
 // summer and 2h in winter without us tracking anything.
 
 import { DateTime } from 'luxon';
-import type { Alarm, Recurrence, Workday, WorkStatus } from '../types';
+import type { Alarm, Recurrence } from '../types';
 
 /** Parse "HH:mm" into [hour, minute]. */
 function parseHM(hhmm: string): [number, number] {
@@ -85,26 +85,6 @@ export function currentZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
-/** Current work status from the home workday definition. Weekends are Off. */
-export function workStatus(workday: Workday, now: DateTime = DateTime.now()): WorkStatus {
-  const z = now.setZone(workday.zone);
-  if (z.weekday >= 6) return 'off'; // Sat (6) or Sun (7)
-
-  const mins = z.hour * 60 + z.minute;
-  const toMin = (hhmm: string) => {
-    const [h, m] = parseHM(hhmm);
-    return h * 60 + m;
-  };
-  const start = toMin(workday.start);
-  const lunchStart = toMin(workday.lunchStart);
-  const lunchEnd = toMin(workday.lunchEnd);
-  const end = toMin(workday.end);
-
-  if (mins < start || mins >= end) return 'off';
-  if (mins >= lunchStart && mins < lunchEnd) return 'lunch';
-  return 'working';
-}
-
 /** The soonest upcoming enabled alarm across a list, or null if none fire. */
 export function nextUpcoming(
   alarms: Alarm[],
@@ -144,4 +124,18 @@ export function countdownTo(instant: DateTime, now: DateTime = DateTime.now()): 
   if (h > 0) return `in ${h}h ${m}m`;
   if (m > 0) return `in ${m}m`;
   return `in ${Math.max(s, 0)}s`;
+}
+
+/** Get all upcoming enabled alarms sorted by fire time. */
+export function allUpcomingAlarms(
+  alarms: Alarm[],
+  now: DateTime = DateTime.now(),
+): { alarm: Alarm; instant: DateTime }[] {
+  const upcoming: { alarm: Alarm; instant: DateTime }[] = [];
+  for (const alarm of alarms) {
+    if (!alarm.enabled) continue;
+    const instant = nextFireInstant(alarm, now);
+    if (instant) upcoming.push({ alarm, instant });
+  }
+  return upcoming.sort((a, b) => a.instant.toMillis() - b.instant.toMillis());
 }
