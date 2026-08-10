@@ -7,6 +7,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Alarm, Location, Recurrence } from './types';
 import type { Language } from './lib/i18n';
+import { shouldUse24Hour } from './lib/i18n';
 
 const OLD_STORE_KEY = 'anchor-store-v2';
 const NEW_STORE_KEY = 'moondial-store-v1';
@@ -81,6 +82,7 @@ type State = {
   hasHydrated: boolean;
   themePref: ThemePref;
   use24Hour: boolean;
+  use24HourManuallySet: boolean;
   language: Language;
   notificationPromptDismissed: boolean;
   lastAlarmSettings: LastAlarmSettings;
@@ -113,6 +115,7 @@ export const useStore = create<State>()(
       hasHydrated: false,
       themePref: 'system',
       use24Hour: false,
+      use24HourManuallySet: false,
       language: 'en' as Language,
       notificationPromptDismissed: false,
       lastAlarmSettings: {
@@ -126,8 +129,11 @@ export const useStore = create<State>()(
       labelOptions: DEFAULT_LABEL_OPTIONS,
 
       setThemePref: (pref) => set({ themePref: pref }),
-      setUse24Hour: (use24) => set({ use24Hour: use24 }),
-      setLanguage: (lang) => set({ language: lang }),
+      setUse24Hour: (use24) => set({ use24Hour: use24, use24HourManuallySet: true }),
+      setLanguage: (lang) => set((s) => ({ 
+        language: lang, 
+        use24Hour: s.use24HourManuallySet ? s.use24Hour : shouldUse24Hour(lang) 
+      })),
       dismissNotificationPrompt: () => set({ notificationPromptDismissed: true }),
       setLastAlarmSettings: (settings) => set((s) => ({ 
         lastAlarmSettings: { ...s.lastAlarmSettings, ...settings } 
@@ -185,7 +191,7 @@ export const useStore = create<State>()(
     {
       name: NEW_STORE_KEY,
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ locations, alarms, themePref, use24Hour, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }) => ({ locations, alarms, themePref, use24Hour, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }),
+      partialize: ({ locations, alarms, themePref, use24Hour, use24HourManuallySet, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }) => ({ locations, alarms, themePref, use24Hour, use24HourManuallySet, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }),
       migrate: (persisted: unknown, version: number) => {
         // Migrate from anchor-store-v2 format (anchorZone -> pinnedZone)
         const data = persisted as { alarms?: unknown[] } | null;

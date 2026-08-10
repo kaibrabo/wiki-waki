@@ -111,7 +111,16 @@ export function recurrenceLabel(recurrence: Recurrence, language: Language = 'en
     case 'weekdays':
       return t.weekdays;
     case 'weekly': {
-      return recurrence.days.map((d) => dayNames[d]).join(' ') || t.weekdays;
+      const days = recurrence.days;
+      // Check if it matches weekdays (Mon-Fri: 1,2,3,4,5)
+      if (days.length === 5 && [1,2,3,4,5].every(d => days.includes(d))) {
+        return t.weekdays;
+      }
+      // Check if it matches daily (all 7 days)
+      if (days.length === 7) {
+        return t.daily;
+      }
+      return days.map((d) => dayNames[d]).join(' ');
     }
     case 'once':
       return DateTime.fromISO(recurrence.date).toFormat('LLL d');

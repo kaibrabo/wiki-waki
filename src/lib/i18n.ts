@@ -694,6 +694,14 @@ export function useTranslations(lang: Language) {
   return getTranslations(lang);
 }
 
+// Languages that commonly use 12-hour (AM/PM) time format
+const LANGUAGES_WITH_12H: Language[] = ['en', 'tl', 'haw'];
+
+// Check if a language should default to 24-hour time
+export function shouldUse24Hour(lang: Language): boolean {
+  return !LANGUAGES_WITH_12H.includes(lang);
+}
+
 // Map of default label keys to translation keys
 const DEFAULT_LABEL_KEYS: Record<string, keyof TranslationKeys> = {
   'Wake': 'wake',
