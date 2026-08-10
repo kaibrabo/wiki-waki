@@ -238,17 +238,15 @@ function TopBar({
 }) {
   return (
     <XStack items="center" px="$3" pt="$2" pb="$2">
-      <Button size="$3" chromeless onPress={onBack} px="$2" minW={110} justify="flex-start">
-        <Text color="$blue10" fontSize={17}>
-          ‹ Locations
+      <Button size="$3" chromeless onPress={onBack} px="$2" mr="$2" justify="flex-start">
+        <Text color="$blue10" fontSize={28}>
+          ‹
         </Text>
       </Button>
-      <Text flex={1} text="center" fontSize={17} fontWeight="600" color="$color12" numberOfLines={1}>
+      <Text flex={1} fontSize={17} fontWeight="600" color="$color12" numberOfLines={1}>
         {title}
       </Text>
-      <XStack minW={110} justify="flex-end">
-        {right}
-      </XStack>
+      {right}
     </XStack>
   );
 }
