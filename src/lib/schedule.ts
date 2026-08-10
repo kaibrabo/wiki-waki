@@ -7,6 +7,7 @@
 
 import { DateTime } from 'luxon';
 import type { Alarm, Recurrence } from '../types';
+import { getTranslations, type Language } from './i18n';
 
 /** Parse "HH:mm" into [hour, minute]. */
 function parseHM(hhmm: string): [number, number] {
@@ -100,15 +101,17 @@ export function nextUpcoming(
 }
 
 /** Short human label for a recurrence, e.g. "Weekdays" or "Jul 20". */
-export function recurrenceLabel(recurrence: Recurrence): string {
+export function recurrenceLabel(recurrence: Recurrence, language: Language = 'en'): string {
+  const t = getTranslations(language);
+  const dayNames = [t.sun, t.mon, t.tue, t.wed, t.thu, t.fri, t.sat];
+  
   switch (recurrence.type) {
     case 'daily':
-      return 'Every day';
+      return t.daily;
     case 'weekdays':
-      return 'Weekdays';
+      return t.weekdays;
     case 'weekly': {
-      const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      return recurrence.days.map((d) => names[d]).join(' ') || 'Weekly';
+      return recurrence.days.map((d) => dayNames[d]).join(' ') || t.weekdays;
     }
     case 'once':
       return DateTime.fromISO(recurrence.date).toFormat('LLL d');

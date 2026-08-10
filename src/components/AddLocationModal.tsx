@@ -4,12 +4,16 @@ import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { DateTime } from 'luxon';
 import { useStore } from '../store';
 import { searchZones } from '../lib/zones';
+import { getTranslations } from '../lib/i18n';
 
 export function AddLocationModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const locations = useStore((s) => s.locations);
   const addLocation = useStore((s) => s.addLocation);
+  const language = useStore((s) => s.language);
+  const use24Hour = useStore((s) => s.use24Hour);
   const [query, setQuery] = useState('');
 
+  const t = getTranslations(language);
   const taken = new Set(locations.map((l) => l.name));
   const options = useMemo(() => {
     return searchZones(query).filter((z) => !taken.has(z.label));
@@ -23,11 +27,11 @@ export function AddLocationModal({ visible, onClose }: { visible: boolean; onClo
         <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" height="85%">
           <XStack items="center" justify="space-between" px="$4" pb="$3">
             <Text fontSize={20} fontWeight="800" color="$color12">
-              Add Location
+              {t.addLocation}
             </Text>
             <Button size="$3" chromeless onPress={onClose}>
               <Text color="$blue10" fontSize={17} fontWeight="600">
-                Done
+                {t.done}
               </Text>
             </Button>
           </XStack>
@@ -75,7 +79,7 @@ export function AddLocationModal({ visible, onClose }: { visible: boolean; onClo
                     </Text>
                   </YStack>
                   <Text fontSize={15} color="$color10">
-                    {now.setZone(z.zone).toFormat('h:mm a')}
+                    {now.setZone(z.zone).toFormat(use24Hour ? 'HH:mm' : 'h:mm a')}
                   </Text>
                 </XStack>
               </Card>

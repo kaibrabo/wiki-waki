@@ -37,6 +37,9 @@ Each location shows as a card with the current local time, upcoming alarms, and 
 - **DST handled automatically** - uses IANA timezone database, not fixed offsets
 - **Works offline** - local-first, no account required
 - **Dark mode** - easy on the eyes at 3am
+- **24-hour time** - toggle between 12h and 24h formats
+- **12 languages** - English, Spanish, French, German, Mandarin, Cantonese, Japanese, Korean, Indonesian, Tagalog, Arabic, Hawaiian
+- **Native notifications** - real alarm scheduling via expo-notifications
 
 ---
 

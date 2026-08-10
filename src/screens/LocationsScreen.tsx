@@ -9,6 +9,7 @@ import { SettingsButton } from '../components/SettingsButton';
 import { SettingsModal } from '../components/SettingsModal';
 import { AddLocationModal } from '../components/AddLocationModal';
 import { scheduler } from '../lib/scheduler';
+import { getTranslations, translateLabel } from '../lib/i18n';
 import {
   currentZone,
   nextUpcoming,
@@ -28,11 +29,13 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
   const toggleLocationDisabled = useStore((s) => s.toggleLocationDisabled);
   const notificationPromptDismissed = useStore((s) => s.notificationPromptDismissed);
   const dismissNotificationPrompt = useStore((s) => s.dismissNotificationPrompt);
+  const language = useStore((s) => s.language);
   const [adding, setAdding] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [perm, setPerm] = useState(scheduler.permission());
   const { geoInfo } = useGeolocation();
 
+  const t = getTranslations(language);
   const active = currentZone();
   const use24Hour = useStore((s) => s.use24Hour);
   
@@ -54,7 +57,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
     const timeStr = use24Hour 
       ? instant.setZone(alarm.pinnedZone).toFormat('HH:mm')
       : instant.setZone(alarm.pinnedZone).toFormat('h:mm a');
-    const label = alarm.label;
+    const label = translateLabel(alarm.label, language);
     const countdown = countdownTo(instant, now);
     const prefix = code ? `(${code}) ` : '';
     return `${prefix}${timeStr} ${label} ${countdown}`;
@@ -79,7 +82,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <YStack flex={1}>
       <XStack items="center" justify="space-between" px="$4" pt="$4" pb="$3">
-        <Text fontSize={34} fontWeight="800" color="$color12">
+        <Text fontSize={34} fontWeight="600" color="$color12">
           Moondial
         </Text>
         <XStack items="center" gap="$2.5">
@@ -116,14 +119,14 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
         <XStack items="center" gap="$1.5" px="$4" pb="$3">
           <MaterialCommunityIcons name="alarm" size={14} color="#888" />
           <Text color="$color10" fontSize={13} numberOfLines={2}>
-            Next: {alarmQueueText}
+            {t.next}: {alarmQueueText}
           </Text>
         </XStack>
       ) : (
         <XStack items="center" gap="$1.5" px="$4" pb="$3">
           <MaterialCommunityIcons name="alarm-off" size={14} color="#888" />
           <Text color="$color10" fontSize={13}>
-            No upcoming alarms
+            {t.noUpcomingAlarms}
           </Text>
         </XStack>
       )}
@@ -143,11 +146,14 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
               fontWeight="600" 
               flex={1}
               onPress={async () => {
-                await scheduler.requestPermission();
+                const granted = await scheduler.requestPermission();
                 setPerm(scheduler.permission());
+                if (granted) {
+                  dismissNotificationPrompt();
+                }
               }}
             >
-              Enable reminders — tap to allow notifications
+              {t.enableReminders}
             </Text>
             <Text
               color="$blue10"
@@ -162,84 +168,89 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
         </Card>
       )}
 
-      <ScrollView>
-        <YStack px="$4" pt="$2" pb={40}>
-          <Text color="$color10" fontSize={12} fontWeight="700" mb="$2" ml="$1">
-            CURRENT
-          </Text>
-          
-          {currentLocation ? (
-            <LocationCard
-              key={currentLocation.id}
-              loc={currentLocation}
-              now={now}
-              nextText={nextText(alarms.filter((a) => a.locationId === currentLocation.id), currentLocation.ianaZone, now)}
-              onPress={() => onOpen(currentLocation.id)}
-              onLongPress={() => handleLongPress(currentLocation)}
-              onToggleDisabled={() => toggleLocationDisabled(currentLocation.id)}
-            />
-          ) : (
-            <Card
-              borderWidth={1}
-              borderColor="$blue8"
-              borderStyle="dashed"
-              bg="$blue2"
-              rounded="$8"
-              px="$4"
-              py="$3.5"
-              pressStyle={{ bg: '$blue3' }}
-              onPress={() => {
-                const label = labelForZoneWithHint(active, geoInfo?.city);
-                addLocation(label, active);
-              }}
-            >
-              <XStack items="center" justify="space-between" gap="$3">
-                <YStack flex={1} gap="$1">
-                  <Text fontSize={16} fontWeight="600" color="$blue11">
-                    Add {displayNameForZoneWithHint(active, geoInfo?.city)}
-                  </Text>
-                  <Text fontSize={13} color="$blue10">
-                    Create alarms for your current location
-                  </Text>
-                </YStack>
-                <XStack
-                  width={36}
-                  height={36}
-                  rounded={999}
-                  items="center"
-                  justify="center"
-                  bg="$blue9"
-                >
-                  <Text fontSize={22} color="white" lineHeight={24}>
-                    ＋
-                  </Text>
-                </XStack>
-              </XStack>
-            </Card>
-          )}
-
-          {savedLocations.length > 0 && (
-            <>
-              <Text color="$color10" fontSize={12} fontWeight="700" mt="$5" mb="$2" ml="$1">
-                SAVED
-              </Text>
-              <YStack gap="$3">
-                {savedLocations.map((loc) => (
-                  <LocationCard
-                    key={loc.id}
-                    loc={loc}
-                    now={now}
-                    nextText={nextText(alarms.filter((a) => a.locationId === loc.id), loc.ianaZone, now)}
-                    onPress={() => onOpen(loc.id)}
-                    onLongPress={() => handleLongPress(loc)}
-                    onToggleDisabled={() => toggleLocationDisabled(loc.id)}
-                  />
-                ))}
+      {/* Fixed CURRENT section */}
+      <YStack px="$4" pt="$2">
+        <Text color="$color10" fontSize={12} fontWeight="700" mb="$2" ml="$1">
+          {t.current}
+        </Text>
+        
+        {currentLocation ? (
+          <LocationCard
+            key={currentLocation.id}
+            loc={currentLocation}
+            now={now}
+            nextText={nextText(alarms.filter((a) => a.locationId === currentLocation.id), currentLocation.ianaZone, now)}
+            onPress={() => onOpen(currentLocation.id)}
+            onLongPress={() => handleLongPress(currentLocation)}
+            onToggleDisabled={() => toggleLocationDisabled(currentLocation.id)}
+            t={t}
+          />
+        ) : (
+          <Card
+            borderWidth={1}
+            borderColor="$blue8"
+            borderStyle="dashed"
+            bg="$blue2"
+            rounded="$8"
+            px="$4"
+            py="$3.5"
+            pressStyle={{ bg: '$blue3' }}
+            onPress={() => {
+              const label = labelForZoneWithHint(active, geoInfo?.city);
+              addLocation(label, active);
+            }}
+          >
+            <XStack items="center" justify="space-between" gap="$3">
+              <YStack flex={1} gap="$1">
+                <Text fontSize={16} fontWeight="600" color="$blue11">
+                  Add {displayNameForZoneWithHint(active, geoInfo?.city)}
+                </Text>
+                <Text fontSize={13} color="$blue10">
+                  {t.createAlarmsFor}
+                </Text>
               </YStack>
-            </>
-          )}
-        </YStack>
-      </ScrollView>
+              <XStack
+                width={36}
+                height={36}
+                rounded={999}
+                items="center"
+                justify="center"
+                bg="$blue9"
+              >
+                <Text fontSize={22} color="white" lineHeight={24}>
+                  ＋
+                </Text>
+              </XStack>
+            </XStack>
+          </Card>
+        )}
+
+        {savedLocations.length > 0 && (
+          <Text color="$color10" fontSize={12} fontWeight="700" mt="$5" mb="$2" ml="$1">
+            {t.saved}
+          </Text>
+        )}
+      </YStack>
+
+      {/* Scrollable SAVED section */}
+      {savedLocations.length > 0 && (
+        <ScrollView flex={1}>
+          <YStack px="$4" pb={40} gap="$3">
+            {savedLocations.map((loc) => (
+              <LocationCard
+                key={loc.id}
+                loc={loc}
+                now={now}
+                nextText={nextText(alarms.filter((a) => a.locationId === loc.id), loc.ianaZone, now)}
+                onPress={() => onOpen(loc.id)}
+                onLongPress={() => handleLongPress(loc)}
+                onToggleDisabled={() => toggleLocationDisabled(loc.id)}
+                t={t}
+              />
+            ))}
+          </YStack>
+        </ScrollView>
+      )}
 
       <AddLocationModal visible={adding} onClose={() => setAdding(false)} />
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
@@ -260,6 +271,7 @@ function LocationCard({
   onPress,
   onLongPress,
   onToggleDisabled,
+  t,
 }: {
   loc: Location;
   now: ReturnType<typeof useNow>;
@@ -267,6 +279,7 @@ function LocationCard({
   onPress: () => void;
   onLongPress: () => void;
   onToggleDisabled: () => void;
+  t: ReturnType<typeof getTranslations>;
 }) {
   const use24Hour = useStore((s) => s.use24Hour);
   const local = now.setZone(loc.ianaZone);
@@ -322,11 +335,11 @@ function LocationCard({
             <Switch.Thumb backgroundColor="white" />
           </Switch>
           <Text fontSize={12} fontWeight="600" color={isEnabled ? '$blue10' : '$color10'}>
-            {isEnabled ? 'On' : 'Off'}
+            {isEnabled ? t.on : t.off}
           </Text>
         </XStack>
         <Text color="$color10" fontSize={13} shrink={1} text="right" numberOfLines={1}>
-          {loc.disabled ? 'Silenced' : nextText ? `Next: ${nextText}` : 'No upcoming alarms'}
+          {loc.disabled ? t.silenced : nextText ? `${t.next}: ${nextText}` : t.noAlarms}
         </Text>
       </XStack>
     </Card>

@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Alarm, Location, Recurrence } from './types';
+import type { Language } from './lib/i18n';
 
 const OLD_STORE_KEY = 'anchor-store-v2';
 const NEW_STORE_KEY = 'moondial-store-v1';
@@ -69,18 +70,29 @@ const SEED_ALARMS: Alarm[] = [
 
 export type ThemePref = 'light' | 'dark' | 'system';
 
+export type LastAlarmSettings = {
+  label: string;
+  time: string;
+  recType: 'daily' | 'weekdays' | 'once' | 'none' | 'custom';
+  selectedDays: number[];
+};
+
 type State = {
   hasHydrated: boolean;
   themePref: ThemePref;
   use24Hour: boolean;
+  language: Language;
   notificationPromptDismissed: boolean;
+  lastAlarmSettings: LastAlarmSettings;
   locations: Location[];
   alarms: Alarm[];
   labelOptions: string[];
 
   setThemePref: (pref: ThemePref) => void;
   setUse24Hour: (use24: boolean) => void;
+  setLanguage: (lang: Language) => void;
   dismissNotificationPrompt: () => void;
+  setLastAlarmSettings: (settings: Partial<LastAlarmSettings>) => void;
 
   addLocation: (name: string, ianaZone: string) => void;
   removeLocation: (id: string) => void;
@@ -101,14 +113,25 @@ export const useStore = create<State>()(
       hasHydrated: false,
       themePref: 'system',
       use24Hour: false,
+      language: 'en' as Language,
       notificationPromptDismissed: false,
+      lastAlarmSettings: {
+        label: 'Wake',
+        time: '09:00',
+        recType: 'weekdays',
+        selectedDays: [1, 2, 3, 4, 5],
+      },
       locations: SEED_LOCATIONS,
       alarms: SEED_ALARMS,
       labelOptions: DEFAULT_LABEL_OPTIONS,
 
       setThemePref: (pref) => set({ themePref: pref }),
       setUse24Hour: (use24) => set({ use24Hour: use24 }),
+      setLanguage: (lang) => set({ language: lang }),
       dismissNotificationPrompt: () => set({ notificationPromptDismissed: true }),
+      setLastAlarmSettings: (settings) => set((s) => ({ 
+        lastAlarmSettings: { ...s.lastAlarmSettings, ...settings } 
+      })),
 
       addLocation: (name, ianaZone) =>
         set((s) => {
@@ -162,7 +185,7 @@ export const useStore = create<State>()(
     {
       name: NEW_STORE_KEY,
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ locations, alarms, themePref, use24Hour, labelOptions, notificationPromptDismissed }) => ({ locations, alarms, themePref, use24Hour, labelOptions, notificationPromptDismissed }),
+      partialize: ({ locations, alarms, themePref, use24Hour, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }) => ({ locations, alarms, themePref, use24Hour, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }),
       migrate: (persisted: unknown, version: number) => {
         // Migrate from anchor-store-v2 format (anchorZone -> pinnedZone)
         const data = persisted as { alarms?: unknown[] } | null;

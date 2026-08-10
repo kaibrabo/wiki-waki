@@ -8,6 +8,7 @@ import { AppSwitch } from '../components/AppSwitch';
 import { AlarmEditor } from '../components/AlarmEditor';
 import { nextFireInstant, displayInZone, recurrenceLabel } from '../lib/schedule';
 import { formatLocationName } from '../lib/zones';
+import { getTranslations, translateLabel, type Language } from '../lib/i18n';
 import type { Alarm } from '../types';
 
 export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () => void }) {
@@ -17,8 +18,11 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
   const removeLocation = useStore((s) => s.removeLocation);
   const toggleHome = useStore((s) => s.toggleHome);
   const use24Hour = useStore((s) => s.use24Hour);
+  const language = useStore((s) => s.language);
   const [editing, setEditing] = useState<Alarm | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
+
+  const t = getTranslations(language);
 
   if (!location) {
     return (
@@ -103,7 +107,7 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
                 color={location.isHome ? '#3b82f6' : '#888'}
               />
               <Text fontSize={15} color={location.isHome ? '$blue10' : '$color12'}>
-                {location.isHome ? 'Home' : 'Set Home'}
+                {location.isHome ? t.home : t.setHome}
               </Text>
             </XStack>
           </Card>
@@ -119,12 +123,12 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             pressStyle={{ bg: '$color3' }}
             onPress={() => {
               Alert.alert(
-                'Remove Location',
-                `Are you sure you want to remove ${displayName}?`,
+                t.removeLocation,
+                `${t.confirmRemove} ${displayName}?`,
                 [
-                  { text: 'Cancel', style: 'cancel' },
+                  { text: t.cancel, style: 'cancel' },
                   { 
-                    text: 'Remove', 
+                    text: t.remove, 
                     style: 'destructive',
                     onPress: () => {
                       removeLocation(location.id);
@@ -142,19 +146,25 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
                 color="#ef4444"
               />
               <Text fontSize={15} color="$red10">
-                Remove
+                {t.remove}
               </Text>
             </XStack>
           </Card>
         </XStack>
 
         <Text color="$color10" fontSize={12} fontWeight="700" mb="$2" ml="$1">
-          ALARMS
+          {t.alarms}
         </Text>
 
         {owned.length === 0 && (
-          <Text color="$color10" fontSize={14} py="$5" text="center">
-            Tap + to add alarm
+          <Text 
+            color="$color10" 
+            fontSize={14} 
+            py="$5" 
+            text="center"
+            onPress={openNew}
+          >
+            Tap <Text color="$blue10" fontSize={24}>＋</Text> {t.tapToAddAlarm}
           </Text>
         )}
 
@@ -165,6 +175,7 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
               alarm={alarm}
               localTime={instant ? displayInZone(instant, location.ianaZone) : '—'}
               onPress={() => openEdit(alarm)}
+              language={language}
             />
           ))}
         </YStack>
@@ -187,10 +198,12 @@ function AlarmRow({
   alarm,
   localTime,
   onPress,
+  language,
 }: {
   alarm: Alarm;
   localTime: string;
   onPress: () => void;
+  language: Language;
 }) {
   const toggleAlarm = useStore((s) => s.toggleAlarm);
   const dim = alarm.enabled ? 1 : 0.4;
@@ -202,10 +215,10 @@ function AlarmRow({
             {localTime}
           </Text>
           <Text fontSize={15} lineHeight={19} color="$color12" opacity={dim}>
-            {alarm.label}
+            {translateLabel(alarm.label, language)}
           </Text>
           <Text fontSize={12} lineHeight={16} color="$color10">
-            {recurrenceLabel(alarm.recurrence)}
+            {recurrenceLabel(alarm.recurrence, language)}
           </Text>
         </YStack>
         <AppSwitch value={alarm.enabled} onValueChange={() => toggleAlarm(alarm.id)} />
