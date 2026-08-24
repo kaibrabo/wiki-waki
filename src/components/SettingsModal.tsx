@@ -23,21 +23,34 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
 
   if (showLanguagePicker) {
     return (
-      <Modal visible={visible} animationType="slide" transparent onRequestClose={() => setShowLanguagePicker(false)}>
+      <Modal 
+        visible={visible} 
+        animationType="slide" 
+        transparent 
+        onRequestClose={() => setShowLanguagePicker(false)}
+        accessibilityViewIsModal={true}
+      >
         <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
           <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" pb="$6" height="70%">
             <XStack items="center" justify="space-between" px="$4" pb="$3" borderBottomWidth={1} borderColor="$borderColor">
-              <Text fontSize={20} fontWeight="700" color="$color12">
+              <Text fontSize={20} fontWeight="700" color="$color12" accessibilityRole="header">
                 {t.language}
               </Text>
-              <Button size="$3" chromeless onPress={() => setShowLanguagePicker(false)}>
+              <Button 
+                size="$3" 
+                chromeless 
+                onPress={() => setShowLanguagePicker(false)}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={t.done}
+              >
                 <Text color="$blue10" fontSize={17} fontWeight="600">
                   {t.done}
                 </Text>
               </Button>
             </XStack>
             <ScrollView>
-              <YStack px="$4" pt="$3" gap="$2">
+              <YStack px="$4" pt="$3" gap="$2" accessibilityRole="radiogroup">
                 {LANGUAGE_OPTIONS.map((opt) => (
                   <Card
                     key={opt.value}
@@ -52,6 +65,10 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                       setLanguage(opt.value as Language);
                       setShowLanguagePicker(false);
                     }}
+                    accessible={true}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: language === opt.value }}
+                    accessibilityLabel={`${opt.nativeLabel}, ${opt.label}`}
                   >
                     <XStack items="center" justify="space-between">
                       <YStack>
@@ -63,28 +80,41 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                         </Text>
                       </YStack>
                       {language === opt.value && (
-                        <MaterialCommunityIcons name="check" size={22} color="#3b82f6" />
-                      )}
-                    </XStack>
-                  </Card>
-                ))}
-              </YStack>
-            </ScrollView>
-          </YStack>
+                      <MaterialCommunityIcons name="check" size={22} color="#3b82f6" accessibilityElementsHidden />
+                    )}
+                  </XStack>
+                </Card>
+              ))}
+            </YStack>
+          </ScrollView>
         </YStack>
-      </Modal>
-    );
-  }
+      </YStack>
+    </Modal>
+  );
+}
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal 
+      visible={visible} 
+      animationType="slide" 
+      transparent 
+      onRequestClose={onClose}
+      accessibilityViewIsModal={true}
+    >
       <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
         <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" pb="$6">
           <XStack items="center" justify="space-between" px="$4" pb="$3" borderBottomWidth={1} borderColor="$borderColor">
-            <Text fontSize={20} fontWeight="700" color="$color12">
+            <Text fontSize={20} fontWeight="700" color="$color12" accessibilityRole="header">
               {t.settings}
             </Text>
-            <Button size="$3" chromeless onPress={onClose}>
+            <Button 
+              size="$3" 
+              chromeless 
+              onPress={onClose}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={t.done}
+            >
               <Text color="$blue10" fontSize={17} fontWeight="600">
                 {t.done}
               </Text>
@@ -93,7 +123,18 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
 
           <YStack px="$4" pt="$4" gap="$4">
             {/* Theme Toggle */}
-            <Card bg="$color2" borderWidth={1} borderColor="$borderColor" rounded="$4" px="$4" py="$3.5">
+            <Card 
+              bg="$color2" 
+              borderWidth={1} 
+              borderColor="$borderColor" 
+              rounded="$4" 
+              px="$4" 
+              py="$3.5"
+              accessible={true}
+              accessibilityRole="switch"
+              accessibilityLabel={t.darkMode}
+              accessibilityState={{ checked: isDark }}
+            >
               <XStack items="center" justify="space-between">
                 <XStack items="center" gap="$3">
                   <MaterialCommunityIcons
@@ -110,6 +151,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                   checked={isDark}
                   onCheckedChange={(checked) => setThemePref(checked ? 'dark' : 'light')}
                   backgroundColor={isDark ? '$blue9' : '$color5'}
+                  accessibilityElementsHidden
                 >
                   <Switch.Thumb backgroundColor="white" />
                 </Switch>
@@ -117,7 +159,18 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
             </Card>
 
             {/* 24-Hour Toggle */}
-            <Card bg="$color2" borderWidth={1} borderColor="$borderColor" rounded="$4" px="$4" py="$3.5">
+            <Card 
+              bg="$color2" 
+              borderWidth={1} 
+              borderColor="$borderColor" 
+              rounded="$4" 
+              px="$4" 
+              py="$3.5"
+              accessible={true}
+              accessibilityRole="switch"
+              accessibilityLabel={t.time24Hour}
+              accessibilityState={{ checked: use24Hour }}
+            >
               <XStack items="center" justify="space-between">
                 <XStack items="center" gap="$3">
                   <MaterialCommunityIcons
@@ -134,6 +187,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                   checked={use24Hour}
                   onCheckedChange={setUse24Hour}
                   backgroundColor={use24Hour ? '$blue9' : '$color5'}
+                  accessibilityElementsHidden
                 >
                   <Switch.Thumb backgroundColor="white" />
                 </Switch>
@@ -150,6 +204,10 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
               py="$3.5"
               pressStyle={{ bg: '$color3' }}
               onPress={() => setShowLanguagePicker(true)}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`${t.language}: ${currentLangOption?.nativeLabel}`}
+              accessibilityHint="Opens language selection"
             >
               <XStack items="center" justify="space-between">
                 <XStack items="center" gap="$3">

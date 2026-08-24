@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Modal, Alert } from 'react-native';
+import { useEffect, useState, useCallback } from 'react';
+import { Modal, Alert, Linking, Platform } from 'react-native';
 import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { useStore } from '../store';
 import { AppSwitch } from './AppSwitch';
 import { getTranslations, translateLabel } from '../lib/i18n';
 import type { Alarm, Recurrence } from '../types';
 
-type RecType = 'daily' | 'weekdays' | 'once' | 'none' | 'custom';
+type RecType = 'daily' | 'weekdays' | 'none' | 'custom' | 'monthly' | 'yearly';
 
 export function AlarmEditor({
   visible,
@@ -39,7 +39,8 @@ export function AlarmEditor({
     { value: 'none', label: t.none },
     { value: 'daily', label: t.daily, days: [0, 1, 2, 3, 4, 5, 6] },
     { value: 'weekdays', label: t.weekdays, days: [1, 2, 3, 4, 5] },
-    { value: 'once', label: t.once },
+    { value: 'monthly', label: t.monthly },
+    { value: 'yearly', label: t.yearly },
   ];
 
   const WEEKDAYS = [t.sun, t.mon, t.tue, t.wed, t.thu, t.fri, t.sat];
@@ -48,14 +49,16 @@ export function AlarmEditor({
   const [timeValue, setTimeValue] = useState('09:00');
   const [recType, setRecType] = useState<RecType>('weekdays');
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri
-  const [onceDate, setOnceDate] = useState('');
+  const [selectedDayOfMonth, setSelectedDayOfMonth] = useState(1); // 1-31
+  const [selectedMonth, setSelectedMonth] = useState(1); // 1-12
   const [enabled, setEnabled] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addingCustomLabel, setAddingCustomLabel] = useState(false);
   const [customLabelText, setCustomLabelText] = useState('');
   const [showKeypad, setShowKeypad] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const closeKeypad = () => {
+  const closeKeypad = useCallback(() => {
     if (showKeypad) {
       // Clamp time values when closing keypad
       const [h, m] = timeValue.split(':').map(s => parseInt(s, 10));
@@ -66,7 +69,18 @@ export function AlarmEditor({
       setTimeValue(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`);
       setShowKeypad(false);
     }
-  };
+  }, [showKeypad, timeValue]);
+
+  const openSystemSounds = useCallback(() => {
+    closeKeypad();
+    if (Platform.OS === 'ios') {
+      // Opens iOS Settings app - user navigates to Sounds & Haptics
+      Linking.openURL('App-Prefs:SOUNDS');
+    } else {
+      // Opens Android sound settings
+      Linking.openSettings();
+    }
+  }, [closeKeypad]);
   
   useEffect(() => {
     if (!visible) return;
@@ -76,12 +90,21 @@ export function AlarmEditor({
       if (editing.recurrence.type === 'weekly') {
         setRecType('custom');
         setSelectedDays(editing.recurrence.days);
-      } else if (editing.recurrence.type === 'once') {
-        setRecType('once');
-        setOnceDate(editing.recurrence.date);
+      } else if (editing.recurrence.type === 'monthly') {
+        setRecType('monthly');
+        setSelectedDayOfMonth(editing.recurrence.dayOfMonth);
+      } else if (editing.recurrence.type === 'yearly') {
+        setRecType('yearly');
+        setSelectedMonth(editing.recurrence.month);
+        setSelectedDayOfMonth(editing.recurrence.dayOfMonth);
       } else if (editing.recurrence.type === 'daily') {
         setRecType('daily');
         setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
+      } else if (editing.recurrence.type === 'once') {
+        // Legacy: treat once as monthly on that day
+        const date = new Date(editing.recurrence.date);
+        setRecType('monthly');
+        setSelectedDayOfMonth(date.getDate());
       } else {
         // weekdays
         setRecType('weekdays');
@@ -92,23 +115,28 @@ export function AlarmEditor({
       // Use last saved settings for new alarms
       setLabel(lastAlarmSettings.label);
       setTimeValue(lastAlarmSettings.time);
-      setRecType(lastAlarmSettings.recType);
+      setRecType(lastAlarmSettings.recType as RecType);
       setSelectedDays(lastAlarmSettings.selectedDays);
-      setOnceDate('');
+      // Set default date to today
+      const today = new Date();
+      setSelectedDayOfMonth(today.getDate());
+      setSelectedMonth(today.getMonth() + 1);
       setEnabled(true);
     }
     setError(null);
     setAddingCustomLabel(false);
     setCustomLabelText('');
+    setShowDatePicker(false);
   }, [visible, editing, lastAlarmSettings]);
 
   const save = () => {
     if (!label.trim()) return setError(t.selectLabel);
     
     let recurrence: Recurrence;
-    if (recType === 'once') {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(onceDate.trim())) return setError('Date must be YYYY-MM-DD');
-      recurrence = { type: 'once', date: onceDate.trim() };
+    if (recType === 'monthly') {
+      recurrence = { type: 'monthly', dayOfMonth: selectedDayOfMonth };
+    } else if (recType === 'yearly') {
+      recurrence = { type: 'yearly', month: selectedMonth, dayOfMonth: selectedDayOfMonth };
     } else if (recType === 'custom') {
       if (selectedDays.length === 0) return setError('Select at least one day');
       recurrence = { type: 'weekly', days: selectedDays };
@@ -161,6 +189,12 @@ export function AlarmEditor({
     if (option?.days) {
       setSelectedDays(option.days);
     }
+    // Show date picker for monthly/yearly
+    if (preset === 'monthly' || preset === 'yearly') {
+      setShowDatePicker(true);
+    } else {
+      setShowDatePicker(false);
+    }
   };
 
   const handleAddCustomLabel = () => {
@@ -174,19 +208,44 @@ export function AlarmEditor({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal 
+      visible={visible} 
+      animationType="slide" 
+      transparent 
+      onRequestClose={onClose}
+      accessibilityViewIsModal={true}
+    >
       <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
         <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" height="92%">
           <XStack items="center" justify="space-between" px="$4" pb="$3" borderBottomWidth={1} borderColor="$borderColor">
-            <Button size="$3" chromeless onPress={onClose}>
+            <Button 
+              size="$3" 
+              chromeless 
+              onPress={onClose}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={t.cancel}
+            >
               <Text color="$color10" fontSize={17}>
                 {t.cancel}
               </Text>
             </Button>
-            <Text fontSize={17} fontWeight="600" color="$color12">
+            <Text 
+              fontSize={17} 
+              fontWeight="600" 
+              color="$color12"
+              accessibilityRole="header"
+            >
               {editing ? t.editAlarm : t.newAlarm}
             </Text>
-            <Button size="$3" chromeless onPress={save}>
+            <Button 
+              size="$3" 
+              chromeless 
+              onPress={save}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={t.save}
+            >
               <Text color="$blue10" fontSize={17} fontWeight="700">
                 {t.save}
               </Text>
@@ -196,7 +255,18 @@ export function AlarmEditor({
           <ScrollView keyboardShouldPersistTaps="handled" onScrollBeginDrag={closeKeypad}>
             <YStack pb={32} onPress={closeKeypad}>
               {/* Enabled toggle at top */}
-              <XStack items="center" justify="space-between" px="$4" pt="$4" pb="$2" onPress={closeKeypad}>
+              <XStack 
+                items="center" 
+                justify="space-between" 
+                px="$4" 
+                pt="$4" 
+                pb="$2" 
+                onPress={closeKeypad}
+                accessible={true}
+                accessibilityRole="switch"
+                accessibilityLabel={t.enabled}
+                accessibilityState={{ checked: enabled }}
+              >
                 <Text color="$color12" fontSize={16} fontWeight="600">
                   {t.enabled}
                 </Text>
@@ -215,13 +285,17 @@ export function AlarmEditor({
 
               {/* Label Picker */}
               <Field label={t.label} onPress={closeKeypad}>
-                <XStack flexWrap="wrap" gap="$2">
+                <XStack flexWrap="wrap" gap="$2" accessibilityRole="radiogroup">
                   {labelOptions.map((opt) => (
                     <Button
                       key={opt}
                       size="$3"
                       bg={label === opt ? '$blue9' : '$color3'}
                       onPress={() => { closeKeypad(); setLabel(opt); }}
+                      accessible={true}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: label === opt }}
+                      accessibilityLabel={translateLabel(opt, language)}
                     >
                       <Text color={label === opt ? 'white' : '$color12'} fontWeight="600">
                         {translateLabel(opt, language)}
@@ -238,8 +312,17 @@ export function AlarmEditor({
                         placeholder="Label..."
                         autoFocus
                         onFocus={closeKeypad}
+                        accessible={true}
+                        accessibilityLabel="Custom label input"
                       />
-                      <Button size="$3" bg="$blue9" onPress={handleAddCustomLabel}>
+                      <Button 
+                        size="$3" 
+                        bg="$blue9" 
+                        onPress={handleAddCustomLabel}
+                        accessible={true}
+                        accessibilityRole="button"
+                        accessibilityLabel="Add custom label"
+                      >
                         <Text color="white" fontWeight="600">Add</Text>
                       </Button>
                     </XStack>
@@ -251,6 +334,9 @@ export function AlarmEditor({
                       borderColor="$blue8"
                       borderStyle="dashed"
                       onPress={() => setAddingCustomLabel(true)}
+                      accessible={true}
+                      accessibilityRole="button"
+                      accessibilityLabel="Add custom label"
                     >
                       <Text color="$blue10" fontWeight="600">Add +</Text>
                     </Button>
@@ -260,13 +346,17 @@ export function AlarmEditor({
 
               {/* Repeat Options */}
               <Field label={t.repeat} onPress={closeKeypad}>
-                <XStack flexWrap="wrap" gap="$2" mb="$3">
+                <XStack flexWrap="wrap" gap="$2" mb="$3" accessibilityRole="radiogroup">
                   {REPEAT_OPTIONS.map((opt) => (
                     <Button
                       key={opt.value}
                       size="$3"
-                      bg={recType === opt.value || (recType === 'custom' && opt.value !== 'none' && opt.value !== 'once') ? (recType === opt.value ? '$blue9' : '$color3') : '$color3'}
+                      bg={recType === opt.value ? '$blue9' : '$color3'}
                       onPress={() => { closeKeypad(); selectPreset(opt.value); }}
+                      accessible={true}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: recType === opt.value }}
+                      accessibilityLabel={opt.label}
                     >
                       <Text color={recType === opt.value ? 'white' : '$color12'} fontWeight="600">
                         {opt.label}
@@ -275,18 +365,99 @@ export function AlarmEditor({
                   ))}
                 </XStack>
 
-                {recType === 'once' && (
-                  <Input
-                    size="$4"
-                    value={onceDate}
-                    onChangeText={setOnceDate}
-                    placeholder="YYYY-MM-DD"
-                    onFocus={closeKeypad}
-                  />
+                {/* Monthly - Day of month picker */}
+                {recType === 'monthly' && (
+                  <YStack gap="$2">
+                    <Text color="$color10" fontSize={13}>Day of month</Text>
+                    <XStack flexWrap="wrap" gap="$1.5">
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                        <Button
+                          key={day}
+                          size="$2"
+                          width={38}
+                          height={38}
+                          bg={selectedDayOfMonth === day ? '$blue9' : '$color3'}
+                          onPress={() => { closeKeypad(); setSelectedDayOfMonth(day); }}
+                          accessible={true}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: selectedDayOfMonth === day }}
+                          accessibilityLabel={`Day ${day}`}
+                        >
+                          <Text
+                            fontSize={13}
+                            fontWeight="600"
+                            color={selectedDayOfMonth === day ? 'white' : '$color12'}
+                          >
+                            {day}
+                          </Text>
+                        </Button>
+                      ))}
+                    </XStack>
+                  </YStack>
                 )}
 
-                {recType !== 'once' && recType !== 'none' && (
-                  <XStack gap="$1.5" justify="space-between">
+                {/* Yearly - Month and day picker */}
+                {recType === 'yearly' && (
+                  <YStack gap="$3">
+                    <YStack gap="$2">
+                      <Text color="$color10" fontSize={13}>Month</Text>
+                      <XStack flexWrap="wrap" gap="$1.5">
+                        {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => (
+                          <Button
+                            key={month}
+                            size="$2"
+                            px="$2"
+                            bg={selectedMonth === i + 1 ? '$blue9' : '$color3'}
+                            onPress={() => { closeKeypad(); setSelectedMonth(i + 1); }}
+                            accessible={true}
+                            accessibilityRole="radio"
+                            accessibilityState={{ selected: selectedMonth === i + 1 }}
+                            accessibilityLabel={month}
+                          >
+                            <Text
+                              fontSize={12}
+                              fontWeight="600"
+                              color={selectedMonth === i + 1 ? 'white' : '$color12'}
+                            >
+                              {month}
+                            </Text>
+                          </Button>
+                        ))}
+                      </XStack>
+                    </YStack>
+                    <YStack gap="$2">
+                      <Text color="$color10" fontSize={13}>Day</Text>
+                      <XStack flexWrap="wrap" gap="$1.5">
+                        {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                          <Button
+                            key={day}
+                            size="$2"
+                            width={38}
+                            height={38}
+                            bg={selectedDayOfMonth === day ? '$blue9' : '$color3'}
+                            onPress={() => { closeKeypad(); setSelectedDayOfMonth(day); }}
+                            accessible={true}
+                            accessibilityRole="radio"
+                            accessibilityState={{ selected: selectedDayOfMonth === day }}
+                            accessibilityLabel={`Day ${day}`}
+                          >
+                            <Text
+                              fontSize={13}
+                              fontWeight="600"
+                              color={selectedDayOfMonth === day ? 'white' : '$color12'}
+                            >
+                              {day}
+                            </Text>
+                          </Button>
+                        ))}
+                      </XStack>
+                    </YStack>
+                  </YStack>
+                )}
+
+                {/* Weekly day selector */}
+                {(recType === 'daily' || recType === 'weekdays' || recType === 'custom') && (
+                  <XStack gap="$1.5" justify="space-between" accessible={true} accessibilityLabel="Select days of the week">
                     {WEEKDAYS.map((day, i) => (
                       <Button
                         key={`${day}-${i}`}
@@ -294,6 +465,10 @@ export function AlarmEditor({
                         width={40}
                         bg={selectedDays.includes(i) ? '$blue9' : '$color3'}
                         onPress={() => { closeKeypad(); toggleDay(i); }}
+                        accessible={true}
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: selectedDays.includes(i) }}
+                        accessibilityLabel={day}
                       >
                         <Text
                           fontSize={13}
@@ -308,8 +483,32 @@ export function AlarmEditor({
                 )}
               </Field>
 
+              {/* Alarm Sounds Button */}
+              <YStack px="$4" pt="$4.5">
+                <Button
+                  size="$4"
+                  bg="$color3"
+                  onPress={openSystemSounds}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.alarmSound}
+                  accessibilityHint="Opens system sound settings"
+                >
+                  <Text color="$color12" fontSize={16} fontWeight="600">
+                    {t.alarmSound}
+                  </Text>
+                </Button>
+              </YStack>
+
               {error && (
-                <Text color="$red10" fontSize={13} px="$4" pt="$3.5">
+                <Text 
+                  color="$red10" 
+                  fontSize={13} 
+                  px="$4" 
+                  pt="$3.5"
+                  accessibilityRole="alert"
+                  accessibilityLiveRegion="polite"
+                >
                   {error}
                 </Text>
               )}
@@ -325,6 +524,9 @@ export function AlarmEditor({
                     removeAlarm(editing.id);
                     onClose();
                   }}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.deleteAlarm}
                 >
                   <Text color="$red10" fontSize={16} fontWeight="600">
                     {t.deleteAlarm}

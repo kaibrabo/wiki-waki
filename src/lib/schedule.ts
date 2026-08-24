@@ -30,6 +30,10 @@ function matchesRecurrence(candidate: DateTime, recurrence: Recurrence): boolean
       return recurrence.days.includes(jsDay(candidate.weekday));
     case 'once':
       return candidate.toFormat('yyyy-MM-dd') === recurrence.date;
+    case 'monthly':
+      return candidate.day === recurrence.dayOfMonth;
+    case 'yearly':
+      return candidate.month === recurrence.month && candidate.day === recurrence.dayOfMonth;
   }
 }
 
@@ -48,6 +52,39 @@ export function nextFireInstant(alarm: Alarm, now: DateTime = DateTime.now()): D
       zone: alarm.pinnedZone,
     }).set({ second: 0, millisecond: 0 });
     return target.isValid && target >= now ? target : null;
+  }
+
+  if (alarm.recurrence.type === 'monthly') {
+    // Scan up to 62 days ahead (covers 2 months)
+    for (let i = 0; i < 62; i++) {
+      const candidate = nowZ
+        .plus({ days: i })
+        .set({ hour, minute, second: 0, millisecond: 0 });
+      if (candidate >= now && candidate.day === alarm.recurrence.dayOfMonth) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
+  if (alarm.recurrence.type === 'yearly') {
+    // Check this year and next year
+    for (let yearOffset = 0; yearOffset <= 1; yearOffset++) {
+      const candidate = nowZ
+        .plus({ years: yearOffset })
+        .set({ 
+          month: alarm.recurrence.month, 
+          day: alarm.recurrence.dayOfMonth, 
+          hour, 
+          minute, 
+          second: 0, 
+          millisecond: 0 
+        });
+      if (candidate.isValid && candidate >= now) {
+        return candidate;
+      }
+    }
+    return null;
   }
 
   // Scan up to 8 days ahead to cover weekly recurrences.
@@ -124,6 +161,12 @@ export function recurrenceLabel(recurrence: Recurrence, language: Language = 'en
     }
     case 'once':
       return DateTime.fromISO(recurrence.date).toFormat('LLL d');
+    case 'monthly':
+      return `${t.monthly} (${recurrence.dayOfMonth})`;
+    case 'yearly': {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${monthNames[recurrence.month - 1]} ${recurrence.dayOfMonth}`;
+    }
   }
 }
 

@@ -74,7 +74,7 @@ export type ThemePref = 'light' | 'dark' | 'system';
 export type LastAlarmSettings = {
   label: string;
   time: string;
-  recType: 'daily' | 'weekdays' | 'once' | 'none' | 'custom';
+  recType: 'daily' | 'weekdays' | 'none' | 'custom' | 'monthly' | 'yearly';
   selectedDays: number[];
 };
 

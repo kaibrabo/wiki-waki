@@ -17,7 +17,10 @@ export function SettingsButton({ onPress }: { onPress: () => void }) {
       pressStyle={{ bg: '$color5' }}
       cursor="pointer"
       onPress={onPress}
-      aria-label="Settings"
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel="Settings"
+      accessibilityHint="Opens settings menu"
     >
       <MaterialCommunityIcons name="cog" size={22} color={iconColor} />
     </XStack>

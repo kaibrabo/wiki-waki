@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, AccessibilityInfo } from 'react-native';
 import { ScrollView, YStack, XStack, Text, Card, Switch } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
@@ -82,7 +82,12 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
   return (
     <YStack flex={1}>
       <XStack items="center" justify="space-between" px="$4" pt="$4" pb="$3">
-        <Text fontSize={34} fontWeight="600" color="$color12">
+        <Text 
+          fontSize={34} 
+          fontWeight="600" 
+          color="$color12"
+          accessibilityRole="header"
+        >
           Moondial
         </Text>
         <XStack items="center" gap="$2.5">
@@ -97,18 +102,28 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
             pressStyle={{ bg: '$blue6' }}
             cursor="pointer"
             onPress={() => setAdding(true)}
-            aria-label="Add location"
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={t.addLocation}
+            accessibilityHint="Opens dialog to add a new location"
           >
-            <Text fontSize={24} color="$blue10" lineHeight={26}>
-              ＋
+            <Text fontSize={24} color="$blue10" lineHeight={26} aria-hidden>
+              +
             </Text>
           </XStack>
         </XStack>
       </XStack>
 
       {geoInfo && (
-        <XStack items="center" gap="$1.5" px="$4" pb="$2">
-          <MaterialCommunityIcons name="map-marker" size={14} color="#888" />
+        <XStack 
+          items="center" 
+          gap="$1.5" 
+          px="$4" 
+          pb="$2"
+          accessible={true}
+          accessibilityLabel={`Current location: ${[geoInfo.city, geoInfo.region].filter(Boolean).join(', ')}, ${geoInfo.time}, ${geoInfo.timezone}`}
+        >
+          <MaterialCommunityIcons name="map-marker" size={14} color="#888" accessibilityElementsHidden />
           <Text color="$color10" fontSize={13}>
             {[geoInfo.city, geoInfo.region, geoInfo.postalCode].filter(Boolean).join(', ')} {geoInfo.time} {geoInfo.timezone}
           </Text>
@@ -116,15 +131,30 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
       )}
 
       {alarmQueueText ? (
-        <XStack items="center" gap="$1.5" px="$4" pb="$3">
-          <MaterialCommunityIcons name="alarm" size={14} color="#888" />
+        <XStack 
+          items="center" 
+          gap="$1.5" 
+          px="$4" 
+          pb="$3"
+          accessible={true}
+          accessibilityLabel={`${t.next} alarm: ${alarmQueueText}`}
+          accessibilityRole="text"
+        >
+          <MaterialCommunityIcons name="alarm" size={14} color="#888" accessibilityElementsHidden />
           <Text color="$color10" fontSize={13} numberOfLines={2}>
             {t.next}: {alarmQueueText}
           </Text>
         </XStack>
       ) : (
-        <XStack items="center" gap="$1.5" px="$4" pb="$3">
-          <MaterialCommunityIcons name="alarm-off" size={14} color="#888" />
+        <XStack 
+          items="center" 
+          gap="$1.5" 
+          px="$4" 
+          pb="$3"
+          accessible={true}
+          accessibilityLabel={t.noUpcomingAlarms}
+        >
+          <MaterialCommunityIcons name="alarm-off" size={14} color="#888" accessibilityElementsHidden />
           <Text color="$color10" fontSize={13}>
             {t.noUpcomingAlarms}
           </Text>
@@ -138,6 +168,9 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
           bg="$blue4"
           px="$3.5"
           py="$2.5"
+          accessible={true}
+          accessibilityRole="alert"
+          accessibilityLabel={t.enableReminders}
         >
           <XStack items="center" justify="space-between">
             <Text 
@@ -152,6 +185,10 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
                   dismissNotificationPrompt();
                 }
               }}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={t.enableReminders}
+              accessibilityHint="Tap to enable alarm notifications"
             >
               {t.enableReminders}
             </Text>
@@ -161,8 +198,11 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
               fontWeight="600"
               px="$2"
               onPress={dismissNotificationPrompt}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss notification prompt"
             >
-              ✕
+              X
             </Text>
           </XStack>
         </Card>
@@ -170,7 +210,14 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
 
       {/* Fixed CURRENT section */}
       <YStack px="$4" pt="$2">
-        <Text color="$color10" fontSize={12} fontWeight="700" mb="$2" ml="$1">
+        <Text 
+          color="$color10" 
+          fontSize={12} 
+          fontWeight="700" 
+          mb="$2" 
+          ml="$1"
+          accessibilityRole="header"
+        >
           {t.current}
         </Text>
         
@@ -199,6 +246,10 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
               const label = labelForZoneWithHint(active, geoInfo?.city);
               addLocation(label, active);
             }}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Add ${displayNameForZoneWithHint(active, geoInfo?.city)} to your locations`}
+            accessibilityHint={t.createAlarmsFor}
           >
             <XStack items="center" justify="space-between" gap="$3">
               <YStack flex={1} gap="$1">
@@ -216,9 +267,10 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
                 items="center"
                 justify="center"
                 bg="$blue9"
+                aria-hidden
               >
                 <Text fontSize={22} color="white" lineHeight={24}>
-                  ＋
+                  +
                 </Text>
               </XStack>
             </XStack>
@@ -226,7 +278,15 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
         )}
 
         {savedLocations.length > 0 && (
-          <Text color="$color10" fontSize={12} fontWeight="700" mt="$5" mb="$2" ml="$1">
+          <Text 
+            color="$color10" 
+            fontSize={12} 
+            fontWeight="700" 
+            mt="$5" 
+            mb="$2" 
+            ml="$1"
+            accessibilityRole="header"
+          >
             {t.saved}
           </Text>
         )}
@@ -285,7 +345,19 @@ function LocationCard({
   const local = now.setZone(loc.ianaZone);
   const isEnabled = !loc.disabled;
   const displayName = formatLocationName(loc.name, loc.ianaZone);
-  const timeFormat = use24Hour ? 'HH:mm' : 'h:mm';
+  const timeFormat = use24Hour ? 'HH:mm' : 'h:mm a';
+  const timeString = local.toFormat(timeFormat);
+  const dateString = local.toFormat('cccc, LLL d');
+  
+  const accessibilityLabel = [
+    displayName,
+    loc.isHome ? 'Home location' : '',
+    dateString,
+    timeString,
+    isEnabled ? t.on : t.off,
+    loc.disabled ? t.silenced : nextText ? `${t.next}: ${nextText}` : t.noAlarms,
+  ].filter(Boolean).join(', ');
+
   return (
     <Card
       borderWidth={1}
@@ -298,8 +370,12 @@ function LocationCard({
       onPress={onPress}
       onLongPress={onLongPress}
       opacity={loc.disabled ? 0.5 : 1}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint="Tap to view alarms, long press to delete"
     >
-      <XStack items="center" justify="space-between" gap="$3">
+      <XStack items="center" justify="space-between" gap="$3" importantForAccessibility="no-hide-descendants">
         <YStack flex={1} minW={0} gap="$1.5">
           <Text fontSize={18} lineHeight={23} fontWeight="700" color="$color12" numberOfLines={1}>
             {displayName}
@@ -309,13 +385,13 @@ function LocationCard({
               <MaterialCommunityIcons name="home" size={14} color="#3b82f6" />
             )}
             <Text color="$color10" fontSize={13} lineHeight={17} numberOfLines={1}>
-              {local.toFormat('cccc, LLL d')}
+              {dateString}
             </Text>
           </XStack>
         </YStack>
         <XStack items="baseline" gap="$1" shrink={0}>
           <Text fontSize={40} lineHeight={44} fontWeight="200" color="$color12">
-            {local.toFormat(timeFormat)}
+            {local.toFormat(use24Hour ? 'HH:mm' : 'h:mm')}
           </Text>
           {!use24Hour && (
             <Text fontSize={14} fontWeight="500" color="$color10">
@@ -325,12 +401,24 @@ function LocationCard({
         </XStack>
       </XStack>
       <XStack items="center" justify="space-between" mt="$3.5" gap="$3">
-        <XStack items="center" gap="$2">
+        <XStack 
+          items="center" 
+          gap="$2"
+          accessible={true}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: isEnabled }}
+          accessibilityLabel={`${displayName} alarms ${isEnabled ? 'enabled' : 'disabled'}`}
+          onPress={(e) => {
+            e.stopPropagation();
+            onToggleDisabled();
+          }}
+        >
           <Switch
             size="$2"
             checked={isEnabled}
             onCheckedChange={() => onToggleDisabled()}
             backgroundColor={isEnabled ? '$blue9' : '$color5'}
+            accessibilityElementsHidden
           >
             <Switch.Thumb backgroundColor="white" />
           </Switch>

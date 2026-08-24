@@ -64,9 +64,18 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
         onBack={onBack}
         title={displayName}
         right={
-          <Button size="$3" circular chromeless onPress={openNew} aria-label="Add alarm">
-            <Text fontSize={24} color="$blue10">
-              ＋
+          <Button 
+            size="$3" 
+            circular 
+            chromeless 
+            onPress={openNew}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={t.newAlarm}
+            accessibilityHint="Opens dialog to create a new alarm"
+          >
+            <Text fontSize={24} color="$blue10" aria-hidden>
+              +
             </Text>
           </Button>
         }
@@ -74,7 +83,14 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
 
       <ScrollView>
         <YStack px="$4" pb={40}>
-        <XStack items="flex-end" justify="center" mt="$4" gap="$2">
+        <XStack 
+          items="flex-end" 
+          justify="center" 
+          mt="$4" 
+          gap="$2"
+          accessible={true}
+          accessibilityLabel={`Current time: ${local.toFormat(use24Hour ? 'HH:mm' : 'h:mm a')}`}
+        >
           <Text fontSize={76} lineHeight={84} fontWeight="200" color="$color12">
             {local.toFormat(timeFormat)}
           </Text>
@@ -84,8 +100,17 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             </Text>
           )}
         </XStack>
-        <Text color="$color10" fontSize={14} lineHeight={20} text="center" mt="$2" mb="$6">
-          {local.toFormat('cccc, LLLL d')} · {local.toFormat('ZZZZ')}
+        <Text 
+          color="$color10" 
+          fontSize={14} 
+          lineHeight={20} 
+          text="center" 
+          mt="$2" 
+          mb="$6"
+          accessible={true}
+          accessibilityLabel={`${local.toFormat('cccc, LLLL d')}, timezone ${local.toFormat('ZZZZ')}`}
+        >
+          {local.toFormat('cccc, LLLL d')} - {local.toFormat('ZZZZ')}
         </Text>
 
         <XStack gap="$3" mb="$6">
@@ -99,6 +124,10 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             py="$3"
             pressStyle={{ bg: '$color3' }}
             onPress={() => toggleHome(location.id)}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={location.isHome ? `${displayName} is your home location` : `Set ${displayName} as home`}
+            accessibilityState={{ selected: location.isHome }}
           >
             <XStack items="center" justify="center" gap="$2">
               <MaterialCommunityIcons
@@ -138,6 +167,10 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
                 ]
               );
             }}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Remove ${displayName}`}
+            accessibilityHint="Opens confirmation dialog to delete this location"
           >
             <XStack items="center" justify="center" gap="$2">
               <MaterialCommunityIcons
@@ -152,7 +185,14 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
           </Card>
         </XStack>
 
-        <Text color="$color10" fontSize={12} fontWeight="700" mb="$2" ml="$1">
+        <Text 
+          color="$color10" 
+          fontSize={12} 
+          fontWeight="700" 
+          mb="$2" 
+          ml="$1"
+          accessibilityRole="header"
+        >
           {t.alarms}
         </Text>
 
@@ -163,8 +203,11 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             py="$5" 
             text="center"
             onPress={openNew}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Tap plus button ${t.tapToAddAlarm}`}
           >
-            Tap <Text color="$blue10" fontSize={24}>＋</Text> {t.tapToAddAlarm}
+            Tap <Text color="$blue10" fontSize={24}>+</Text> {t.tapToAddAlarm}
           </Text>
         )}
 
@@ -173,7 +216,7 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             <AlarmRow
               key={alarm.id}
               alarm={alarm}
-              localTime={instant ? displayInZone(instant, location.ianaZone) : '—'}
+              localTime={instant ? displayInZone(instant, location.ianaZone) : '-'}
               onPress={() => openEdit(alarm)}
               language={language}
             />
@@ -206,22 +249,57 @@ function AlarmRow({
   language: Language;
 }) {
   const toggleAlarm = useStore((s) => s.toggleAlarm);
+  const t = getTranslations(language);
   const dim = alarm.enabled ? 1 : 0.4;
+  const label = translateLabel(alarm.label, language);
+  const recurrence = recurrenceLabel(alarm.recurrence, language);
+  
+  const accessibilityLabel = [
+    label,
+    `at ${localTime}`,
+    recurrence,
+    alarm.enabled ? 'enabled' : 'disabled',
+  ].join(', ');
+
   return (
-    <Card borderWidth={1} borderColor="$borderColor" bg="$color2" rounded="$6" px="$4" py="$3" pressStyle={{ bg: '$color3' }} onPress={onPress}>
-      <XStack items="center" justify="space-between" gap="$3">
+    <Card 
+      borderWidth={1} 
+      borderColor="$borderColor" 
+      bg="$color2" 
+      rounded="$6" 
+      px="$4" 
+      py="$3" 
+      pressStyle={{ bg: '$color3' }} 
+      onPress={onPress}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint="Tap to edit this alarm"
+    >
+      <XStack items="center" justify="space-between" gap="$3" importantForAccessibility="no-hide-descendants">
         <YStack flex={1} gap="$1">
           <Text fontSize={28} lineHeight={34} fontWeight="300" color="$color12" opacity={dim}>
             {localTime}
           </Text>
           <Text fontSize={15} lineHeight={19} color="$color12" opacity={dim}>
-            {translateLabel(alarm.label, language)}
+            {label}
           </Text>
           <Text fontSize={12} lineHeight={16} color="$color10">
-            {recurrenceLabel(alarm.recurrence, language)}
+            {recurrence}
           </Text>
         </YStack>
-        <AppSwitch value={alarm.enabled} onValueChange={() => toggleAlarm(alarm.id)} />
+        <XStack
+          accessible={true}
+          accessibilityRole="switch"
+          accessibilityLabel={`${label} alarm`}
+          accessibilityState={{ checked: alarm.enabled }}
+          onPress={(e) => {
+            e.stopPropagation();
+            toggleAlarm(alarm.id);
+          }}
+        >
+          <AppSwitch value={alarm.enabled} onValueChange={() => toggleAlarm(alarm.id)} />
+        </XStack>
       </XStack>
     </Card>
   );
@@ -238,12 +316,29 @@ function TopBar({
 }) {
   return (
     <XStack items="center" px="$3" pt="$2" pb="$2">
-      <Button size="$3" chromeless onPress={onBack} px="$2" mr="$2" justify="flex-start">
-        <Text color="$blue10" fontSize={28}>
-          ‹
+      <Button 
+        size="$3" 
+        chromeless 
+        onPress={onBack} 
+        px="$2" 
+        mr="$2" 
+        justify="flex-start"
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+      >
+        <Text color="$blue10" fontSize={28} aria-hidden>
+          &#8249;
         </Text>
       </Button>
-      <Text flex={1} fontSize={17} fontWeight="600" color="$color12" numberOfLines={1}>
+      <Text 
+        flex={1} 
+        fontSize={17} 
+        fontWeight="600" 
+        color="$color12" 
+        numberOfLines={1}
+        accessibilityRole="header"
+      >
         {title}
       </Text>
       {right}

@@ -8,9 +8,11 @@
 
 export type Recurrence =
   | { type: 'daily' }
-  | { type: 'weekdays' } // Mon–Fri
+  | { type: 'weekdays' } // Mon-Fri
   | { type: 'weekly'; days: number[] } // 0=Sun .. 6=Sat
-  | { type: 'once'; date: string }; // YYYY-MM-DD (in the pinned zone)
+  | { type: 'once'; date: string } // YYYY-MM-DD (in the pinned zone)
+  | { type: 'monthly'; dayOfMonth: number } // 1-31
+  | { type: 'yearly'; month: number; dayOfMonth: number }; // month 1-12, day 1-31
 
 export type Alarm = {
   id: string;

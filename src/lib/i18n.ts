@@ -57,7 +57,8 @@ type TranslationKeys = {
   none: string;
   daily: string;
   weekdays: string;
-  once: string;
+  monthly: string;
+  yearly: string;
   deleteAlarm: string;
   selectLabel: string;
   
@@ -81,6 +82,7 @@ type TranslationKeys = {
   darkMode: string;
   time24Hour: string;
   language: string;
+  alarmSound: string;
 };
 
 const translations: Record<Language, TranslationKeys> = {
@@ -115,7 +117,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'None',
     daily: 'Daily',
     weekdays: 'Weekdays',
-    once: 'Once',
+    monthly: 'Monthly',
+    yearly: 'Yearly',
     deleteAlarm: 'Delete Alarm',
     selectLabel: 'Select a label',
     wake: 'Wake',
@@ -133,6 +136,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'Dark Mode',
     time24Hour: '24-Hour Time',
     language: 'Language',
+    alarmSound: 'Alarm Sound',
   },
   es: {
     appName: 'Moondial',
@@ -165,7 +169,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'Ninguno',
     daily: 'Diario',
     weekdays: 'Días laborales',
-    once: 'Una vez',
+    monthly: 'Mensual',
+    yearly: 'Anual',
     deleteAlarm: 'Eliminar Alarma',
     selectLabel: 'Selecciona una etiqueta',
     wake: 'Despertar',
@@ -183,6 +188,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'Modo Oscuro',
     time24Hour: 'Formato 24 Horas',
     language: 'Idioma',
+    alarmSound: 'Sonido de Alarma',
   },
   fr: {
     appName: 'Moondial',
@@ -215,7 +221,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'Aucun',
     daily: 'Quotidien',
     weekdays: 'Jours ouvrables',
-    once: 'Une fois',
+    monthly: 'Mensuel',
+    yearly: 'Annuel',
     deleteAlarm: 'Supprimer Alarme',
     selectLabel: 'Sélectionnez une étiquette',
     wake: 'Réveil',
@@ -233,6 +240,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'Mode Sombre',
     time24Hour: 'Format 24 Heures',
     language: 'Langue',
+    alarmSound: 'Son d\'Alarme',
   },
   de: {
     appName: 'Moondial',
@@ -265,7 +273,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'Keine',
     daily: 'Täglich',
     weekdays: 'Wochentage',
-    once: 'Einmal',
+    monthly: 'Monatlich',
+    yearly: 'Jährlich',
     deleteAlarm: 'Wecker löschen',
     selectLabel: 'Bezeichnung auswählen',
     wake: 'Aufwachen',
@@ -283,6 +292,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'Dunkelmodus',
     time24Hour: '24-Stunden-Format',
     language: 'Sprache',
+    alarmSound: 'Weckton',
   },
   'zh-CN': {
     appName: 'Moondial',
@@ -315,7 +325,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: '无',
     daily: '每天',
     weekdays: '工作日',
-    once: '一次',
+    monthly: '每月',
+    yearly: '每年',
     deleteAlarm: '删除闹钟',
     selectLabel: '选择标签',
     wake: '起床',
@@ -333,6 +344,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: '深色模式',
     time24Hour: '24小时制',
     language: '语言',
+    alarmSound: '闹钟铃声',
   },
   'zh-HK': {
     appName: 'Moondial',
@@ -365,7 +377,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: '無',
     daily: '每日',
     weekdays: '平日',
-    once: '一次',
+    monthly: '每月',
+    yearly: '每年',
     deleteAlarm: '刪除鬧鐘',
     selectLabel: '選擇標籤',
     wake: '起身',
@@ -383,6 +396,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: '深色模式',
     time24Hour: '24小時制',
     language: '語言',
+    alarmSound: '鬧鐘鈴聲',
   },
   tl: {
     appName: 'Moondial',
@@ -415,7 +429,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'Wala',
     daily: 'Araw-araw',
     weekdays: 'Mga araw ng trabaho',
-    once: 'Isang beses',
+    monthly: 'Buwanan',
+    yearly: 'Taunan',
     deleteAlarm: 'Burahin ang Alarma',
     selectLabel: 'Pumili ng label',
     wake: 'Gising',
@@ -433,6 +448,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'Dark Mode',
     time24Hour: '24 na Oras',
     language: 'Wika',
+    alarmSound: 'Tunog ng Alarma',
   },
   ar: {
     appName: 'Moondial',
@@ -465,7 +481,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'لا شيء',
     daily: 'يومي',
     weekdays: 'أيام الأسبوع',
-    once: 'مرة واحدة',
+    monthly: 'شهري',
+    yearly: 'سنوي',
     deleteAlarm: 'حذف المنبه',
     selectLabel: 'اختر تسمية',
     wake: 'استيقاظ',
@@ -483,6 +500,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'الوضع الداكن',
     time24Hour: 'نظام 24 ساعة',
     language: 'اللغة',
+    alarmSound: 'صوت المنبه',
   },
   haw: {
     appName: 'Moondial',
@@ -515,7 +533,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'ʻAʻohe',
     daily: 'I kēlā me kēia lā',
     weekdays: 'Nā lā hana',
-    once: 'Hoʻokahi manawa',
+    monthly: 'Mahina',
+    yearly: 'Makahiki',
     deleteAlarm: 'Holoi i ka Alama',
     selectLabel: 'E koho i ka lepili',
     wake: 'Ala',
@@ -533,6 +552,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'ʻAno Pōʻeleʻele',
     time24Hour: '24 Hola',
     language: 'ʻŌlelo',
+    alarmSound: 'Leo Alama',
   },
   ja: {
     appName: 'Moondial',
@@ -565,7 +585,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'なし',
     daily: '毎日',
     weekdays: '平日',
-    once: '1回',
+    monthly: '毎月',
+    yearly: '毎年',
     deleteAlarm: 'アラームを削除',
     selectLabel: 'ラベルを選択',
     wake: '起床',
@@ -583,6 +604,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'ダークモード',
     time24Hour: '24時間表示',
     language: '言語',
+    alarmSound: 'アラーム音',
   },
   ko: {
     appName: 'Moondial',
@@ -615,7 +637,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: '없음',
     daily: '매일',
     weekdays: '평일',
-    once: '한 번',
+    monthly: '매월',
+    yearly: '매년',
     deleteAlarm: '알람 삭제',
     selectLabel: '라벨 선택',
     wake: '기상',
@@ -633,6 +656,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: '다크 모드',
     time24Hour: '24시간 형식',
     language: '언어',
+    alarmSound: '알람 소리',
   },
   id: {
     appName: 'Moondial',
@@ -665,7 +689,8 @@ const translations: Record<Language, TranslationKeys> = {
     none: 'Tidak ada',
     daily: 'Harian',
     weekdays: 'Hari kerja',
-    once: 'Sekali',
+    monthly: 'Bulanan',
+    yearly: 'Tahunan',
     deleteAlarm: 'Hapus Alarm',
     selectLabel: 'Pilih label',
     wake: 'Bangun',
@@ -683,6 +708,7 @@ const translations: Record<Language, TranslationKeys> = {
     darkMode: 'Mode Gelap',
     time24Hour: 'Format 24 Jam',
     language: 'Bahasa',
+    alarmSound: 'Suara Alarm',
   },
 };
 

@@ -6,6 +6,7 @@ import { tamaguiConfig } from './tamagui.config';
 import { useStore, migrateFromAnchorStore } from './src/store';
 import { scheduler } from './src/lib/scheduler';
 import { useEffectiveTheme } from './src/hooks/useEffectiveTheme';
+import { useWidgetSync } from './src/hooks/useWidgetSync';
 import { LocationsScreen } from './src/screens/LocationsScreen';
 import { LocationDetailScreen } from './src/screens/LocationDetailScreen';
 
@@ -15,6 +16,9 @@ export default function App() {
   const [route, setRoute] = useState<Route>({ name: 'locations' });
   const hasHydrated = useStore((s) => s.hasHydrated);
   const theme = useEffectiveTheme();
+
+  // Sync widget data whenever alarms or locations change
+  useWidgetSync();
 
   // Migrate data from old 'anchor-store-v2' to 'moondial-store-v1' on first launch
   useEffect(() => {
