@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Alarm, Location, Recurrence } from './types';
+import type { Alarm, Location, Recurrence, AlarmSound, AlarmHaptic } from './types';
 import type { Language } from './lib/i18n';
 import { shouldUse24Hour } from './lib/i18n';
 
@@ -76,6 +76,8 @@ export type LastAlarmSettings = {
   time: string;
   recType: 'daily' | 'weekdays' | 'none' | 'custom' | 'monthly' | 'yearly';
   selectedDays: number[];
+  sound?: AlarmSound;
+  haptic?: AlarmHaptic;
 };
 
 type State = {
@@ -123,6 +125,8 @@ export const useStore = create<State>()(
         time: '09:00',
         recType: 'weekdays',
         selectedDays: [1, 2, 3, 4, 5],
+        sound: 'default',
+        haptic: 'medium',
       },
       locations: SEED_LOCATIONS,
       alarms: SEED_ALARMS,

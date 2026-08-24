@@ -4,7 +4,7 @@
     "slug": "moondial",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -17,7 +17,11 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Moondial uses your location to detect your current timezone for setting alarms.",
-        "UIBackgroundModes": ["audio", "fetch", "remote-notification"]
+        "UIBackgroundModes": [
+          "audio",
+          "fetch",
+          "remote-notification"
+        ]
       },
       "config": {
         "usesNonExemptEncryption": false
@@ -50,7 +54,18 @@
           "locationWhenInUsePermission": "Moondial uses your location to detect your current timezone for setting alarms."
         }
       ],
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/chime.wav",
+            "./assets/sounds/beacon.wav",
+            "./assets/sounds/radar.wav",
+            "./assets/sounds/pulse.wav"
+          ]
+        }
+      ],
+      "expo-audio"
     ],
     "extra": {
       "eas": {

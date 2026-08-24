@@ -1,0 +1,6 @@
+{
+  "name": "moondial-widget",
+  "version": "1.0.0",
+  "description": "Bridges Moondial data to the iOS home-screen widget via the App Group shared container.",
+  "main": "index.ts"
+}

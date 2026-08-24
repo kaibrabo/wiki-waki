@@ -30,10 +30,18 @@ function matchesRecurrence(candidate: DateTime, recurrence: Recurrence): boolean
       return recurrence.days.includes(jsDay(candidate.weekday));
     case 'once':
       return candidate.toFormat('yyyy-MM-dd') === recurrence.date;
-    case 'monthly':
-      return candidate.day === recurrence.dayOfMonth;
-    case 'yearly':
-      return candidate.month === recurrence.month && candidate.day === recurrence.dayOfMonth;
+    case 'monthly': {
+      // For months with fewer days, match the last day of month
+      const daysInMonth = candidate.daysInMonth!;
+      const targetDay = Math.min(recurrence.dayOfMonth, daysInMonth);
+      return candidate.day === targetDay;
+    }
+    case 'yearly': {
+      if (candidate.month !== recurrence.month) return false;
+      const daysInMonth = candidate.daysInMonth!;
+      const targetDay = Math.min(recurrence.dayOfMonth, daysInMonth);
+      return candidate.day === targetDay;
+    }
   }
 }
 
@@ -55,12 +63,15 @@ export function nextFireInstant(alarm: Alarm, now: DateTime = DateTime.now()): D
   }
 
   if (alarm.recurrence.type === 'monthly') {
-    // Scan up to 62 days ahead (covers 2 months)
-    for (let i = 0; i < 62; i++) {
-      const candidate = nowZ
-        .plus({ days: i })
-        .set({ hour, minute, second: 0, millisecond: 0 });
-      if (candidate >= now && candidate.day === alarm.recurrence.dayOfMonth) {
+    const targetDay = alarm.recurrence.dayOfMonth;
+    // Check this month and next 2 months
+    for (let monthOffset = 0; monthOffset <= 2; monthOffset++) {
+      const monthStart = nowZ.plus({ months: monthOffset }).startOf('month');
+      const daysInMonth = monthStart.daysInMonth!;
+      // Use the target day, or last day of month if target is higher
+      const actualDay = Math.min(targetDay, daysInMonth);
+      const candidate = monthStart.set({ day: actualDay, hour, minute, second: 0, millisecond: 0 });
+      if (candidate >= now) {
         return candidate;
       }
     }
@@ -70,16 +81,18 @@ export function nextFireInstant(alarm: Alarm, now: DateTime = DateTime.now()): D
   if (alarm.recurrence.type === 'yearly') {
     // Check this year and next year
     for (let yearOffset = 0; yearOffset <= 1; yearOffset++) {
-      const candidate = nowZ
-        .plus({ years: yearOffset })
-        .set({ 
-          month: alarm.recurrence.month, 
-          day: alarm.recurrence.dayOfMonth, 
-          hour, 
-          minute, 
-          second: 0, 
-          millisecond: 0 
-        });
+      const targetYear = nowZ.plus({ years: yearOffset });
+      const monthStart = targetYear.set({ month: alarm.recurrence.month }).startOf('month');
+      const daysInMonth = monthStart.daysInMonth!;
+      // Use the target day, or last day of month if target is higher
+      const actualDay = Math.min(alarm.recurrence.dayOfMonth, daysInMonth);
+      const candidate = monthStart.set({ 
+        day: actualDay, 
+        hour, 
+        minute, 
+        second: 0, 
+        millisecond: 0 
+      });
       if (candidate.isValid && candidate >= now) {
         return candidate;
       }

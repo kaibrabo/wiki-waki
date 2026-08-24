@@ -1,11 +1,15 @@
-import { NativeModules, Platform } from 'react-native';
+import { Platform } from 'react-native';
+import { setWidgetData, reloadAllTimelines } from '../../modules/moondial-widget';
 
-// Type definitions for widget data
+// Type definitions for widget data. These mirror the Codable structs in
+// ios/MoondialWidgetExtension/MoondialWidget.swift — keep the two in sync.
+
 export interface WidgetAlarmData {
   label: string;
-  time: string;
+  time: string; // wall-clock time in the alarm's pinned zone, pre-formatted
   locationName: string;
   timezone: string;
+  fireEpoch: number; // Unix seconds of the next fire instant — powers the live countdown
   enabled: boolean;
 }
 
@@ -22,54 +26,25 @@ export interface WidgetData {
   locations: WidgetLocationData[];
 }
 
-const APP_GROUP = 'group.com.kaibrabo.moondial';
-const WIDGET_DATA_KEY = 'widgetData';
-
 /**
- * Updates the widget with current alarm and location data.
- * On iOS, this writes to the App Group shared UserDefaults.
- * On Android, this is a no-op (widgets not yet implemented).
+ * Writes the widget payload into the App Group shared container (iOS) and asks
+ * WidgetKit to refresh. No-op on Android/web, where the native module is absent.
  */
-export async function updateWidget(data: WidgetData): Promise<void> {
-  if (Platform.OS !== 'ios') {
-    // Android widget support not implemented yet
-    return;
-  }
-
+export function updateWidget(data: WidgetData): void {
+  if (Platform.OS !== 'ios') return;
   try {
-    // Use expo-secure-store or react-native-mmkv with App Group support
-    // For now, we'll use a native module approach
-    const { SharedGroupPreferences } = NativeModules;
-    
-    if (SharedGroupPreferences) {
-      await SharedGroupPreferences.setItem(
-        WIDGET_DATA_KEY,
-        JSON.stringify(data),
-        APP_GROUP
-      );
-      
-      // Trigger widget refresh
-      if (NativeModules.WidgetKit) {
-        NativeModules.WidgetKit.reloadAllTimelines();
-      }
-    }
+    setWidgetData(JSON.stringify(data));
+    reloadAllTimelines();
   } catch (error) {
     console.warn('Failed to update widget:', error);
   }
 }
 
-/**
- * Reloads all widget timelines to refresh their data.
- */
-export async function reloadWidgets(): Promise<void> {
-  if (Platform.OS !== 'ios') {
-    return;
-  }
-
+/** Reloads all widget timelines to refresh their data. */
+export function reloadWidgets(): void {
+  if (Platform.OS !== 'ios') return;
   try {
-    if (NativeModules.WidgetKit) {
-      NativeModules.WidgetKit.reloadAllTimelines();
-    }
+    reloadAllTimelines();
   } catch (error) {
     console.warn('Failed to reload widgets:', error);
   }

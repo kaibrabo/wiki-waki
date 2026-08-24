@@ -8,6 +8,8 @@ import type { Alarm } from '../types';
 import type { AlarmScheduler } from './alarm';
 import { nextFireInstant, displayInZone, currentZone } from './schedule';
 import { labelForZone } from './zones';
+import { notificationSoundName, DEFAULT_HAPTIC, playHaptic } from './alarmSounds';
+import type { AlarmHaptic } from '../types';
 
 // Configure notification handler
 Notifications.setNotificationHandler({
@@ -65,8 +67,8 @@ class IOSScheduler implements AlarmScheduler {
             content: {
               title: alarm.label,
               body: `${local} here (${pinned})`,
-              sound: 'default',
-              data: { alarmId: alarm.id },
+              sound: notificationSoundName(alarm.sound),
+              data: { alarmId: alarm.id, haptic: alarm.haptic ?? DEFAULT_HAPTIC },
             },
             trigger: {
               type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -78,16 +80,25 @@ class IOSScheduler implements AlarmScheduler {
     };
     
     scheduleAlarms();
-    
+
     const interval = setInterval(() => {
       scheduleAlarms();
     }, 60000);
-    
+
+    // Play the alarm's chosen haptic when it fires while the app is foregrounded.
+    // (iOS won't run an arbitrary custom haptic for a background notification; the
+    // system plays its built-in haptic alongside the sound in that case.)
+    const hapticSub = Notifications.addNotificationReceivedListener((notification) => {
+      const haptic = notification.request.content.data?.haptic as AlarmHaptic | undefined;
+      if (haptic) playHaptic(haptic);
+    });
+
     this.stopFn = () => {
       clearInterval(interval);
+      hapticSub.remove();
       Notifications.cancelAllScheduledNotificationsAsync();
     };
-    
+
     return this.stopFn;
   }
 }
