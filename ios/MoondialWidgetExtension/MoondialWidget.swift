@@ -177,21 +177,36 @@ private struct CurrentHeader: View {
     var locationName: String
     var timeSize: CGFloat
     var date: String = ""
+    var dateSize: CGFloat = 12
+    var dateOnRight: Bool = false
     var alignment: HorizontalAlignment = .leading
+
+    private var timeText: some View {
+        Text(Date(), style: .time)
+            .font(.system(size: timeSize, weight: .thin, design: .rounded))
+            .foregroundColor(.primary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+    }
+
+    private var dateText: some View {
+        Text(date)
+            .font(.system(size: dateSize))
+            .foregroundColor(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+    }
 
     var body: some View {
         VStack(alignment: alignment, spacing: 2) {
-            Text(Date(), style: .time)
-                .font(.system(size: timeSize, weight: .thin, design: .rounded))
-                .foregroundColor(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-            if !date.isEmpty {
-                Text(date)
-                    .font(.system(size: max(11, timeSize * 0.26)))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+            if dateOnRight && !date.isEmpty {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    timeText
+                    dateText
+                }
+            } else {
+                timeText
+                if !date.isEmpty { dateText }
             }
             HStack(spacing: 4) {
                 Image(systemName: "location.fill")
@@ -372,7 +387,7 @@ struct SmallWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 30, date: entry.data?.currentDate ?? "")
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 30, date: entry.data?.currentDate ?? "", dateSize: 14)
             Spacer(minLength: 4)
             Divider()
             NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20)
@@ -389,11 +404,11 @@ struct MediumWidgetView: View {
         let saved = savedLocations(entry.data)
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 12) {
-                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 46, date: entry.data?.currentDate ?? "")
+                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 36, date: entry.data?.currentDate ?? "", dateSize: 15, dateOnRight: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if !saved.isEmpty {
                     SavedSection(locations: saved, limit: 2)
-                        .frame(width: 130, alignment: .leading)
+                        .frame(width: 108, alignment: .leading)
                 }
             }
             Divider()
@@ -421,7 +436,7 @@ struct LargeWidgetView: View {
                 .foregroundColor(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
 
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, date: entry.data?.currentDate ?? "", alignment: .center)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, date: entry.data?.currentDate ?? "", dateSize: 13, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .center)
 
             NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13)
