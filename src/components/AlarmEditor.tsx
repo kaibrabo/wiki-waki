@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Modal } from 'react-native';
+import { Modal, Alert } from 'react-native';
 import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
@@ -65,16 +65,16 @@ export function AlarmEditor({
   const [customLabelText, setCustomLabelText] = useState('');
   const [showKeypad, setShowKeypad] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [timeError, setTimeError] = useState(false);
   const [sound, setSound] = useState<AlarmSound>(DEFAULT_SOUND);
 
   const closeKeypad = useCallback(() => {
     if (showKeypad) {
-      // Clamp time values when closing keypad
+      // Normalize to 2-digit HH:mm (no clamping — an out-of-range value is
+      // caught on save with a warning so the user can adjust it).
       const [h, m] = timeValue.split(':').map(s => parseInt(s, 10));
-      let hh = isNaN(h) ? 0 : h;
-      let mm = isNaN(m) ? 0 : m;
-      if (hh > 23) hh = 23;
-      if (mm > 59) mm = 59;
+      const hh = isNaN(h) ? 0 : h;
+      const mm = isNaN(m) ? 0 : m;
       setTimeValue(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`);
       setShowKeypad(false);
     }
@@ -141,14 +141,33 @@ export function AlarmEditor({
       setSound(coerceSound(lastAlarmSettings.sound));
     }
     setError(null);
+    setTimeError(false);
     setAddingCustomLabel(false);
     setCustomLabelText('');
     setShowDatePicker(false);
   }, [visible, editing, lastAlarmSettings]);
 
   const save = () => {
+    // Validate the time. A valid 24h time (00:00-23:59) also covers the 12h
+    // max of 12:59, since any valid 24h value displays as <=12:59 in 12h mode.
+    const [hh, mm] = timeValue.split(':').map((s) => parseInt(s, 10));
+    const timeValid =
+      !isNaN(hh) && !isNaN(mm) && hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
+    if (!timeValid) {
+      setTimeError(true);
+      setShowKeypad(true);
+      Alert.alert(
+        'Invalid time',
+        use24Hour
+          ? 'Please enter a time between 00:00 and 23:59.'
+          : 'Please enter a time between 1:00 and 12:59.'
+      );
+      return;
+    }
+    setTimeError(false);
+
     if (!label.trim()) return setError(t.selectLabel);
-    
+
     let recurrence: Recurrence;
     if (recType === 'monthly') {
       recurrence = { type: 'monthly', dayOfMonth: selectedDayOfMonth };
@@ -292,12 +311,13 @@ export function AlarmEditor({
               </XStack>
 
               {/* Time Picker */}
-              <TimeInput 
-                value={timeValue} 
-                onChange={setTimeValue} 
+              <TimeInput
+                value={timeValue}
+                onChange={(v) => { setTimeError(false); setTimeValue(v); }}
                 use24Hour={use24Hour}
                 showKeypad={showKeypad}
-                onShowKeypad={() => setShowKeypad(true)}
+                error={timeError}
+                onShowKeypad={() => { setTimeError(false); setShowKeypad(true); }}
                 onCloseKeypad={closeKeypad}
               />
 
@@ -591,18 +611,20 @@ function Field({ label, children, onPress }: { label: string; children: React.Re
   );
 }
 
-function TimeInput({ 
-  value, 
-  onChange, 
+function TimeInput({
+  value,
+  onChange,
   use24Hour,
   showKeypad,
+  error,
   onShowKeypad,
   onCloseKeypad,
-}: { 
-  value: string; 
+}: {
+  value: string;
   onChange: (v: string) => void;
   use24Hour: boolean;
   showKeypad: boolean;
+  error?: boolean;
   onShowKeypad: () => void;
   onCloseKeypad: () => void;
 }) {
@@ -653,8 +675,8 @@ function TimeInput({
           px="$4"
           py="$3"
           items="center"
-          borderWidth={1}
-          borderColor={showKeypad ? '$blue8' : '$borderColor'}
+          borderWidth={error ? 2 : 1}
+          borderColor={error ? '$red9' : showKeypad ? '$blue8' : '$borderColor'}
           pressStyle={{ bg: '$color3' }}
           onPress={onShowKeypad}
         >
