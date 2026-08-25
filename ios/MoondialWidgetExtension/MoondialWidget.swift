@@ -219,7 +219,7 @@ struct SmallWidgetView: View {
             NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(10)
+        .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 10))
     }
 }
 
@@ -234,7 +234,7 @@ struct MediumWidgetView: View {
             NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 26)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(10)
+        .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 10))
     }
 }
 
@@ -282,7 +282,7 @@ struct LargeWidgetView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(10)
+        .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 10))
     }
 }
 
