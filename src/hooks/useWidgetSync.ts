@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { useStore } from '../store';
 import { updateWidget, WidgetData, WidgetAlarmData, WidgetLocationData } from '../lib/widget';
 import { allUpcomingAlarms } from '../lib/schedule';
+import { useEffectiveTheme } from './useEffectiveTheme';
 import type { Alarm, Location } from '../types';
 
 /**
@@ -53,6 +54,7 @@ export function useWidgetSync() {
   const locations = useStore((s) => s.locations);
   const use24Hour = useStore((s) => s.use24Hour);
   const hasHydrated = useStore((s) => s.hasHydrated);
+  const theme = useEffectiveTheme();
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -74,6 +76,7 @@ export function useWidgetSync() {
         currentTime: now.toFormat(timeFormat),
         currentTimezone: activeZone,
         currentLocationName,
+        theme,
         locations: getLocationTimes(locations, use24Hour, now),
       };
 
@@ -83,5 +86,5 @@ export function useWidgetSync() {
     syncWidget();
     const interval = setInterval(syncWidget, 60000);
     return () => clearInterval(interval);
-  }, [alarms, locations, use24Hour, hasHydrated]);
+  }, [alarms, locations, use24Hour, hasHydrated, theme]);
 }

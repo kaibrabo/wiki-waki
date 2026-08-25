@@ -24,6 +24,7 @@ export interface WidgetData {
   currentTime: string;
   currentTimezone: string;
   currentLocationName: string; // display name of the location at the current timezone
+  theme: 'light' | 'dark'; // the app's effective theme, so the widget can match it
   locations: WidgetLocationData[];
 }
 

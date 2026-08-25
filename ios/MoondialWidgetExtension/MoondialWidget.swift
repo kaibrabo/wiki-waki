@@ -29,6 +29,7 @@ struct WidgetData: Codable {
     let currentTime: String
     let currentTimezone: String
     let currentLocationName: String? // optional for forward/backward compatibility
+    let theme: String? // "light" | "dark" — the app's effective theme
     let locations: [LocationData]
 }
 
@@ -37,6 +38,10 @@ struct WidgetData: Codable {
 extension Color {
     /// App accent blue (#3B82F6).
     static let moondialAccent = Color(red: 0.231, green: 0.510, blue: 0.965)
+    /// App dark background (slate, #0F172A).
+    static let moondialDarkBG = Color(red: 0.059, green: 0.090, blue: 0.165)
+    /// App light background (near-white grey).
+    static let moondialLightBG = Color(red: 0.96, green: 0.96, blue: 0.97)
 }
 
 /// "America/Los_Angeles" -> "Los Angeles".
@@ -66,6 +71,7 @@ struct Provider: TimelineProvider {
         currentTime: "9:41 AM",
         currentTimezone: TimeZone.current.identifier,
         currentLocationName: "San Francisco",
+        theme: "light",
         locations: [
             LocationData(name: "San Francisco", timezone: "America/Los_Angeles", currentTime: "9:41 AM"),
             LocationData(name: "New York", timezone: "America/New_York", currentTime: "12:41 PM"),
@@ -90,8 +96,11 @@ struct Provider: TimelineProvider {
     }
 
     private func loadEntry() -> MoondialEntry {
+        // The app stores the payload as a JSON string, so read it as a string
+        // (UserDefaults.data(forKey:) returns nil for a string value).
         if let sharedDefaults = UserDefaults(suiteName: "group.com.kaibrabo.moondial"),
-           let data = sharedDefaults.data(forKey: "widgetData"),
+           let jsonString = sharedDefaults.string(forKey: "widgetData"),
+           let data = jsonString.data(using: .utf8),
            let widgetData = try? JSONDecoder().decode(WidgetData.self, from: data) {
             return MoondialEntry(date: Date(), data: widgetData)
         }
@@ -211,7 +220,6 @@ struct SmallWidgetView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding()
-        .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
@@ -227,7 +235,6 @@ struct MediumWidgetView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding()
-        .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
@@ -276,7 +283,6 @@ struct LargeWidgetView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding()
-        .containerBackground(.fill.tertiary, for: .widget)
     }
 }
 
@@ -299,7 +305,19 @@ struct MoondialWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     let entry: MoondialEntry
 
+    private var isDark: Bool { entry.data?.theme == "dark" }
+
     var body: some View {
+        // Force the widget to the app's effective theme (not the system
+        // appearance), so it's light when the app is light.
+        sized
+            .environment(\.colorScheme, isDark ? .dark : .light)
+            .containerBackground(for: .widget) {
+                isDark ? Color.moondialDarkBG : Color.moondialLightBG
+            }
+    }
+
+    @ViewBuilder private var sized: some View {
         switch family {
         case .systemSmall:
             SmallWidgetView(entry: entry)
