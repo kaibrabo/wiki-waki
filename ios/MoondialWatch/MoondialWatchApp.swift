@@ -22,6 +22,16 @@ extension Color {
     static let moondialAccent = Color(red: 0.231, green: 0.510, blue: 0.965) // #3B82F6
     static let moondialDarkBG = Color(red: 0.059, green: 0.090, blue: 0.165) // #0F172A
     static let moondialLightBG = Color(red: 0.96, green: 0.96, blue: 0.97)
+
+    // Explicit text colors per theme. watchOS is dark-first and keeps `.primary`/
+    // `.secondary` light even under `preferredColorScheme(.light)`, so on the light
+    // theme the text washed out — we set the colors directly instead.
+    static func moondialPrimaryText(_ isDark: Bool) -> Color {
+        isDark ? .white : Color(red: 0.09, green: 0.11, blue: 0.16) // near-black slate
+    }
+    static func moondialSecondaryText(_ isDark: Bool) -> Color {
+        isDark ? Color(white: 0.72) : Color(white: 0.38)
+    }
 }
 
 /// "America/Los_Angeles" -> "Los Angeles".
@@ -59,11 +69,13 @@ struct ContentView: View {
                 CurrentHeader(
                     locationName: locationName,
                     date: data?.currentDate ?? "",
-                    use24Hour: data?.use24Hour ?? false
+                    use24Hour: data?.use24Hour ?? false,
+                    isDark: isDark
                 )
                 Divider()
                 NextAlarm(
                     alarm: data?.nextAlarm,
+                    isDark: isDark,
                     nextLabel: labels.next,
                     noAlarmsLabel: labels.noAlarms
                 )
@@ -81,6 +93,7 @@ private struct CurrentHeader: View {
     var locationName: String
     var date: String
     var use24Hour: Bool
+    var isDark: Bool
 
     // Force the live clock's 12/24h formatting from the app setting rather than
     // the device locale, while keeping the auto-updating .time style.
@@ -94,14 +107,14 @@ private struct CurrentHeader: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(Date(), style: .time)
                 .font(.system(size: 34, weight: .regular, design: .rounded))
-                .foregroundColor(.primary)
+                .foregroundColor(.moondialPrimaryText(isDark))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .environment(\.locale, clockLocale)
             if !date.isEmpty {
                 Text(date)
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.moondialSecondaryText(isDark))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
@@ -112,7 +125,7 @@ private struct CurrentHeader: View {
                 Text(locationName)
                     .font(.system(size: 13))
                     .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.moondialSecondaryText(isDark))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
@@ -123,6 +136,7 @@ private struct CurrentHeader: View {
 /// The "Next" alarm — label, clock time and a live countdown, like the home card.
 private struct NextAlarm: View {
     var alarm: WatchAlarmData?
+    var isDark: Bool
     var nextLabel: String
     var noAlarmsLabel: String
 
@@ -135,13 +149,13 @@ private struct NextAlarm: View {
                 Text(nextLabel)
                     .font(.system(size: 10))
                     .fontWeight(.bold)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.moondialSecondaryText(isDark))
             }
             if let alarm = alarm, alarm.enabled {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text(alarm.time)
                         .font(.system(size: 20, weight: .light, design: .rounded))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.moondialPrimaryText(isDark))
                     Text("in")
                         .font(.caption2)
                         .foregroundColor(.moondialAccent)
@@ -155,14 +169,14 @@ private struct NextAlarm: View {
                 if !alarm.label.isEmpty {
                     Text(alarm.label)
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.moondialSecondaryText(isDark))
                         .lineLimit(1)
                         .truncationMode(.tail)
                 }
             } else {
                 Text(noAlarmsLabel)
                     .font(.footnote)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.moondialSecondaryText(isDark))
             }
         }
     }
