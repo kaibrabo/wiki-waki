@@ -194,6 +194,27 @@ export function countdownTo(instant: DateTime, now: DateTime = DateTime.now()): 
   return `in ${Math.max(s, 0)}s`;
 }
 
+/**
+ * The next `count` fire instants for a single alarm (a rolling window). Powers
+ * AlarmKit scheduling, which needs fixed one-time alarms per occurrence. Stops
+ * early for non-repeating ('once') alarms.
+ */
+export function upcomingFireInstants(
+  alarm: Alarm,
+  now: DateTime = DateTime.now(),
+  count = 5,
+): DateTime[] {
+  const out: DateTime[] = [];
+  let cursor = now;
+  for (let i = 0; i < count; i++) {
+    const inst = nextFireInstant(alarm, cursor);
+    if (!inst) break;
+    out.push(inst);
+    cursor = inst.plus({ minutes: 1 }); // step past this occurrence
+  }
+  return out;
+}
+
 /** Get all upcoming enabled alarms sorted by fire time. */
 export function allUpcomingAlarms(
   alarms: Alarm[],

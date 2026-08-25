@@ -17,6 +17,7 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Moondial uses your location to detect your current timezone for setting alarms.",
+        "NSAlarmKitUsageDescription": "Moondial schedules alarms so they ring at the right time, wherever you are.",
         "UIBackgroundModes": [
           "audio",
           "fetch",

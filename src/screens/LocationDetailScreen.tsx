@@ -315,12 +315,13 @@ function TopBar({
   right?: React.ReactNode;
 }) {
   return (
-    <XStack items="center" px="$4" pt="$3" pb="$3" gap="$2">
+    <XStack items="center" pl="$1.5" pr="$4" pt="$3" pb="$3" gap="$2">
       <Button
         size="$6"
         circular
         chromeless
         onPress={onBack}
+        ml={-8}
         hitSlop={12}
         pressStyle={{ bg: '$color4' }}
         accessible={true}

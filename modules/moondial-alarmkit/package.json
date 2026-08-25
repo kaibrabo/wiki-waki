@@ -1,0 +1,6 @@
+{
+  "name": "moondial-alarmkit",
+  "version": "1.0.0",
+  "description": "iOS 26 AlarmKit bridge for Moondial - real ringing alarms with Stop/Snooze.",
+  "main": "index.ts"
+}

@@ -88,6 +88,8 @@ PODS:
   - hermes-engine (250829098.0.16):
     - hermes-engine/Pre-built (= 250829098.0.16)
   - hermes-engine/Pre-built (250829098.0.16)
+  - MoondialAlarmKit (1.0.0):
+    - ExpoModulesCore
   - MoondialWidget (1.0.0):
     - ExpoModulesCore
   - RCTDeprecation (0.86.2)
@@ -2193,6 +2195,7 @@ DEPENDENCIES:
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - MoondialAlarmKit (from `../modules/moondial-alarmkit/ios`)
   - MoondialWidget (from `../modules/moondial-widget/ios`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
@@ -2313,6 +2316,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-v250829098.0.16
+  MoondialAlarmKit:
+    :path: "../modules/moondial-alarmkit/ios"
   MoondialWidget:
     :path: "../modules/moondial-widget/ios"
   RCTDeprecation:
@@ -2490,6 +2495,7 @@ SPEC CHECKSUMS:
   ExpoSystemUI: ff3142b323ae7b4d11dc0b1dc4acfa30d92be7dc
   FBLazyVector: 3c3be9a019176b5699455f7f66c5444b78a411c6
   hermes-engine: bbb7b8c83e41c21a675567fab89b1e75fb391fcc
+  MoondialAlarmKit: c7082ce44513ff3a690e715b82b73c2e04fe94a4
   MoondialWidget: 1807def5388e31bfdbce3ba0bf8a65bc489b8702
   RCTDeprecation: bccb6545c26db881ecddfd83a3f9ea82aba1605f
   RCTRequired: b2f74764d596fc0051f00fee94b49bf41a6f7f5a
