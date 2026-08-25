@@ -225,7 +225,6 @@ private struct NextQueueItem: View {
                 }
             }
             .lineLimit(1)
-            .minimumScaleFactor(0.6)
             if !alarm.label.isEmpty {
                 Text(alarm.label)
                     .font(.system(size: timeSize))
@@ -243,7 +242,6 @@ private struct NextQueueItem: View {
                     .foregroundColor(.moondialAccent)
             }
             .lineLimit(1)
-            .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -349,7 +347,7 @@ struct MediumWidgetView: View {
                 }
             }
             Divider()
-            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 15)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 14)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -380,7 +378,7 @@ struct LargeWidgetView: View {
 
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52)
 
-            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 16)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.moondialAccent.opacity(0.10))
