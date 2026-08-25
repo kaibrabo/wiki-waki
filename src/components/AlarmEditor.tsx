@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Modal, Alert } from 'react-native';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { Modal, Alert, TextInput } from 'react-native';
 import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
@@ -66,6 +66,14 @@ export function AlarmEditor({
   const [showKeypad, setShowKeypad] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [timeError, setTimeError] = useState(false);
+  const customLabelRef = useRef<TextInput>(null);
+
+  // Focus the custom-label input as soon as it appears so the user can type.
+  useEffect(() => {
+    if (!addingCustomLabel) return;
+    const t = setTimeout(() => customLabelRef.current?.focus(), 50);
+    return () => clearTimeout(t);
+  }, [addingCustomLabel]);
   const [sound, setSound] = useState<AlarmSound>(DEFAULT_SOUND);
 
   const closeKeypad = useCallback(() => {
@@ -343,6 +351,7 @@ export function AlarmEditor({
                   {addingCustomLabel ? (
                     <XStack gap="$2" items="center" width="100%">
                       <Input
+                        ref={customLabelRef}
                         size="$3"
                         flex={1}
                         value={customLabelText}
