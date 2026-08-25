@@ -21,11 +21,11 @@ type SoundOption = {
 
 // require() must be static so Metro can bundle each asset.
 export const SOUND_OPTIONS: SoundOption[] = [
-  { id: 'reveille', label: 'Reveille', module: require('../../assets/sounds/reveille.wav') },
   { id: 'chime', label: 'Chime', module: require('../../assets/sounds/chime.wav') },
   { id: 'beacon', label: 'Beacon', module: require('../../assets/sounds/beacon.wav') },
   { id: 'radar', label: 'Radar', module: require('../../assets/sounds/radar.wav') },
   { id: 'pulse', label: 'Pulse', module: require('../../assets/sounds/pulse.wav') },
+  { id: 'reveille', label: 'Reveille', module: require('../../assets/sounds/reveille.wav') },
 ];
 
 export const DEFAULT_SOUND: AlarmSound = 'chime';
