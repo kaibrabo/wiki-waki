@@ -4,6 +4,7 @@ import { useStore } from '../store';
 import { updateWidget, WidgetData, WidgetAlarmData, WidgetLocationData } from '../lib/widget';
 import { allUpcomingAlarms } from '../lib/schedule';
 import { codeForLocation } from '../lib/zones';
+import { getTranslations } from '../lib/i18n';
 import { useEffectiveTheme } from './useEffectiveTheme';
 import type { Alarm, Location } from '../types';
 
@@ -62,6 +63,7 @@ export function useWidgetSync() {
   const locations = useStore((s) => s.locations);
   const use24Hour = useStore((s) => s.use24Hour);
   const dateFormat = useStore((s) => s.dateFormat);
+  const language = useStore((s) => s.language);
   const hasHydrated = useStore((s) => s.hasHydrated);
   const theme = useEffectiveTheme();
 
@@ -83,6 +85,7 @@ export function useWidgetSync() {
       const upcomingAlarms = getUpcomingAlarms(alarms, locations, use24Hour, now, 3);
 
       const currentDate = now.toFormat(dateFormat === 'DMY' ? 'dd/MM/yyyy' : 'MM/dd/yyyy');
+      const t = getTranslations(language);
 
       const widgetData: WidgetData = {
         nextAlarm: upcomingAlarms[0] ?? null,
@@ -92,6 +95,7 @@ export function useWidgetSync() {
         currentTimezone: activeZone,
         currentLocationName,
         theme,
+        strings: { next: t.next, saved: t.saved, noAlarms: t.noUpcomingAlarms },
         locations: getLocationTimes(locations, use24Hour, now),
       };
 
@@ -101,5 +105,5 @@ export function useWidgetSync() {
     syncWidget();
     const interval = setInterval(syncWidget, 60000);
     return () => clearInterval(interval);
-  }, [alarms, locations, use24Hour, dateFormat, hasHydrated, theme]);
+  }, [alarms, locations, use24Hour, dateFormat, language, hasHydrated, theme]);
 }

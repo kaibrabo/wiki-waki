@@ -20,6 +20,13 @@ export interface WidgetLocationData {
   currentTime: string;
 }
 
+// Localized UI strings so the widget follows the app's language setting.
+export interface WidgetStrings {
+  next: string;
+  saved: string;
+  noAlarms: string;
+}
+
 export interface WidgetData {
   nextAlarm: WidgetAlarmData | null;
   upcomingAlarms: WidgetAlarmData[]; // the next few alarms (queue), soonest first
@@ -28,6 +35,7 @@ export interface WidgetData {
   currentTimezone: string;
   currentLocationName: string; // display name of the location at the current timezone
   theme: 'light' | 'dark'; // the app's effective theme, so the widget can match it
+  strings: WidgetStrings; // localized UI labels
   locations: WidgetLocationData[];
 }
 

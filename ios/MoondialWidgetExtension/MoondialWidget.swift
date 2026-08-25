@@ -25,6 +25,12 @@ struct LocationData: Codable {
     let currentTime: String
 }
 
+struct WidgetStrings: Codable {
+    let next: String
+    let saved: String
+    let noAlarms: String
+}
+
 struct WidgetData: Codable {
     let nextAlarm: AlarmData?
     let upcomingAlarms: [AlarmData]? // the next few alarms (queue), soonest first
@@ -33,6 +39,7 @@ struct WidgetData: Codable {
     let currentTimezone: String
     let currentLocationName: String? // optional for forward/backward compatibility
     let theme: String? // "light" | "dark" — the app's effective theme
+    let strings: WidgetStrings? // localized UI labels
     let locations: [LocationData]
 }
 
@@ -65,6 +72,16 @@ private func savedLocations(_ data: WidgetData?) -> [LocationData] {
     return (data?.locations ?? []).filter { $0.name != current }
 }
 
+/// Localized widget labels (header strings uppercased), with English fallbacks.
+private func widgetLabels(_ data: WidgetData?) -> (next: String, saved: String, noAlarms: String) {
+    let s = data?.strings
+    return (
+        (s?.next ?? "Next").uppercased(),
+        (s?.saved ?? "Saved").uppercased(),
+        s?.noAlarms ?? "No upcoming alarms"
+    )
+}
+
 // MARK: - Data Provider
 
 struct Provider: TimelineProvider {
@@ -88,6 +105,7 @@ struct Provider: TimelineProvider {
         currentTimezone: TimeZone.current.identifier,
         currentLocationName: "San Francisco",
         theme: "light",
+        strings: WidgetStrings(next: "Next", saved: "Saved", noAlarms: "No upcoming alarms"),
         locations: [
             LocationData(name: "San Francisco", timezone: "America/Los_Angeles", currentTime: "9:41 AM"),
             LocationData(name: "New York", timezone: "America/New_York", currentTime: "12:41 PM"),
@@ -141,6 +159,7 @@ struct Provider: TimelineProvider {
             currentTimezone: data.currentTimezone,
             currentLocationName: data.currentLocationName,
             theme: data.theme,
+            strings: data.strings,
             locations: data.locations
         )
     }
@@ -228,6 +247,8 @@ private struct CurrentHeader: View {
 private struct NextAlarm: View {
     var alarm: AlarmData?
     var timeSize: CGFloat = 22
+    var nextLabel: String = "NEXT"
+    var noAlarmsLabel: String = "No upcoming alarms"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -235,7 +256,7 @@ private struct NextAlarm: View {
                 Image(systemName: "alarm.fill")
                     .font(.system(size: 10))
                     .foregroundColor(.moondialAccent)
-                Text("NEXT")
+                Text(nextLabel)
                     .font(.system(size: 10))
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
@@ -265,7 +286,7 @@ private struct NextAlarm: View {
                         .truncationMode(.tail)
                 }
             } else {
-                Text("No upcoming alarms")
+                Text(noAlarmsLabel)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -318,6 +339,8 @@ private struct NextQueue: View {
     var alarms: [AlarmData]
     var count: Int = 3
     var timeSize: CGFloat = 20
+    var nextLabel: String = "NEXT"
+    var noAlarmsLabel: String = "No upcoming alarms"
 
     var body: some View {
         let active = alarms.filter { $0.enabled }
@@ -326,13 +349,13 @@ private struct NextQueue: View {
                 Image(systemName: "alarm.fill")
                     .font(.system(size: 10))
                     .foregroundColor(.moondialAccent)
-                Text("NEXT")
+                Text(nextLabel)
                     .font(.system(size: 10))
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
             }
             if active.isEmpty {
-                Text("No upcoming alarms")
+                Text(noAlarmsLabel)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             } else {
@@ -368,9 +391,10 @@ private struct ClockRow: View {
 private struct SavedSection: View {
     var locations: [LocationData]
     var limit: Int
+    var title: String = "SAVED"
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("SAVED")
+            Text(title)
                 .font(.system(size: 10))
                 .fontWeight(.bold)
                 .foregroundColor(.secondary)
@@ -387,11 +411,12 @@ struct SmallWidgetView: View {
     let entry: MoondialEntry
 
     var body: some View {
+        let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 6) {
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 38, date: entry.data?.currentDate ?? "", dateSize: 14)
             Spacer(minLength: 4)
             Divider()
-            NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20)
+            NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20, nextLabel: labels.next, noAlarmsLabel: labels.noAlarms)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 10))
@@ -403,17 +428,18 @@ struct MediumWidgetView: View {
 
     var body: some View {
         let saved = savedLocations(entry.data)
+        let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 12) {
                 CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 36, date: entry.data?.currentDate ?? "", dateSize: 15, dateOnRight: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if !saved.isEmpty {
-                    SavedSection(locations: saved, limit: 2)
+                    SavedSection(locations: saved, limit: 2, title: labels.saved)
                         .frame(width: 108, alignment: .leading)
                 }
             }
             Divider()
-            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 14)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 14, nextLabel: labels.next, noAlarmsLabel: labels.noAlarms)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -430,6 +456,7 @@ struct LargeWidgetView: View {
     }
 
     var body: some View {
+        let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 8) {
             Text("Moondial")
                 .font(.caption)
@@ -440,14 +467,14 @@ struct LargeWidgetView: View {
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, date: entry.data?.currentDate ?? "", dateSize: 15, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .center)
 
-            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13, nextLabel: labels.next, noAlarmsLabel: labels.noAlarms)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.moondialAccent.opacity(0.10))
                 .cornerRadius(12)
 
             if !savedLocations.isEmpty {
-                SavedSection(locations: savedLocations, limit: 4)
+                SavedSection(locations: savedLocations, limit: 4, title: labels.saved)
                     .padding(.top, 6)
             }
 
