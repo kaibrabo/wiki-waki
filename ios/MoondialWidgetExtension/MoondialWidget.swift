@@ -146,10 +146,10 @@ private struct CurrentHeader: View {
                 .minimumScaleFactor(0.6)
             HStack(spacing: 4) {
                 Image(systemName: "location.fill")
-                    .font(.system(size: max(9, timeSize * 0.24)))
+                    .font(.system(size: max(10, timeSize * 0.26)))
                     .foregroundColor(.moondialAccent)
                 Text(locationName)
-                    .font(.system(size: max(12, timeSize * 0.30)))
+                    .font(.system(size: max(13, timeSize * 0.34)))
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
@@ -339,11 +339,11 @@ struct MediumWidgetView: View {
         let saved = savedLocations(entry.data)
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 12) {
-                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 36)
+                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 46)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if !saved.isEmpty {
                     SavedSection(locations: saved, limit: 3)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(width: 130, alignment: .leading)
                 }
             }
             Divider()
