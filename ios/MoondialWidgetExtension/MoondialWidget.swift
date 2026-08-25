@@ -199,25 +199,25 @@ private struct NextAlarm: View {
     }
 }
 
-/// One row in the upcoming-alarm queue: time · label on the left, live countdown right.
-private struct NextQueueRow: View {
+/// One column in the horizontal upcoming-alarm queue: time / label / countdown.
+private struct NextQueueItem: View {
     var alarm: AlarmData
     var timeSize: CGFloat
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
+        VStack(alignment: .leading, spacing: 1) {
             Text(alarm.time)
                 .font(.system(size: timeSize, weight: .light, design: .rounded))
                 .foregroundColor(.primary)
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
             if !alarm.label.isEmpty {
                 Text(alarm.label)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
-            Spacer(minLength: 6)
-            HStack(spacing: 3) {
+            HStack(spacing: 2) {
                 Text("in")
                     .font(.caption2)
                     .foregroundColor(.moondialAccent)
@@ -225,17 +225,19 @@ private struct NextQueueRow: View {
                     .font(.caption2.monospacedDigit())
                     .fontWeight(.semibold)
                     .foregroundColor(.moondialAccent)
-                    .frame(minWidth: 44, alignment: .trailing)
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-/// The upcoming-alarm queue (up to `count`) for medium/large widgets.
+/// The upcoming-alarm queue (up to `count`), laid out horizontally.
 private struct NextQueue: View {
     var alarms: [AlarmData]
     var count: Int = 3
-    var timeSize: CGFloat = 18
+    var timeSize: CGFloat = 20
 
     var body: some View {
         let active = alarms.filter { $0.enabled }
@@ -254,8 +256,10 @@ private struct NextQueue: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             } else {
-                ForEach(Array(active.prefix(count).enumerated()), id: \.offset) { _, alarm in
-                    NextQueueRow(alarm: alarm, timeSize: timeSize)
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(Array(active.prefix(count).enumerated()), id: \.offset) { _, alarm in
+                        NextQueueItem(alarm: alarm, timeSize: timeSize)
+                    }
                 }
             }
         }
