@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { useStore } from '../store';
 import { updateWidget, WidgetData, WidgetAlarmData, WidgetLocationData } from '../lib/widget';
 import { allUpcomingAlarms } from '../lib/schedule';
+import { codeForLocation } from '../lib/zones';
 import { useEffectiveTheme } from './useEffectiveTheme';
 import type { Alarm, Location } from '../types';
 
@@ -27,10 +28,12 @@ function getUpcomingAlarms(
     .slice(0, count)
     .map(({ alarm, instant }) => {
       const location = locations.find((l) => l.id === alarm.locationId);
+      const code = location ? codeForLocation(location.name, location.ianaZone) ?? '' : '';
       return {
         label: alarm.label,
         time: instant.setZone(alarm.pinnedZone).toFormat(timeFormat),
         locationName: location?.name.split(',')[0] ?? '',
+        code,
         timezone: alarm.pinnedZone,
         fireEpoch: Math.round(instant.toSeconds()),
         enabled: true,

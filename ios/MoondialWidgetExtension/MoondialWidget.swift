@@ -11,6 +11,7 @@ struct AlarmData: Codable {
     let label: String
     let time: String
     let locationName: String
+    let code: String? // location/airport code like "SFO" (may be empty)
     let timezone: String
     let fireEpoch: Double // Unix seconds of the next fire instant
     let enabled: Bool
@@ -65,14 +66,15 @@ struct Provider: TimelineProvider {
             label: "Start work",
             time: "9:00 AM",
             locationName: "San Francisco",
+            code: "SFO",
             timezone: "America/Los_Angeles",
             fireEpoch: Date().addingTimeInterval(3 * 3600 + 12 * 60).timeIntervalSince1970,
             enabled: true
         ),
         upcomingAlarms: [
-            AlarmData(label: "Start work", time: "9:00 AM", locationName: "San Francisco", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(3 * 3600).timeIntervalSince1970, enabled: true),
-            AlarmData(label: "Lunch", time: "12:00 PM", locationName: "San Francisco", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(6 * 3600).timeIntervalSince1970, enabled: true),
-            AlarmData(label: "End work", time: "5:00 PM", locationName: "San Francisco", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(11 * 3600).timeIntervalSince1970, enabled: true)
+            AlarmData(label: "Start work", time: "9:00 AM", locationName: "San Francisco", code: "SFO", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(3 * 3600).timeIntervalSince1970, enabled: true),
+            AlarmData(label: "Lunch", time: "12:00 PM", locationName: "San Francisco", code: "SFO", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(6 * 3600).timeIntervalSince1970, enabled: true),
+            AlarmData(label: "End work", time: "5:00 PM", locationName: "San Francisco", code: "SFO", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(11 * 3600).timeIntervalSince1970, enabled: true)
         ],
         currentTime: "9:41 AM",
         currentTimezone: TimeZone.current.identifier,
@@ -206,11 +208,18 @@ private struct NextQueueItem: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(alarm.time)
-                .font(.system(size: timeSize, weight: .semibold, design: .rounded))
-                .foregroundColor(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(alarm.time)
+                    .font(.system(size: timeSize, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primary)
+                if let code = alarm.code, !code.isEmpty {
+                    Text("(\(code))")
+                        .font(.system(size: timeSize))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
             if !alarm.label.isEmpty {
                 Text(alarm.label)
                     .font(.system(size: timeSize))

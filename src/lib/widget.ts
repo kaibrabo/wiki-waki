@@ -8,6 +8,7 @@ export interface WidgetAlarmData {
   label: string;
   time: string; // wall-clock time in the alarm's pinned zone, pre-formatted
   locationName: string;
+  code: string; // location/airport code like "SFO" (may be empty)
   timezone: string;
   fireEpoch: number; // Unix seconds of the next fire instant — powers the live countdown
   enabled: boolean;
