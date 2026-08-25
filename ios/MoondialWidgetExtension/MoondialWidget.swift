@@ -58,6 +58,12 @@ private func currentLocationName(_ data: WidgetData?) -> String {
     return cityName(from: data?.currentTimezone ?? TimeZone.current.identifier)
 }
 
+/// Saved locations = every location except the current one.
+private func savedLocations(_ data: WidgetData?) -> [LocationData] {
+    let current = currentLocationName(data)
+    return (data?.locations ?? []).filter { $0.name != current }
+}
+
 // MARK: - Data Provider
 
 struct Provider: TimelineProvider {
@@ -276,7 +282,7 @@ private struct NextQueue: View {
     }
 }
 
-/// A world-clock row for the saved locations (large widget).
+/// A world-clock row for the saved locations.
 private struct ClockRow: View {
     var location: LocationData
     var body: some View {
@@ -290,6 +296,23 @@ private struct ClockRow: View {
                 .font(.caption.monospacedDigit())
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
+        }
+    }
+}
+
+/// The "SAVED" world-clock list, shared by the medium and large widgets.
+private struct SavedSection: View {
+    var locations: [LocationData]
+    var limit: Int
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("SAVED")
+                .font(.system(size: 10))
+                .fontWeight(.bold)
+                .foregroundColor(.secondary)
+            ForEach(Array(locations.prefix(limit)), id: \.timezone) { loc in
+                ClockRow(location: loc)
+            }
         }
     }
 }
@@ -315,8 +338,16 @@ struct MediumWidgetView: View {
     let entry: MoondialEntry
 
     var body: some View {
+        let saved = savedLocations(entry.data)
         VStack(alignment: .leading, spacing: 6) {
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 40)
+            HStack(alignment: .top, spacing: 12) {
+                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 36)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if !saved.isEmpty {
+                    SavedSection(locations: saved, limit: 3)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
             Divider()
             NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 15)
             Spacer(minLength: 0)
@@ -356,15 +387,7 @@ struct LargeWidgetView: View {
                 .cornerRadius(12)
 
             if !savedLocations.isEmpty {
-                Text("SAVED")
-                    .font(.system(size: 10))
-                    .fontWeight(.bold)
-                    .foregroundColor(.secondary)
-                VStack(spacing: 8) {
-                    ForEach(Array(savedLocations.prefix(5)), id: \.timezone) { loc in
-                        ClockRow(location: loc)
-                    }
-                }
+                SavedSection(locations: savedLocations, limit: 5)
             }
 
             Spacer(minLength: 0)
