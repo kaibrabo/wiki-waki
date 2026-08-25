@@ -2,118 +2,163 @@ import SwiftUI
 
 @main
 struct MoondialWatchApp: App {
+    @StateObject private var store = WatchStore()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(store: store)
         }
     }
 }
+
+// MARK: - Theme (mirrors the Tamagui app palette / the home-screen widget)
+
+extension Color {
+    static let moondialAccent = Color(red: 0.231, green: 0.510, blue: 0.965) // #3B82F6
+    static let moondialDarkBG = Color(red: 0.059, green: 0.090, blue: 0.165) // #0F172A
+    static let moondialLightBG = Color(red: 0.96, green: 0.96, blue: 0.97)
+}
+
+/// "America/Los_Angeles" -> "Los Angeles".
+private func cityName(from timezone: String) -> String {
+    guard let last = timezone.split(separator: "/").last else { return timezone }
+    return last.replacingOccurrences(of: "_", with: " ")
+}
+
+// MARK: - Content
+//
+// Mirrors the small home-screen widget: live current-location clock on top, then
+// the date and location, a divider, and the next alarm with a live countdown.
 
 struct ContentView: View {
-    @State private var locations: [WatchLocation] = []
-    @State private var nextAlarm: WatchAlarm?
-    
+    @ObservedObject var store: WatchStore
+
+    private var data: WatchPayload? { store.payload }
+    private var isDark: Bool { data?.theme != "light" }
+
+    private var locationName: String {
+        if let name = data?.currentLocationName, !name.isEmpty { return name }
+        return cityName(from: data?.currentTimezone ?? TimeZone.current.identifier)
+    }
+
+    private var labels: (next: String, noAlarms: String) {
+        ( (data?.strings?.next ?? "Next").uppercased(),
+          data?.strings?.noAlarms ?? "No upcoming alarms" )
+    }
+
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 12) {
-                    if let alarm = nextAlarm {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("NEXT")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                            
-                            Text(alarm.time)
-                                .font(.system(size: 28, weight: .light, design: .rounded))
-                            
-                            Text(alarm.label)
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                        .background(Color(.darkGray).opacity(0.3))
-                        .cornerRadius(12)
-                    }
-                    
-                    ForEach(locations, id: \.timezone) { location in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(location.name)
-                                    .font(.caption)
-                                    .lineLimit(1)
-                            }
-                            Spacer()
-                            Text(location.currentTime)
-                                .font(.system(.body, design: .rounded))
-                                .monospacedDigit()
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                    }
+        ZStack {
+            (isDark ? Color.moondialDarkBG : Color.moondialLightBG)
+                .ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 6) {
+                CurrentHeader(
+                    locationName: locationName,
+                    date: data?.currentDate ?? "",
+                    use24Hour: data?.use24Hour ?? false
+                )
+                Divider()
+                NextAlarm(
+                    alarm: data?.nextAlarm,
+                    nextLabel: labels.next,
+                    noAlarmsLabel: labels.noAlarms
+                )
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.horizontal, 4)
+        }
+        .preferredColorScheme(isDark ? .dark : .light)
+    }
+}
+
+/// Current location: live time on top, then date and the location name.
+private struct CurrentHeader: View {
+    var locationName: String
+    var date: String
+    var use24Hour: Bool
+
+    // Force the live clock's 12/24h formatting from the app setting rather than
+    // the device locale, while keeping the auto-updating .time style.
+    private var clockLocale: Locale {
+        var comps = Locale.Components(locale: .current)
+        comps.hourCycle = use24Hour ? .zeroToTwentyThree : .oneToTwelve
+        return Locale(components: comps)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(Date(), style: .time)
+                .font(.system(size: 34, weight: .regular, design: .rounded))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .environment(\.locale, clockLocale)
+            if !date.isEmpty {
+                Text(date)
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            HStack(spacing: 4) {
+                Image(systemName: "location.fill")
+                    .font(.system(size: 10))
+                    .foregroundColor(.moondialAccent)
+                Text(locationName)
+                    .font(.system(size: 13))
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+    }
+}
+
+/// The "Next" alarm — label, clock time and a live countdown, like the home card.
+private struct NextAlarm: View {
+    var alarm: WatchAlarmData?
+    var nextLabel: String
+    var noAlarmsLabel: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 4) {
+                Image(systemName: "alarm.fill")
+                    .font(.system(size: 10))
+                    .foregroundColor(.moondialAccent)
+                Text(nextLabel)
+                    .font(.system(size: 10))
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+            }
+            if let alarm = alarm, alarm.enabled {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text(alarm.time)
+                        .font(.system(size: 20, weight: .light, design: .rounded))
+                        .foregroundColor(.primary)
+                    Text("in")
+                        .font(.caption2)
+                        .foregroundColor(.moondialAccent)
+                    Text(alarm.fireDate, style: .timer)
+                        .font(.caption2.monospacedDigit())
+                        .fontWeight(.semibold)
+                        .foregroundColor(.moondialAccent)
                 }
-                .padding(.horizontal)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                if !alarm.label.isEmpty {
+                    Text(alarm.label)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+            } else {
+                Text(noAlarmsLabel)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
             }
-            .navigationTitle("Moondial")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-        .onAppear {
-            loadData()
-        }
-    }
-    
-    private func loadData() {
-        if let sharedDefaults = UserDefaults(suiteName: "group.com.kaibrabo.moondial"),
-           let data = sharedDefaults.data(forKey: "widgetData"),
-           let widgetData = try? JSONDecoder().decode(WatchWidgetData.self, from: data) {
-            
-            self.locations = widgetData.locations.map { loc in
-                WatchLocation(name: loc.name, timezone: loc.timezone, currentTime: loc.currentTime)
-            }
-            
-            if let alarm = widgetData.nextAlarm {
-                self.nextAlarm = WatchAlarm(label: alarm.label, time: alarm.time, location: alarm.locationName)
-            }
-        } else {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "h:mm a"
-            
-            self.locations = [
-                WatchLocation(name: "Local", timezone: TimeZone.current.identifier, currentTime: formatter.string(from: Date()))
-            ]
         }
     }
-}
-
-struct WatchLocation {
-    let name: String
-    let timezone: String
-    let currentTime: String
-}
-
-struct WatchAlarm {
-    let label: String
-    let time: String
-    let location: String
-}
-
-struct WatchWidgetData: Codable {
-    let nextAlarm: WatchAlarmData?
-    let currentTime: String
-    let currentTimezone: String
-    let locations: [WatchLocationData]
-}
-
-struct WatchAlarmData: Codable {
-    let label: String
-    let time: String
-    let locationName: String
-    let timezone: String
-    let enabled: Bool
-}
-
-struct WatchLocationData: Codable {
-    let name: String
-    let timezone: String
-    let currentTime: String
 }
