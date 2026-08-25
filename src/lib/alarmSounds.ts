@@ -42,31 +42,40 @@ export function notificationSoundName(sound: AlarmSound | undefined): string {
 
 let previewPlayer: AudioPlayer | null = null;
 let previewTimeout: ReturnType<typeof setTimeout> | null = null;
+let loadSub: { remove: () => void } | null = null;
 let audioModeSet = false;
 
 // Previews are capped so tapping through the list is quick; Reveille (a real
 // ~21s bugle call) is exempt and plays to the end.
 const PREVIEW_MAX_MS = 5000;
 
-function clearPreviewTimeout(): void {
+function clearPending(): void {
   if (previewTimeout) {
     clearTimeout(previewTimeout);
     previewTimeout = null;
   }
+  if (loadSub) {
+    try {
+      loadSub.remove();
+    } catch {
+      // ignore
+    }
+    loadSub = null;
+  }
 }
 
 /**
- * Preview a sound. Reuses a single persistent player (swapping its source with
- * replace()) rather than creating/tearing one down each tap — recreating churns
- * the shared audio session and intermittently drops the next play(). Tapping
- * another option swaps + restarts immediately; every sound except Reveille is
- * capped at 5s.
+ * Preview a sound. Reuses one persistent player (replace() the source) so the
+ * shared audio session doesn't churn, and starts playback as soon as the source
+ * is loaded — waiting on the load event when needed — so it plays on the first
+ * tap instead of needing a second press. Tapping another option swaps + restarts
+ * immediately; every sound except Reveille is capped at 5s.
  */
 export function previewSound(sound: AlarmSound): void {
   if (!HAS_AUDIO) return;
   const option = SOUND_OPTIONS.find((o) => o.id === sound);
   if (!option) return;
-  clearPreviewTimeout();
+  clearPending();
   try {
     const expoAudio = require('expo-audio') as typeof import('expo-audio');
     const { createAudioPlayer, setAudioModeAsync } = expoAudio;
@@ -85,17 +94,41 @@ export function previewSound(sound: AlarmSound): void {
       }
       previewPlayer.replace(option.module);
     }
-    previewPlayer.seekTo(0);
-    previewPlayer.play();
-    // Cap every sound except Reveille at 5s (pause, keep the player for reuse).
-    if (sound !== 'reveille') {
-      previewTimeout = setTimeout(() => {
-        try {
-          previewPlayer?.pause();
-        } catch {
-          // ignore
+    const player = previewPlayer;
+    const start = () => {
+      try {
+        player.seekTo(0);
+        player.play();
+      } catch {
+        // ignore
+      }
+      // Cap every sound except Reveille at 5s (pause, keep the player for reuse).
+      if (sound !== 'reveille') {
+        previewTimeout = setTimeout(() => {
+          try {
+            player.pause();
+          } catch {
+            // ignore
+          }
+        }, PREVIEW_MAX_MS);
+      }
+    };
+    if (player.isLoaded) {
+      start();
+    } else {
+      loadSub = player.addListener('playbackStatusUpdate', (status) => {
+        if (status.isLoaded) {
+          if (loadSub) {
+            try {
+              loadSub.remove();
+            } catch {
+              // ignore
+            }
+            loadSub = null;
+          }
+          start();
         }
-      }, PREVIEW_MAX_MS);
+      });
     }
   } catch (e) {
     console.warn('Failed to preview sound:', e);
@@ -104,7 +137,7 @@ export function previewSound(sound: AlarmSound): void {
 
 /** Release the shared preview player (call when the editor closes). */
 export function stopPreview(): void {
-  clearPreviewTimeout();
+  clearPending();
   if (previewPlayer) {
     try {
       previewPlayer.pause();

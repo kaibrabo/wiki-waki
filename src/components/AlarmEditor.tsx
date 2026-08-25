@@ -35,7 +35,6 @@ export function AlarmEditor({
   const updateAlarm = useStore((s) => s.updateAlarm);
   const removeAlarm = useStore((s) => s.removeAlarm);
   const labelOptions = useStore((s) => s.labelOptions);
-  const addLabelOption = useStore((s) => s.addLabelOption);
   const use24Hour = useStore((s) => s.use24Hour);
   const language = useStore((s) => s.language);
   const lastAlarmSettings = useStore((s) => s.lastAlarmSettings);
@@ -245,7 +244,7 @@ export function AlarmEditor({
   const handleAddCustomLabel = () => {
     const trimmed = customLabelText.trim();
     if (trimmed) {
-      addLabelOption(trimmed);
+      // Use the custom label for this alarm only — don't persist it as a chip.
       setLabel(trimmed);
     }
     setAddingCustomLabel(false);
