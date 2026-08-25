@@ -216,7 +216,7 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             <AlarmRow
               key={alarm.id}
               alarm={alarm}
-              localTime={instant ? displayInZone(instant, location.ianaZone) : '-'}
+              localTime={instant ? displayInZone(instant, location.ianaZone, use24Hour) : '-'}
               onPress={() => openEdit(alarm)}
               language={language}
             />

@@ -113,8 +113,8 @@ export function nextFireInstant(alarm: Alarm, now: DateTime = DateTime.now()): D
 }
 
 /** Format an instant as local wall-clock in the given zone, e.g. "6:00 AM". */
-export function displayInZone(instant: DateTime, ianaZone: string): string {
-  return instant.setZone(ianaZone).toFormat('h:mm a');
+export function displayInZone(instant: DateTime, ianaZone: string, use24Hour = false): string {
+  return instant.setZone(ianaZone).toFormat(use24Hour ? 'HH:mm' : 'h:mm a');
 }
 
 /**

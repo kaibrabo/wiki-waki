@@ -226,7 +226,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
             key={currentLocation.id}
             loc={currentLocation}
             now={now}
-            nextText={nextText(alarms.filter((a) => a.locationId === currentLocation.id), currentLocation.ianaZone, now)}
+            nextText={nextText(alarms.filter((a) => a.locationId === currentLocation.id), currentLocation.ianaZone, now, use24Hour)}
             onPress={() => onOpen(currentLocation.id)}
             onLongPress={() => handleLongPress(currentLocation)}
             onToggleDisabled={() => toggleLocationDisabled(currentLocation.id)}
@@ -301,7 +301,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
                 key={loc.id}
                 loc={loc}
                 now={now}
-                nextText={nextText(alarms.filter((a) => a.locationId === loc.id), loc.ianaZone, now)}
+                nextText={nextText(alarms.filter((a) => a.locationId === loc.id), loc.ianaZone, now, use24Hour)}
                 onPress={() => onOpen(loc.id)}
                 onLongPress={() => handleLongPress(loc)}
                 onToggleDisabled={() => toggleLocationDisabled(loc.id)}
@@ -318,10 +318,10 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
   );
 }
 
-function nextText(alarms: Alarm[], zone: string, now: ReturnType<typeof useNow>) {
+function nextText(alarms: Alarm[], zone: string, now: ReturnType<typeof useNow>, use24Hour: boolean) {
   const up = nextUpcoming(alarms, now);
   if (!up) return null;
-  return `${up.alarm.label} · ${displayInZone(up.instant, zone)} · ${countdownTo(up.instant, now)}`;
+  return `${up.alarm.label} · ${displayInZone(up.instant, zone, use24Hour)} · ${countdownTo(up.instant, now)}`;
 }
 
 function LocationCard({
