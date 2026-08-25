@@ -4,10 +4,10 @@ import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import { AppSwitch } from './AppSwitch';
+import { AppHapticSlider } from './AppHapticSlider';
 import { getTranslations, translateLabel } from '../lib/i18n';
 import {
   SOUND_OPTIONS,
-  HAPTIC_OPTIONS,
   DEFAULT_SOUND,
   DEFAULT_HAPTIC,
   previewSound,
@@ -108,8 +108,13 @@ export function AlarmEditor({
       setLabel(editing.label);
       setTimeValue(editing.time);
       if (editing.recurrence.type === 'weekly') {
-        setRecType('custom');
-        setSelectedDays(editing.recurrence.days);
+        // 'weekly' is how the editor persists both Weekdays and custom day sets
+        // (see save()), so map it back to the right chip instead of always 'custom'.
+        const days = editing.recurrence.days;
+        const isWeekdays = days.length === 5 && [1, 2, 3, 4, 5].every((d) => days.includes(d));
+        const isDaily = days.length === 7;
+        setRecType(isWeekdays ? 'weekdays' : isDaily ? 'daily' : 'custom');
+        setSelectedDays(days);
       } else if (editing.recurrence.type === 'monthly') {
         setRecType('monthly');
         setSelectedDayOfMonth(editing.recurrence.dayOfMonth);
@@ -121,10 +126,9 @@ export function AlarmEditor({
         setRecType('daily');
         setSelectedDays([0, 1, 2, 3, 4, 5, 6]);
       } else if (editing.recurrence.type === 'once') {
-        // Legacy: treat once as monthly on that day
-        const date = new Date(editing.recurrence.date);
-        setRecType('monthly');
-        setSelectedDayOfMonth(date.getDate());
+        // A one-time alarm maps back to the "None" repeat chip (save() stores
+        // 'none' as a 'once' recurrence). Previously this wrongly showed Monthly.
+        setRecType('none');
       } else {
         // weekdays
         setRecType('weekdays');
@@ -556,30 +560,9 @@ export function AlarmEditor({
                 </XStack>
               </Field>
 
-              {/* Haptics Picker (tap to feel) */}
-              <Field label="Haptics" onPress={closeKeypad}>
-                <XStack flexWrap="wrap" gap="$2" accessibilityRole="radiogroup">
-                  {HAPTIC_OPTIONS.map((opt) => {
-                    const selected = haptic === opt.id;
-                    return (
-                      <Button
-                        key={opt.id}
-                        size="$3"
-                        bg={selected ? '$blue9' : '$color3'}
-                        onPress={() => selectHaptic(opt.id)}
-                        accessible={true}
-                        accessibilityRole="radio"
-                        accessibilityState={{ selected }}
-                        accessibilityLabel={`${opt.label} haptic`}
-                        accessibilityHint="Selects and previews this haptic"
-                      >
-                        <Text color={selected ? 'white' : '$color12'} fontWeight="600">
-                          {opt.label}
-                        </Text>
-                      </Button>
-                    );
-                  })}
-                </XStack>
+              {/* Haptics Level (drag the slider to feel each step) */}
+              <Field label="Haptics Level" onPress={closeKeypad}>
+                <AppHapticSlider value={haptic} onChange={selectHaptic} />
               </Field>
 
               {error && (

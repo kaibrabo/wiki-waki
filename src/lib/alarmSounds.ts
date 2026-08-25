@@ -52,6 +52,7 @@ export function notificationSoundName(sound: AlarmSound | undefined): string {
 }
 
 let previewPlayer: AudioPlayer | null = null;
+let audioModeSet = false;
 
 /** Play a short preview of the given sound (no-op for the OS default or when audio isn't linked). */
 export function previewSound(sound: AlarmSound): void {
@@ -60,7 +61,13 @@ export function previewSound(sound: AlarmSound): void {
   if (!option || option.module == null) return;
   try {
     // Safe to require now that the native module is present.
-    const { createAudioPlayer } = require('expo-audio') as typeof import('expo-audio');
+    const expoAudio = require('expo-audio') as typeof import('expo-audio');
+    const { createAudioPlayer, setAudioModeAsync } = expoAudio;
+    // Let previews play even when the ringer/silent switch is on (once).
+    if (!audioModeSet) {
+      audioModeSet = true;
+      setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
+    }
     if (previewPlayer) {
       previewPlayer.replace(option.module);
     } else {
