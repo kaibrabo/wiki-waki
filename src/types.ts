@@ -14,10 +14,9 @@ export type Recurrence =
   | { type: 'monthly'; dayOfMonth: number } // 1-31
   | { type: 'yearly'; month: number; dayOfMonth: number }; // month 1-12, day 1-31
 
-// Sound + haptic identifiers an alarm can carry. Both are optional so older
-// persisted alarms keep working; absent means the app default.
-export type AlarmSound = 'default' | 'chime' | 'beacon' | 'radar' | 'pulse';
-export type AlarmHaptic = 'none' | 'light' | 'medium' | 'heavy';
+// Sound an alarm can carry. Optional so older persisted alarms keep working;
+// absent (or an unknown legacy value) resolves to the default sound.
+export type AlarmSound = 'chime' | 'beacon' | 'radar' | 'pulse';
 
 export type Alarm = {
   id: string;
@@ -27,8 +26,7 @@ export type Alarm = {
   pinnedZone: string; // IANA zone the alarm rings by - always its owner location's zone
   recurrence: Recurrence;
   enabled: boolean;
-  sound?: AlarmSound; // notification sound; defaults to 'default'
-  haptic?: AlarmHaptic; // haptic played on foreground delivery; defaults to 'medium'
+  sound?: AlarmSound; // notification sound; defaults to Chime when absent
 };
 
 export type Location = {

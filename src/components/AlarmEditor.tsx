@@ -4,17 +4,15 @@ import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import { AppSwitch } from './AppSwitch';
-import { AppHapticSlider } from './AppHapticSlider';
 import { getTranslations, translateLabel } from '../lib/i18n';
 import {
   SOUND_OPTIONS,
   DEFAULT_SOUND,
-  DEFAULT_HAPTIC,
+  coerceSound,
   previewSound,
   stopPreview,
-  playHaptic,
 } from '../lib/alarmSounds';
-import type { Alarm, Recurrence, AlarmSound, AlarmHaptic } from '../types';
+import type { Alarm, Recurrence, AlarmSound } from '../types';
 
 type RecType = 'daily' | 'weekdays' | 'none' | 'custom' | 'monthly' | 'yearly';
 
@@ -68,7 +66,6 @@ export function AlarmEditor({
   const [showKeypad, setShowKeypad] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [sound, setSound] = useState<AlarmSound>(DEFAULT_SOUND);
-  const [haptic, setHaptic] = useState<AlarmHaptic>(DEFAULT_HAPTIC);
 
   const closeKeypad = useCallback(() => {
     if (showKeypad) {
@@ -83,17 +80,11 @@ export function AlarmEditor({
     }
   }, [showKeypad, timeValue]);
 
-  // Pick a sound and immediately preview it; pick a haptic and feel it.
+  // Pick a sound and immediately preview it.
   const selectSound = useCallback((next: AlarmSound) => {
     closeKeypad();
     setSound(next);
     previewSound(next);
-  }, [closeKeypad]);
-
-  const selectHaptic = useCallback((next: AlarmHaptic) => {
-    closeKeypad();
-    setHaptic(next);
-    playHaptic(next);
   }, [closeKeypad]);
 
   // Release the preview player when the editor is dismissed.
@@ -135,8 +126,7 @@ export function AlarmEditor({
         setSelectedDays([1, 2, 3, 4, 5]);
       }
       setEnabled(editing.enabled);
-      setSound(editing.sound ?? DEFAULT_SOUND);
-      setHaptic(editing.haptic ?? DEFAULT_HAPTIC);
+      setSound(coerceSound(editing.sound));
     } else {
       // Use last saved settings for new alarms
       setLabel(lastAlarmSettings.label);
@@ -148,8 +138,7 @@ export function AlarmEditor({
       setSelectedDayOfMonth(today.getDate());
       setSelectedMonth(today.getMonth() + 1);
       setEnabled(true);
-      setSound(lastAlarmSettings.sound ?? DEFAULT_SOUND);
-      setHaptic(lastAlarmSettings.haptic ?? DEFAULT_HAPTIC);
+      setSound(coerceSound(lastAlarmSettings.sound));
     }
     setError(null);
     setAddingCustomLabel(false);
@@ -191,10 +180,9 @@ export function AlarmEditor({
       recType,
       selectedDays,
       sound,
-      haptic,
     });
 
-    const payload = { locationId, label: label.trim(), time: timeValue, pinnedZone: zone, recurrence, enabled, sound, haptic };
+    const payload = { locationId, label: label.trim(), time: timeValue, pinnedZone: zone, recurrence, enabled, sound };
     if (editing) updateAlarm(editing.id, payload);
     else addAlarm(payload);
     onClose();
@@ -549,11 +537,6 @@ export function AlarmEditor({
                     );
                   })}
                 </XStack>
-              </Field>
-
-              {/* Haptics Level (drag the slider to feel each step) */}
-              <Field label="Haptics Level" onPress={closeKeypad}>
-                <AppHapticSlider value={haptic} onChange={selectHaptic} />
               </Field>
 
               {error && (
