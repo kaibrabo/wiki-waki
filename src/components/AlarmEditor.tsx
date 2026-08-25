@@ -670,33 +670,27 @@ function TimeInput({
   return (
     <YStack items="center" gap="$3" px="$4" pt="$4">
       {/* Time Display */}
-      <XStack items="center" gap="$1">
-        <XStack 
-          bg="$color2" 
-          rounded="$4" 
-          px="$4" 
+      <XStack items="center" gap="$2">
+        {/* Single fixed-size time container: HH : MM, colon centered between two
+            fixed-width digit groups so it never shifts as the numbers change. */}
+        <XStack
+          bg="$color2"
+          rounded="$4"
+          px="$4"
           py="$3"
+          items="center"
           borderWidth={1}
           borderColor={showKeypad ? '$blue8' : '$borderColor'}
           pressStyle={{ bg: '$color3' }}
           onPress={onShowKeypad}
         >
-          <Text fontSize={48} fontWeight="200" color="$color12">
+          <Text fontSize={48} fontWeight="200" color="$color12" width={64} text="center" fontVariant={['tabular-nums']}>
             {displayHours}
           </Text>
-        </XStack>
-        <Text fontSize={48} fontWeight="200" color="$color10">:</Text>
-        <XStack 
-          bg="$color2" 
-          rounded="$4" 
-          px="$4" 
-          py="$3"
-          borderWidth={1}
-          borderColor={showKeypad ? '$blue8' : '$borderColor'}
-          pressStyle={{ bg: '$color3' }}
-          onPress={onShowKeypad}
-        >
-          <Text fontSize={48} fontWeight="200" color="$color12">
+          <Text fontSize={48} fontWeight="200" color="$color10" width={18} text="center">
+            :
+          </Text>
+          <Text fontSize={48} fontWeight="200" color="$color12" width={64} text="center" fontVariant={['tabular-nums']}>
             {m1}{m2}
           </Text>
         </XStack>

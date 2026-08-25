@@ -315,27 +315,25 @@ function TopBar({
   right?: React.ReactNode;
 }) {
   return (
-    <XStack items="center" px="$3" pt="$2" pb="$2">
-      <Button 
-        size="$3" 
-        chromeless 
-        onPress={onBack} 
-        px="$2" 
-        mr="$2" 
-        justify="flex-start"
+    <XStack items="center" px="$4" pt="$3" pb="$3" gap="$2">
+      <Button
+        size="$6"
+        circular
+        chromeless
+        onPress={onBack}
+        hitSlop={12}
+        pressStyle={{ bg: '$color4' }}
         accessible={true}
         accessibilityRole="button"
         accessibilityLabel="Go back"
       >
-        <Text color="$blue10" fontSize={28} aria-hidden>
-          &#8249;
-        </Text>
+        <MaterialCommunityIcons name="chevron-left" size={48} color="#3b82f6" accessibilityElementsHidden />
       </Button>
-      <Text 
-        flex={1} 
-        fontSize={17} 
-        fontWeight="600" 
-        color="$color12" 
+      <Text
+        flex={1}
+        fontSize={17}
+        fontWeight="600"
+        color="$color12"
         numberOfLines={1}
         accessibilityRole="header"
       >
