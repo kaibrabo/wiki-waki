@@ -341,10 +341,10 @@ export function AlarmEditor({
                     </Button>
                   ))}
                   {addingCustomLabel ? (
-                    <XStack gap="$2" items="center">
+                    <XStack gap="$2" items="center" width="100%">
                       <Input
                         size="$3"
-                        width={120}
+                        flex={1}
                         value={customLabelText}
                         onChangeText={setCustomLabelText}
                         placeholder="Label..."
