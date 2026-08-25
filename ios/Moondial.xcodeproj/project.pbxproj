@@ -16,6 +16,7 @@
 		8B3E8D5F303CF1CF009B769D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B3E8D5E303CF1CF009B769D /* WidgetKit.framework */; };
 		8B3E8D61303CF1CF009B769D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B3E8D60303CF1CF009B769D /* SwiftUI.framework */; };
 		8B3E8D6E303CF1D1009B769D /* MoondialWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8B3E8D5D303CF1CF009B769D /* MoondialWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AC22FEE0772919EC07AE93DA /* reveille.wav in Resources */ = {isa = PBXBuildFile; fileRef = B2237E0D5E97476BB4DD48E5 /* reveille.wav */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		E355CBD5F7BE87A0F99B39B7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 839EC8BC418F5529A7E32093 /* PrivacyInfo.xcprivacy */; };
 		ECC37B7D26A97ACF60B94BF1 /* beacon.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5331BCF516779C02EE978BCF /* beacon.wav */; };
@@ -62,6 +63,7 @@
 		8B3E8D60303CF1CF009B769D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		8B7CD091303CF3570011BE0F /* MoondialWidgetExtensionExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MoondialWidgetExtensionExtension.entitlements; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Moondial/SplashScreen.storyboard; sourceTree = "<group>"; };
+		B2237E0D5E97476BB4DD48E5 /* reveille.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = reveille.wav; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		D41F8ACB8E47AEF0E6FBE8AB /* Pods-Moondial.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Moondial.release.xcconfig"; path = "Target Support Files/Pods-Moondial/Pods-Moondial.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -157,6 +159,7 @@
 				F4C7E2015F193952B91E3FCC /* chime.wav */,
 				6A392AEEB5814F3252F91395 /* pulse.wav */,
 				FC20BBAA90EEC367749E9793 /* radar.wav */,
+				B2237E0D5E97476BB4DD48E5 /* reveille.wav */,
 			);
 			name = Sounds;
 			path = Moondial/Sounds;
@@ -318,6 +321,7 @@
 				FA0B2788A757FD867F1C8EAA /* chime.wav in Resources */,
 				454451099217CB9D75FAA0A1 /* pulse.wav in Resources */,
 				6B3188BE85C3FC9234B3CB27 /* radar.wav in Resources */,
+				AC22FEE0772919EC07AE93DA /* reveille.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

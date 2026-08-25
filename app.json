@@ -58,6 +58,7 @@
         "expo-notifications",
         {
           "sounds": [
+            "./assets/sounds/reveille.wav",
             "./assets/sounds/chime.wav",
             "./assets/sounds/beacon.wav",
             "./assets/sounds/radar.wav",

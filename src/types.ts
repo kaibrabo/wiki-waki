@@ -16,7 +16,7 @@ export type Recurrence =
 
 // Sound an alarm can carry. Optional so older persisted alarms keep working;
 // absent (or an unknown legacy value) resolves to the default sound.
-export type AlarmSound = 'chime' | 'beacon' | 'radar' | 'pulse';
+export type AlarmSound = 'reveille' | 'chime' | 'beacon' | 'radar' | 'pulse';
 
 export type Alarm = {
   id: string;
