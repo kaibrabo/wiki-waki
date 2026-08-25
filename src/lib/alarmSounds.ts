@@ -37,7 +37,6 @@ export const HAPTIC_OPTIONS: { id: AlarmHaptic; label: string }[] = [
   { id: 'light', label: 'Light' },
   { id: 'medium', label: 'Medium' },
   { id: 'heavy', label: 'Heavy' },
-  { id: 'success', label: 'Success' },
 ];
 
 export const DEFAULT_SOUND: AlarmSound = 'default';
@@ -102,9 +101,6 @@ export function playHaptic(haptic: AlarmHaptic): void {
         break;
       case 'heavy':
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(swallow);
-        break;
-      case 'success':
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(swallow);
         break;
     }
   } catch (e) {

@@ -17,7 +17,7 @@ export type Recurrence =
 // Sound + haptic identifiers an alarm can carry. Both are optional so older
 // persisted alarms keep working; absent means the app default.
 export type AlarmSound = 'default' | 'chime' | 'beacon' | 'radar' | 'pulse';
-export type AlarmHaptic = 'none' | 'light' | 'medium' | 'heavy' | 'success';
+export type AlarmHaptic = 'none' | 'light' | 'medium' | 'heavy';
 
 export type Alarm = {
   id: string;
