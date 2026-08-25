@@ -61,6 +61,7 @@ export function useWidgetSync() {
   const alarms = useStore((s) => s.alarms);
   const locations = useStore((s) => s.locations);
   const use24Hour = useStore((s) => s.use24Hour);
+  const dateFormat = useStore((s) => s.dateFormat);
   const hasHydrated = useStore((s) => s.hasHydrated);
   const theme = useEffectiveTheme();
 
@@ -81,10 +82,13 @@ export function useWidgetSync() {
 
       const upcomingAlarms = getUpcomingAlarms(alarms, locations, use24Hour, now, 3);
 
+      const currentDate = now.toFormat(dateFormat === 'DMY' ? 'dd/MM/yyyy' : 'MM/dd/yyyy');
+
       const widgetData: WidgetData = {
         nextAlarm: upcomingAlarms[0] ?? null,
         upcomingAlarms,
         currentTime: now.toFormat(timeFormat),
+        currentDate,
         currentTimezone: activeZone,
         currentLocationName,
         theme,
@@ -97,5 +101,5 @@ export function useWidgetSync() {
     syncWidget();
     const interval = setInterval(syncWidget, 60000);
     return () => clearInterval(interval);
-  }, [alarms, locations, use24Hour, hasHydrated, theme]);
+  }, [alarms, locations, use24Hour, dateFormat, hasHydrated, theme]);
 }

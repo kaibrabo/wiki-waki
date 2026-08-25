@@ -12,6 +12,8 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
   const setThemePref = useStore((s) => s.setThemePref);
   const use24Hour = useStore((s) => s.use24Hour);
   const setUse24Hour = useStore((s) => s.setUse24Hour);
+  const dateFormat = useStore((s) => s.dateFormat);
+  const setDateFormat = useStore((s) => s.setDateFormat);
   const language = useStore((s) => s.language);
   const setLanguage = useStore((s) => s.setLanguage);
   const theme = useEffectiveTheme();
@@ -191,6 +193,47 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                 >
                   <Switch.Thumb backgroundColor="white" />
                 </Switch>
+              </XStack>
+            </Card>
+
+            {/* Date Format */}
+            <Card
+              bg="$color2"
+              borderWidth={1}
+              borderColor="$borderColor"
+              rounded="$4"
+              px="$4"
+              py="$3.5"
+            >
+              <XStack items="center" justify="space-between" gap="$2">
+                <XStack items="center" gap="$3" shrink={1}>
+                  <MaterialCommunityIcons name="calendar" size={22} color="#888" />
+                  <Text fontSize={16} color="$color12">
+                    Date Format
+                  </Text>
+                </XStack>
+                <XStack gap="$2" accessibilityRole="radiogroup">
+                  {(['MDY', 'DMY'] as const).map((f) => {
+                    const selected = dateFormat === f;
+                    const label = f === 'MDY' ? 'MM/DD/YYYY' : 'DD/MM/YYYY';
+                    return (
+                      <Button
+                        key={f}
+                        size="$2"
+                        bg={selected ? '$blue9' : '$color3'}
+                        onPress={() => setDateFormat(f)}
+                        accessible={true}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected }}
+                        accessibilityLabel={label}
+                      >
+                        <Text color={selected ? 'white' : '$color12'} fontSize={12} fontWeight="600">
+                          {label}
+                        </Text>
+                      </Button>
+                    );
+                  })}
+                </XStack>
               </XStack>
             </Card>
 

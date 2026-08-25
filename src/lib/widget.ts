@@ -24,6 +24,7 @@ export interface WidgetData {
   nextAlarm: WidgetAlarmData | null;
   upcomingAlarms: WidgetAlarmData[]; // the next few alarms (queue), soonest first
   currentTime: string;
+  currentDate: string; // current date, pre-formatted per the app's date-format setting
   currentTimezone: string;
   currentLocationName: string; // display name of the location at the current timezone
   theme: 'light' | 'dark'; // the app's effective theme, so the widget can match it

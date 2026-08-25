@@ -71,6 +71,9 @@ const SEED_ALARMS: Alarm[] = [
 
 export type ThemePref = 'light' | 'dark' | 'system';
 
+// Date display order: MM/DD/YYYY or DD/MM/YYYY.
+export type DateFormat = 'MDY' | 'DMY';
+
 export type LastAlarmSettings = {
   label: string;
   time: string;
@@ -84,6 +87,7 @@ type State = {
   themePref: ThemePref;
   use24Hour: boolean;
   use24HourManuallySet: boolean;
+  dateFormat: DateFormat;
   language: Language;
   notificationPromptDismissed: boolean;
   lastAlarmSettings: LastAlarmSettings;
@@ -93,6 +97,7 @@ type State = {
 
   setThemePref: (pref: ThemePref) => void;
   setUse24Hour: (use24: boolean) => void;
+  setDateFormat: (format: DateFormat) => void;
   setLanguage: (lang: Language) => void;
   dismissNotificationPrompt: () => void;
   setLastAlarmSettings: (settings: Partial<LastAlarmSettings>) => void;
@@ -117,6 +122,7 @@ export const useStore = create<State>()(
       themePref: 'system',
       use24Hour: false,
       use24HourManuallySet: false,
+      dateFormat: 'MDY',
       language: 'en' as Language,
       notificationPromptDismissed: false,
       lastAlarmSettings: {
@@ -132,6 +138,7 @@ export const useStore = create<State>()(
 
       setThemePref: (pref) => set({ themePref: pref }),
       setUse24Hour: (use24) => set({ use24Hour: use24, use24HourManuallySet: true }),
+      setDateFormat: (format) => set({ dateFormat: format }),
       setLanguage: (lang) => set((s) => ({ 
         language: lang, 
         use24Hour: s.use24HourManuallySet ? s.use24Hour : shouldUse24Hour(lang) 
@@ -193,7 +200,7 @@ export const useStore = create<State>()(
     {
       name: NEW_STORE_KEY,
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ locations, alarms, themePref, use24Hour, use24HourManuallySet, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }) => ({ locations, alarms, themePref, use24Hour, use24HourManuallySet, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }),
+      partialize: ({ locations, alarms, themePref, use24Hour, use24HourManuallySet, dateFormat, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }) => ({ locations, alarms, themePref, use24Hour, use24HourManuallySet, dateFormat, language, labelOptions, notificationPromptDismissed, lastAlarmSettings }),
       migrate: (persisted: unknown, version: number) => {
         // Migrate from anchor-store-v2 format (anchorZone -> pinnedZone)
         const data = persisted as { alarms?: unknown[] } | null;
