@@ -205,24 +205,25 @@ private struct NextQueueItem: View {
     var timeSize: CGFloat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(alarm.time)
-                .font(.system(size: timeSize, weight: .light, design: .rounded))
+                .font(.system(size: timeSize, weight: .semibold, design: .rounded))
                 .foregroundColor(.primary)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.6)
             if !alarm.label.isEmpty {
                 Text(alarm.label)
-                    .font(.caption)
+                    .font(.system(size: timeSize))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
             HStack(spacing: 3) {
                 Text("in")
-                    .font(.system(size: 13))
+                    .font(.system(size: timeSize))
                     .foregroundColor(.moondialAccent)
                 Text(alarm.fireDate, style: .timer)
-                    .font(.system(size: 15, weight: .semibold).monospacedDigit())
+                    .font(.system(size: timeSize, weight: .semibold).monospacedDigit())
                     .foregroundColor(.moondialAccent)
             }
             .lineLimit(1)
@@ -307,7 +308,7 @@ struct MediumWidgetView: View {
         VStack(alignment: .leading, spacing: 6) {
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 40)
             Divider()
-            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 18)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 15)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -338,7 +339,7 @@ struct LargeWidgetView: View {
 
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52)
 
-            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 20)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 16)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.moondialAccent.opacity(0.10))
