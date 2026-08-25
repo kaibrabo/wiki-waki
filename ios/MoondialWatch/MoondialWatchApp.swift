@@ -82,7 +82,8 @@ struct ContentView: View {
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.horizontal, 4)
+            .padding(.leading, 16)
+            .padding(.trailing, 4)
         }
         .preferredColorScheme(isDark ? .dark : .light)
     }
