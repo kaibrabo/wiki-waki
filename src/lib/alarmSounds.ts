@@ -48,12 +48,63 @@ let audioModeSet = false;
 // ~21s bugle call) is exempt and plays to the end.
 const PREVIEW_MAX_MS = 5000;
 
-/** Immediately stop and release any currently-playing preview. */
-function releasePreview(): void {
+function clearPreviewTimeout(): void {
   if (previewTimeout) {
     clearTimeout(previewTimeout);
     previewTimeout = null;
   }
+}
+
+/**
+ * Preview a sound. Reuses a single persistent player (swapping its source with
+ * replace()) rather than creating/tearing one down each tap — recreating churns
+ * the shared audio session and intermittently drops the next play(). Tapping
+ * another option swaps + restarts immediately; every sound except Reveille is
+ * capped at 5s.
+ */
+export function previewSound(sound: AlarmSound): void {
+  if (!HAS_AUDIO) return;
+  const option = SOUND_OPTIONS.find((o) => o.id === sound);
+  if (!option) return;
+  clearPreviewTimeout();
+  try {
+    const expoAudio = require('expo-audio') as typeof import('expo-audio');
+    const { createAudioPlayer, setAudioModeAsync } = expoAudio;
+    // Let previews play even when the ringer/silent switch is on (once).
+    if (!audioModeSet) {
+      audioModeSet = true;
+      setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
+    }
+    if (!previewPlayer) {
+      previewPlayer = createAudioPlayer(option.module);
+    } else {
+      try {
+        previewPlayer.pause();
+      } catch {
+        // ignore
+      }
+      previewPlayer.replace(option.module);
+    }
+    previewPlayer.seekTo(0);
+    previewPlayer.play();
+    // Cap every sound except Reveille at 5s (pause, keep the player for reuse).
+    if (sound !== 'reveille') {
+      previewTimeout = setTimeout(() => {
+        try {
+          previewPlayer?.pause();
+        } catch {
+          // ignore
+        }
+      }, PREVIEW_MAX_MS);
+    }
+  } catch (e) {
+    console.warn('Failed to preview sound:', e);
+  }
+}
+
+/** Release the shared preview player (call when the editor closes). */
+export function stopPreview(): void {
+  clearPreviewTimeout();
   if (previewPlayer) {
     try {
       previewPlayer.pause();
@@ -67,35 +118,4 @@ function releasePreview(): void {
     }
     previewPlayer = null;
   }
-}
-
-/** Play a short preview of the given sound (no-op when audio isn't linked). */
-export function previewSound(sound: AlarmSound): void {
-  if (!HAS_AUDIO) return;
-  const option = SOUND_OPTIONS.find((o) => o.id === sound);
-  if (!option) return;
-  // Stop whatever is currently previewing, immediately.
-  releasePreview();
-  try {
-    const expoAudio = require('expo-audio') as typeof import('expo-audio');
-    const { createAudioPlayer, setAudioModeAsync } = expoAudio;
-    // Let previews play even when the ringer/silent switch is on (once).
-    if (!audioModeSet) {
-      audioModeSet = true;
-      setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
-    }
-    previewPlayer = createAudioPlayer(option.module);
-    previewPlayer.play();
-    // Cap every sound except Reveille at 5s.
-    if (sound !== 'reveille') {
-      previewTimeout = setTimeout(releasePreview, PREVIEW_MAX_MS);
-    }
-  } catch (e) {
-    console.warn('Failed to preview sound:', e);
-  }
-}
-
-/** Release the shared preview player (call when the editor closes). */
-export function stopPreview(): void {
-  releasePreview();
 }
