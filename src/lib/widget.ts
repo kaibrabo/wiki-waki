@@ -23,6 +23,7 @@ export interface WidgetData {
   nextAlarm: WidgetAlarmData | null;
   currentTime: string;
   currentTimezone: string;
+  currentLocationName: string; // display name of the location at the current timezone
   locations: WidgetLocationData[];
 }
 

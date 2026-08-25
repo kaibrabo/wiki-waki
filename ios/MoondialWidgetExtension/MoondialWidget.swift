@@ -28,6 +28,7 @@ struct WidgetData: Codable {
     let nextAlarm: AlarmData?
     let currentTime: String
     let currentTimezone: String
+    let currentLocationName: String? // optional for forward/backward compatibility
     let locations: [LocationData]
 }
 
@@ -36,14 +37,18 @@ struct WidgetData: Codable {
 extension Color {
     /// App accent blue (#3B82F6).
     static let moondialAccent = Color(red: 0.231, green: 0.510, blue: 0.965)
-    /// App brand slate (#0F172A) used for the splash/background.
-    static let moondialBrand = Color(red: 0.059, green: 0.090, blue: 0.165)
 }
 
 /// "America/Los_Angeles" -> "Los Angeles".
 private func cityName(from timezone: String) -> String {
     guard let last = timezone.split(separator: "/").last else { return timezone }
     return last.replacingOccurrences(of: "_", with: " ")
+}
+
+/// The current location's display name: prefer what the app sent, else the tz city.
+private func currentLocationName(_ data: WidgetData?) -> String {
+    if let name = data?.currentLocationName, !name.isEmpty { return name }
+    return cityName(from: data?.currentTimezone ?? TimeZone.current.identifier)
 }
 
 // MARK: - Data Provider
@@ -60,6 +65,7 @@ struct Provider: TimelineProvider {
         ),
         currentTime: "9:41 AM",
         currentTimezone: TimeZone.current.identifier,
+        currentLocationName: "San Francisco",
         locations: [
             LocationData(name: "San Francisco", timezone: "America/Los_Angeles", currentTime: "9:41 AM"),
             LocationData(name: "New York", timezone: "America/New_York", currentTime: "12:41 PM"),
@@ -102,63 +108,46 @@ struct MoondialEntry: TimelineEntry {
 
 // MARK: - Reusable pieces
 
-/// Header row: moon glyph + a title/subtitle.
-private struct BrandHeader: View {
-    var title: String
-    var body: some View {
-        HStack(spacing: 5) {
-            Image(systemName: "moon.stars.fill")
-                .font(.caption2)
-                .foregroundColor(.moondialAccent)
-            Text(title)
-                .font(.caption2)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .lineLimit(1)
-        }
-    }
-}
-
-/// Live clock for the device's current location (updates itself).
-private struct CurrentClock: View {
-    var timezone: String
-    var size: CGFloat
-    var showCity: Bool = true
+/// Current location: big live time on top, then the location name — like the
+/// app's CURRENT card.
+private struct CurrentHeader: View {
+    var locationName: String
+    var timeSize: CGFloat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            if showCity {
-                HStack(spacing: 3) {
-                    Image(systemName: "location.fill")
-                        .font(.system(size: max(9, size * 0.22)))
-                        .foregroundColor(.moondialAccent)
-                    Text(cityName(from: timezone))
-                        .font(.system(size: max(11, size * 0.28)))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-            }
+        VStack(alignment: .leading, spacing: 2) {
             Text(Date(), style: .time)
-                .font(.system(size: size, weight: .thin, design: .rounded))
+                .font(.system(size: timeSize, weight: .thin, design: .rounded))
                 .foregroundColor(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+            HStack(spacing: 4) {
+                Image(systemName: "location.fill")
+                    .font(.system(size: max(9, timeSize * 0.24)))
+                    .foregroundColor(.moondialAccent)
+                Text(locationName)
+                    .font(.system(size: max(12, timeSize * 0.30)))
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
         }
     }
 }
 
-/// Next-alarm block: label, clock time + a live countdown. Falls back gracefully.
+/// The "Next" alarm — label, clock time and a live countdown, like the home card.
 private struct NextAlarm: View {
     var alarm: AlarmData?
-    var compact: Bool = false
+    var timeSize: CGFloat = 22
 
     var body: some View {
-        VStack(alignment: .leading, spacing: compact ? 2 : 4) {
+        VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 4) {
                 Image(systemName: "alarm.fill")
                     .font(.system(size: 10))
                     .foregroundColor(.moondialAccent)
-                Text("NEXT ALARM")
+                Text("NEXT")
                     .font(.system(size: 10))
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
@@ -166,7 +155,7 @@ private struct NextAlarm: View {
             if let alarm = alarm, alarm.enabled {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(alarm.time)
-                        .font(.system(size: compact ? 22 : 28, weight: .light, design: .rounded))
+                        .font(.system(size: timeSize, weight: .light, design: .rounded))
                         .foregroundColor(.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -177,18 +166,10 @@ private struct NextAlarm: View {
                             .lineLimit(1)
                     }
                 }
-                HStack(spacing: 4) {
-                    if !alarm.locationName.isEmpty {
-                        Text(alarm.locationName)
-                            .font(.caption2)
-                            .foregroundColor(.moondialAccent)
-                            .lineLimit(1)
-                    }
-                    Text(alarm.fireDate, style: .timer)
-                        .font(.caption2.monospacedDigit())
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                }
+                Text(alarm.fireDate, style: .timer)
+                    .font(.caption2.monospacedDigit())
+                    .fontWeight(.semibold)
+                    .foregroundColor(.moondialAccent)
             } else {
                 Text("No upcoming alarms")
                     .font(.subheadline)
@@ -198,7 +179,7 @@ private struct NextAlarm: View {
     }
 }
 
-/// A world-clock row mirroring the home-screen location card.
+/// A world-clock row for the saved locations (large widget).
 private struct ClockRow: View {
     var location: LocationData
     var body: some View {
@@ -220,14 +201,13 @@ private struct ClockRow: View {
 
 struct SmallWidgetView: View {
     let entry: MoondialEntry
-    private var tz: String { entry.data?.currentTimezone ?? TimeZone.current.identifier }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            CurrentClock(timezone: tz, size: 30)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 30)
             Spacer(minLength: 4)
             Divider()
-            NextAlarm(alarm: entry.data?.nextAlarm, compact: true)
+            NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding()
@@ -237,27 +217,13 @@ struct SmallWidgetView: View {
 
 struct MediumWidgetView: View {
     let entry: MoondialEntry
-    private var tz: String { entry.data?.currentTimezone ?? TimeZone.current.identifier }
 
     var body: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 8) {
-                CurrentClock(timezone: tz, size: 30)
-                Spacer(minLength: 2)
-                NextAlarm(alarm: entry.data?.nextAlarm, compact: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
+        VStack(alignment: .leading, spacing: 8) {
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 40)
+            Spacer(minLength: 4)
             Divider()
-
-            VStack(alignment: .leading, spacing: 6) {
-                BrandHeader(title: "World Clocks")
-                ForEach(Array((entry.data?.locations ?? []).prefix(4)), id: \.timezone) { loc in
-                    ClockRow(location: loc)
-                }
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 26)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding()
@@ -267,30 +233,40 @@ struct MediumWidgetView: View {
 
 struct LargeWidgetView: View {
     let entry: MoondialEntry
-    private var tz: String { entry.data?.currentTimezone ?? TimeZone.current.identifier }
+
+    private var savedLocations: [LocationData] {
+        let current = currentLocationName(entry.data)
+        return (entry.data?.locations ?? []).filter { $0.name != current }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                BrandHeader(title: "Moondial")
+            HStack(spacing: 5) {
+                Image(systemName: "moon.stars.fill")
+                    .font(.caption2)
+                    .foregroundColor(.moondialAccent)
+                Text("Moondial")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
                 Spacer()
             }
 
-            CurrentClock(timezone: tz, size: 46)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52)
 
-            NextAlarm(alarm: entry.data?.nextAlarm)
+            NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 30)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.moondialAccent.opacity(0.10))
                 .cornerRadius(12)
 
-            if let locations = entry.data?.locations, !locations.isEmpty {
-                Text("WORLD CLOCKS")
+            if !savedLocations.isEmpty {
+                Text("SAVED")
                     .font(.system(size: 10))
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
                 VStack(spacing: 8) {
-                    ForEach(Array(locations.prefix(6)), id: \.timezone) { loc in
+                    ForEach(Array(savedLocations.prefix(5)), id: \.timezone) { loc in
                         ClockRow(location: loc)
                     }
                 }
@@ -314,7 +290,7 @@ struct MoondialWidget: Widget {
             MoondialWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Moondial")
-        .description("Your current time and next alarm, with a live countdown.")
+        .description("Your current time and location, and your next alarm with a live countdown.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

@@ -60,11 +60,20 @@ export function useWidgetSync() {
     const syncWidget = () => {
       const now = DateTime.now();
       const timeFormat = use24Hour ? 'HH:mm' : 'h:mm a';
+      const activeZone = now.zoneName || 'Local';
+
+      // The current location = the saved location at the device's timezone (like
+      // the app's CURRENT card); fall back to the timezone's city name.
+      const currentLoc = locations.find((l) => l.ianaZone === activeZone);
+      const currentLocationName = currentLoc
+        ? currentLoc.name.split(',')[0]
+        : (activeZone.split('/').pop() || activeZone).replace(/_/g, ' ');
 
       const widgetData: WidgetData = {
         nextAlarm: getNextAlarm(alarms, locations, use24Hour, now),
         currentTime: now.toFormat(timeFormat),
-        currentTimezone: now.zoneName || 'Local',
+        currentTimezone: activeZone,
+        currentLocationName,
         locations: getLocationTimes(locations, use24Hour, now),
       };
 
