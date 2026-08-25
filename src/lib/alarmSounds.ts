@@ -68,12 +68,15 @@ export function previewSound(sound: AlarmSound): void {
       audioModeSet = true;
       setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
     }
+    // Fresh one-shot player each tap — avoids reuse/seek edge cases.
     if (previewPlayer) {
-      previewPlayer.replace(option.module);
-    } else {
-      previewPlayer = createAudioPlayer(option.module);
+      try {
+        previewPlayer.remove();
+      } catch {
+        // ignore
+      }
     }
-    previewPlayer.seekTo(0);
+    previewPlayer = createAudioPlayer(option.module);
     previewPlayer.play();
   } catch (e) {
     console.warn('Failed to preview sound:', e);
