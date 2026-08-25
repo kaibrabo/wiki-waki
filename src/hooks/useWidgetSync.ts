@@ -98,6 +98,7 @@ export function useWidgetSync() {
         nextAlarm: upcomingAlarms[0] ?? null,
         upcomingAlarms,
         currentTime: now.toFormat(timeFormat),
+        use24Hour,
         currentDate,
         currentTimezone: activeZone,
         currentLocationName,

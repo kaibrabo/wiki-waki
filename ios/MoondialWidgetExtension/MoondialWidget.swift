@@ -35,6 +35,7 @@ struct WidgetData: Codable {
     let nextAlarm: AlarmData?
     let upcomingAlarms: [AlarmData]? // the next few alarms (queue), soonest first
     let currentTime: String
+    let use24Hour: Bool? // honor the app's 12/24h setting for the live clock
     let currentDate: String? // current date, pre-formatted per the app's setting
     let currentTimezone: String
     let currentLocationName: String? // optional for forward/backward compatibility
@@ -101,6 +102,7 @@ struct Provider: TimelineProvider {
             AlarmData(label: "End work", time: "5:00 PM", locationName: "San Francisco", code: "SFO", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(11 * 3600).timeIntervalSince1970, enabled: true)
         ],
         currentTime: "9:41 AM",
+        use24Hour: false,
         currentDate: "08/25/2025",
         currentTimezone: TimeZone.current.identifier,
         currentLocationName: "San Francisco",
@@ -155,6 +157,7 @@ struct Provider: TimelineProvider {
             nextAlarm: future.first,
             upcomingAlarms: future,
             currentTime: data.currentTime,
+            use24Hour: data.use24Hour,
             currentDate: data.currentDate,
             currentTimezone: data.currentTimezone,
             currentLocationName: data.currentLocationName,
@@ -198,7 +201,16 @@ private struct CurrentHeader: View {
     var date: String = ""
     var dateSize: CGFloat = 12
     var dateOnRight: Bool = false
+    var use24Hour: Bool = false
     var alignment: HorizontalAlignment = .leading
+
+    // Force the live clock's 12/24h formatting from the app setting rather than
+    // the device locale, while keeping the auto-updating .time style.
+    private var clockLocale: Locale {
+        var comps = Locale.Components(locale: .current)
+        comps.hourCycle = use24Hour ? .zeroToTwentyThree : .oneToTwelve
+        return Locale(components: comps)
+    }
 
     private var timeText: some View {
         Text(Date(), style: .time)
@@ -206,6 +218,7 @@ private struct CurrentHeader: View {
             .foregroundColor(.primary)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
+            .environment(\.locale, clockLocale)
     }
 
     private var dateText: some View {
@@ -413,10 +426,10 @@ struct SmallWidgetView: View {
     var body: some View {
         let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 6) {
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 38, date: entry.data?.currentDate ?? "", dateSize: 14)
-            Spacer(minLength: 4)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 38, date: entry.data?.currentDate ?? "", dateSize: 14, use24Hour: entry.data?.use24Hour ?? false)
             Divider()
             NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20, nextLabel: labels.next, noAlarmsLabel: labels.noAlarms)
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 10))
@@ -431,7 +444,7 @@ struct MediumWidgetView: View {
         let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 12) {
-                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 36, date: entry.data?.currentDate ?? "", dateSize: 15, dateOnRight: true)
+                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 36, date: entry.data?.currentDate ?? "", dateSize: 15, dateOnRight: true, use24Hour: entry.data?.use24Hour ?? false)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if !saved.isEmpty {
                     SavedSection(locations: saved, limit: 2, title: labels.saved)
@@ -464,7 +477,7 @@ struct LargeWidgetView: View {
                 .foregroundColor(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
 
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, date: entry.data?.currentDate ?? "", dateSize: 15, alignment: .center)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, date: entry.data?.currentDate ?? "", dateSize: 15, use24Hour: entry.data?.use24Hour ?? false, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .center)
 
             NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13, nextLabel: labels.next, noAlarmsLabel: labels.noAlarms)

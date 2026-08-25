@@ -31,6 +31,7 @@ export interface WidgetData {
   nextAlarm: WidgetAlarmData | null;
   upcomingAlarms: WidgetAlarmData[]; // the next few alarms (queue), soonest first
   currentTime: string;
+  use24Hour: boolean; // so the widget's live clock can honor the app's 12/24h setting
   currentDate: string; // current date, pre-formatted per the app's date-format setting
   currentTimezone: string;
   currentLocationName: string; // display name of the location at the current timezone
