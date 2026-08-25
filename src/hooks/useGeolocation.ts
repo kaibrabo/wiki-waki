@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
 import { DateTime } from 'luxon';
+import { useStore } from '../store';
 
 type GeoInfo = {
   city?: string;
@@ -42,13 +43,17 @@ export function useGeolocation(): { geoInfo: GeoInfo; loading: boolean; error: s
 
         if (mounted && address) {
           const now = DateTime.now();
+          const city = address.city ?? address.subregion ?? undefined;
+          const region = address.region ?? undefined;
           setGeoInfo({
-            city: address.city ?? address.subregion ?? undefined,
-            region: address.region ?? undefined,
+            city,
+            region,
             postalCode: address.postalCode ?? undefined,
             time: now.toFormat('h:mm'),
             timezone: now.toFormat('ZZZZ'),
           });
+          // Share the exact place so the widget can show it (not the tz city).
+          useStore.getState().setCurrentPlace({ city: city ?? null, region: region ?? null });
           setLoading(false);
         }
       } catch (e) {

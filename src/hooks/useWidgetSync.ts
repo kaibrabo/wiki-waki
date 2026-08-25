@@ -64,6 +64,7 @@ export function useWidgetSync() {
   const use24Hour = useStore((s) => s.use24Hour);
   const dateFormat = useStore((s) => s.dateFormat);
   const language = useStore((s) => s.language);
+  const currentPlace = useStore((s) => s.currentPlace);
   const hasHydrated = useStore((s) => s.hasHydrated);
   const theme = useEffectiveTheme();
 
@@ -75,12 +76,18 @@ export function useWidgetSync() {
       const timeFormat = use24Hour ? 'HH:mm' : 'h:mm a';
       const activeZone = now.zoneName || 'Local';
 
-      // The current location = the saved location at the device's timezone (like
-      // the app's CURRENT card); fall back to the timezone's city name.
+      // The current location = the device's exact reverse-geocoded place (e.g.
+      // "San Rafael, CA"). Fall back to the saved location at the current
+      // timezone, then to the timezone's city name.
       const currentLoc = locations.find((l) => l.ianaZone === activeZone);
-      const currentLocationName = currentLoc
-        ? currentLoc.name.split(',')[0]
-        : (activeZone.split('/').pop() || activeZone).replace(/_/g, ' ');
+      const placeLabel = currentPlace
+        ? [currentPlace.city, currentPlace.region].filter(Boolean).join(', ')
+        : '';
+      const currentLocationName =
+        placeLabel ||
+        (currentLoc
+          ? currentLoc.name.split(',')[0]
+          : (activeZone.split('/').pop() || activeZone).replace(/_/g, ' '));
 
       const upcomingAlarms = getUpcomingAlarms(alarms, locations, use24Hour, now, 3);
 
@@ -105,5 +112,5 @@ export function useWidgetSync() {
     syncWidget();
     const interval = setInterval(syncWidget, 60000);
     return () => clearInterval(interval);
-  }, [alarms, locations, use24Hour, dateFormat, language, hasHydrated, theme]);
+  }, [alarms, locations, use24Hour, dateFormat, language, currentPlace, hasHydrated, theme]);
 }
