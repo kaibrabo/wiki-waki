@@ -542,18 +542,9 @@ export function AlarmEditor({
                         accessibilityLabel={opt.label}
                         accessibilityHint="Selects and previews this sound"
                       >
-                        <XStack items="center" gap="$1.5">
-                          {selected && (
-                            <MaterialCommunityIcons
-                              name="volume-high"
-                              size={16}
-                              color="white"
-                            />
-                          )}
-                          <Text color={selected ? 'white' : '$color12'} fontWeight="600">
-                            {opt.label}
-                          </Text>
-                        </XStack>
+                        <Text color={selected ? 'white' : '$color12'} fontWeight="600">
+                          {opt.label}
+                        </Text>
                       </Button>
                     );
                   })}
