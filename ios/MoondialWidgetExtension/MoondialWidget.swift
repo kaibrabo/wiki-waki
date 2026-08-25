@@ -183,7 +183,7 @@ private struct CurrentHeader: View {
 
     private var timeText: some View {
         Text(Date(), style: .time)
-            .font(.system(size: timeSize, weight: .thin, design: .rounded))
+            .font(.system(size: timeSize, weight: .regular, design: .rounded))
             .foregroundColor(.primary)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
