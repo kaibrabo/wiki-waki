@@ -215,7 +215,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                 <XStack gap="$2" accessibilityRole="radiogroup">
                   {(['MDY', 'DMY'] as const).map((f) => {
                     const selected = dateFormat === f;
-                    const label = f === 'MDY' ? 'MM/DD/YYYY' : 'DD/MM/YYYY';
+                    const label = f === 'MDY' ? 'MM/DD' : 'DD/MM';
                     return (
                       <Button
                         key={f}
