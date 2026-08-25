@@ -79,6 +79,17 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
         DispatchQueue.main.async { self.payload = decoded }
     }
 
+    /// Pull the latest stored application context. `didReceiveApplicationContext`
+    /// only fires for contexts that arrive while the app is active; one delivered
+    /// while the app was suspended/backgrounded (common on watchOS, incl. the
+    /// suspended launch the simulator does) just populates `receivedApplicationContext`
+    /// silently. Call this whenever the scene becomes active so those are picked up.
+    func refreshFromContext() {
+        guard WCSession.isSupported() else { return }
+        let context = WCSession.default.receivedApplicationContext
+        if !context.isEmpty { ingest(context) }
+    }
+
     // MARK: WCSessionDelegate
 
     func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {

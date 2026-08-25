@@ -3,10 +3,15 @@ import SwiftUI
 @main
 struct MoondialWatchApp: App {
     @StateObject private var store = WatchStore()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             ContentView(store: store)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Pick up any context delivered while we were suspended/backgrounded.
+            if phase == .active { store.refreshFromContext() }
         }
     }
 }
