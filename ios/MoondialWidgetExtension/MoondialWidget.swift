@@ -225,7 +225,8 @@ private struct NextQueueItem: View {
                     .font(.system(size: timeSize))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             HStack(spacing: 3) {
                 Text("in")
