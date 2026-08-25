@@ -102,23 +102,60 @@ struct Provider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<MoondialEntry>) -> Void) {
-        let entry = loadEntry()
-        // The live clock and countdown update themselves via SwiftUI date-styled
-        // Text, so we only need occasional reloads to refresh the world clocks.
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+        let base = loadData()
+        let now = Date()
+
+        // Re-render just after each alarm fires so the fired alarm drops out and
+        // the countdown moves to the next one (otherwise .timer counts UP past a
+        // fire time). Each entry only shows alarms still in the future.
+        let fireTimes = (base?.upcomingAlarms ?? [])
+            .map { $0.fireDate }
+            .filter { $0 > now }
+            .sorted()
+
+        var renderDates = [now]
+        renderDates.append(contentsOf: fireTimes.map { $0.addingTimeInterval(1) })
+
+        let entries = renderDates.map { date in
+            MoondialEntry(date: date, data: Provider.futureOnly(base, after: date))
+        }
+
+        // Reload after the last known alarm (or in 15 min) so the app can refill
+        // the queue for the following days.
+        let reloadAt = max((fireTimes.last ?? now).addingTimeInterval(60),
+                           now.addingTimeInterval(15 * 60))
+        completion(Timeline(entries: entries, policy: .after(reloadAt)))
     }
 
-    private func loadEntry() -> MoondialEntry {
-        // The app stores the payload as a JSON string, so read it as a string
-        // (UserDefaults.data(forKey:) returns nil for a string value).
+    /// A copy of the payload keeping only alarms that fire after `date`.
+    private static func futureOnly(_ data: WidgetData?, after date: Date) -> WidgetData? {
+        guard let data = data else { return nil }
+        let future = (data.upcomingAlarms ?? []).filter { $0.fireDate > date }
+        return WidgetData(
+            nextAlarm: future.first,
+            upcomingAlarms: future,
+            currentTime: data.currentTime,
+            currentTimezone: data.currentTimezone,
+            currentLocationName: data.currentLocationName,
+            theme: data.theme,
+            locations: data.locations
+        )
+    }
+
+    // The app stores the payload as a JSON string, so read it as a string
+    // (UserDefaults.data(forKey:) returns nil for a string value).
+    private func loadData() -> WidgetData? {
         if let sharedDefaults = UserDefaults(suiteName: "group.com.kaibrabo.moondial"),
            let jsonString = sharedDefaults.string(forKey: "widgetData"),
            let data = jsonString.data(using: .utf8),
            let widgetData = try? JSONDecoder().decode(WidgetData.self, from: data) {
-            return MoondialEntry(date: Date(), data: widgetData)
+            return widgetData
         }
-        return MoondialEntry(date: Date(), data: nil)
+        return nil
+    }
+
+    private func loadEntry() -> MoondialEntry {
+        MoondialEntry(date: Date(), data: Provider.futureOnly(loadData(), after: Date()))
     }
 }
 
@@ -367,9 +404,6 @@ struct LargeWidgetView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 5) {
-                Image(systemName: "moon.stars.fill")
-                    .font(.caption2)
-                    .foregroundColor(.moondialAccent)
                 Text("Moondial")
                     .font(.caption)
                     .fontWeight(.semibold)
