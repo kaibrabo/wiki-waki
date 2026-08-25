@@ -12,25 +12,30 @@ import type { Alarm, Location } from '../types';
  * the canonical scheduling logic in schedule.ts so the widget can never diverge
  * from the app (the old hand-rolled copy here lacked monthly/yearly recurrence).
  */
-function getNextAlarm(alarms: Alarm[], locations: Location[], use24Hour: boolean, now: DateTime): WidgetAlarmData | null {
+function getUpcomingAlarms(
+  alarms: Alarm[],
+  locations: Location[],
+  use24Hour: boolean,
+  now: DateTime,
+  count = 3,
+): WidgetAlarmData[] {
   const enabledLocationIds = new Set(locations.filter((l) => !l.disabled).map((l) => l.id));
   const activeAlarms = alarms.filter((a) => a.enabled && enabledLocationIds.has(a.locationId));
-
-  const upcoming = allUpcomingAlarms(activeAlarms, now);
-  if (upcoming.length === 0) return null;
-
-  const { alarm, instant } = upcoming[0];
-  const location = locations.find((l) => l.id === alarm.locationId);
   const timeFormat = use24Hour ? 'HH:mm' : 'h:mm a';
 
-  return {
-    label: alarm.label,
-    time: instant.setZone(alarm.pinnedZone).toFormat(timeFormat),
-    locationName: location?.name.split(',')[0] ?? '',
-    timezone: alarm.pinnedZone,
-    fireEpoch: Math.round(instant.toSeconds()),
-    enabled: true,
-  };
+  return allUpcomingAlarms(activeAlarms, now)
+    .slice(0, count)
+    .map(({ alarm, instant }) => {
+      const location = locations.find((l) => l.id === alarm.locationId);
+      return {
+        label: alarm.label,
+        time: instant.setZone(alarm.pinnedZone).toFormat(timeFormat),
+        locationName: location?.name.split(',')[0] ?? '',
+        timezone: alarm.pinnedZone,
+        fireEpoch: Math.round(instant.toSeconds()),
+        enabled: true,
+      };
+    });
 }
 
 /** Current wall-clock in each location's zone, city name only. */
@@ -71,8 +76,11 @@ export function useWidgetSync() {
         ? currentLoc.name.split(',')[0]
         : (activeZone.split('/').pop() || activeZone).replace(/_/g, ' ');
 
+      const upcomingAlarms = getUpcomingAlarms(alarms, locations, use24Hour, now, 3);
+
       const widgetData: WidgetData = {
-        nextAlarm: getNextAlarm(alarms, locations, use24Hour, now),
+        nextAlarm: upcomingAlarms[0] ?? null,
+        upcomingAlarms,
         currentTime: now.toFormat(timeFormat),
         currentTimezone: activeZone,
         currentLocationName,

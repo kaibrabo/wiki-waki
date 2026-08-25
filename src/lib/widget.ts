@@ -21,6 +21,7 @@ export interface WidgetLocationData {
 
 export interface WidgetData {
   nextAlarm: WidgetAlarmData | null;
+  upcomingAlarms: WidgetAlarmData[]; // the next few alarms (queue), soonest first
   currentTime: string;
   currentTimezone: string;
   currentLocationName: string; // display name of the location at the current timezone

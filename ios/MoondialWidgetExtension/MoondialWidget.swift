@@ -26,6 +26,7 @@ struct LocationData: Codable {
 
 struct WidgetData: Codable {
     let nextAlarm: AlarmData?
+    let upcomingAlarms: [AlarmData]? // the next few alarms (queue), soonest first
     let currentTime: String
     let currentTimezone: String
     let currentLocationName: String? // optional for forward/backward compatibility
@@ -68,6 +69,11 @@ struct Provider: TimelineProvider {
             fireEpoch: Date().addingTimeInterval(3 * 3600 + 12 * 60).timeIntervalSince1970,
             enabled: true
         ),
+        upcomingAlarms: [
+            AlarmData(label: "Start work", time: "9:00 AM", locationName: "San Francisco", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(3 * 3600).timeIntervalSince1970, enabled: true),
+            AlarmData(label: "Lunch", time: "12:00 PM", locationName: "San Francisco", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(6 * 3600).timeIntervalSince1970, enabled: true),
+            AlarmData(label: "End work", time: "5:00 PM", locationName: "San Francisco", timezone: "America/Los_Angeles", fireEpoch: Date().addingTimeInterval(11 * 3600).timeIntervalSince1970, enabled: true)
+        ],
         currentTime: "9:41 AM",
         currentTimezone: TimeZone.current.identifier,
         currentLocationName: "San Francisco",
@@ -193,6 +199,69 @@ private struct NextAlarm: View {
     }
 }
 
+/// One row in the upcoming-alarm queue: time · label on the left, live countdown right.
+private struct NextQueueRow: View {
+    var alarm: AlarmData
+    var timeSize: CGFloat
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(alarm.time)
+                .font(.system(size: timeSize, weight: .light, design: .rounded))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+            if !alarm.label.isEmpty {
+                Text(alarm.label)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 6)
+            HStack(spacing: 3) {
+                Text("in")
+                    .font(.caption2)
+                    .foregroundColor(.moondialAccent)
+                Text(alarm.fireDate, style: .timer)
+                    .font(.caption2.monospacedDigit())
+                    .fontWeight(.semibold)
+                    .foregroundColor(.moondialAccent)
+                    .frame(minWidth: 44, alignment: .trailing)
+            }
+        }
+    }
+}
+
+/// The upcoming-alarm queue (up to `count`) for medium/large widgets.
+private struct NextQueue: View {
+    var alarms: [AlarmData]
+    var count: Int = 3
+    var timeSize: CGFloat = 18
+
+    var body: some View {
+        let active = alarms.filter { $0.enabled }
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 4) {
+                Image(systemName: "alarm.fill")
+                    .font(.system(size: 10))
+                    .foregroundColor(.moondialAccent)
+                Text("NEXT")
+                    .font(.system(size: 10))
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+            }
+            if active.isEmpty {
+                Text("No upcoming alarms")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(Array(active.prefix(count).enumerated()), id: \.offset) { _, alarm in
+                    NextQueueRow(alarm: alarm, timeSize: timeSize)
+                }
+            }
+        }
+    }
+}
+
 /// A world-clock row for the saved locations (large widget).
 private struct ClockRow: View {
     var location: LocationData
@@ -236,7 +305,7 @@ struct MediumWidgetView: View {
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 40)
             Spacer(minLength: 4)
             Divider()
-            NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 26)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 18)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 10))
@@ -266,7 +335,7 @@ struct LargeWidgetView: View {
 
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52)
 
-            NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 30)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 20)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.moondialAccent.opacity(0.10))
