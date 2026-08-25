@@ -203,6 +203,7 @@ private struct CurrentHeader: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     timeText
                     dateText
+                        .padding(.leading, 8)
                 }
             } else {
                 timeText
@@ -387,7 +388,7 @@ struct SmallWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 30, date: entry.data?.currentDate ?? "", dateSize: 14)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 38, date: entry.data?.currentDate ?? "", dateSize: 14)
             Spacer(minLength: 4)
             Divider()
             NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20)
@@ -436,7 +437,7 @@ struct LargeWidgetView: View {
                 .foregroundColor(.secondary)
                 .frame(maxWidth: .infinity, alignment: .center)
 
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, date: entry.data?.currentDate ?? "", dateSize: 13, alignment: .center)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, date: entry.data?.currentDate ?? "", dateSize: 15, alignment: .center)
                 .frame(maxWidth: .infinity, alignment: .center)
 
             NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13)
