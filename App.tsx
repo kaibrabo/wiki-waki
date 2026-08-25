@@ -50,10 +50,18 @@ export default function App() {
                     Moondial
                   </Text>
                 </YStack>
-              ) : route.name === 'locations' ? (
-                <LocationsScreen onOpen={(id) => setRoute({ name: 'detail', id })} />
               ) : (
-                <LocationDetailScreen id={route.id} onBack={() => setRoute({ name: 'locations' })} />
+                <>
+                  {/* Keep the list mounted (just hidden) while viewing a location,
+                      so returning doesn't re-fetch geolocation / recompute the next
+                      alarm - the screen's state is cached in memory, no reload on back. */}
+                  <YStack flex={1} display={route.name === 'locations' ? 'flex' : 'none'}>
+                    <LocationsScreen onOpen={(id) => setRoute({ name: 'detail', id })} />
+                  </YStack>
+                  {route.name === 'detail' && (
+                    <LocationDetailScreen id={route.id} onBack={() => setRoute({ name: 'locations' })} />
+                  )}
+                </>
               )}
             </YStack>
             <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
