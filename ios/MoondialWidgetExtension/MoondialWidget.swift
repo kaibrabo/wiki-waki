@@ -219,7 +219,7 @@ struct SmallWidgetView: View {
             NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding()
+        .padding(10)
     }
 }
 
@@ -234,7 +234,7 @@ struct MediumWidgetView: View {
             NextAlarm(alarm: entry.data?.nextAlarm, timeSize: 26)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding()
+        .padding(10)
     }
 }
 
@@ -282,7 +282,7 @@ struct LargeWidgetView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding()
+        .padding(10)
     }
 }
 
@@ -298,6 +298,7 @@ struct MoondialWidget: Widget {
         .configurationDisplayName("Moondial")
         .description("Your current time and location, and your next alarm with a live countdown.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .contentMarginsDisabled()
     }
 }
 
