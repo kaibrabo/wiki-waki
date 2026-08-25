@@ -176,27 +176,28 @@ private struct NextAlarm: View {
                     .foregroundColor(.secondary)
             }
             if let alarm = alarm, alarm.enabled {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                // Line 1: "XX:XX in (countdown)"
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text(alarm.time)
                         .font(.system(size: timeSize, weight: .light, design: .rounded))
                         .foregroundColor(.primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                    if !alarm.label.isEmpty {
-                        Text(alarm.label)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-                HStack(spacing: 3) {
                     Text("in")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(.moondialAccent)
                     Text(alarm.fireDate, style: .timer)
-                        .font(.caption2.monospacedDigit())
+                        .font(.caption.monospacedDigit())
                         .fontWeight(.semibold)
                         .foregroundColor(.moondialAccent)
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                // Line 2: the label, on its own line for more space.
+                if !alarm.label.isEmpty {
+                    Text(alarm.label)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
             } else {
                 Text("No upcoming alarms")
