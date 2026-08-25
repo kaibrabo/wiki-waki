@@ -226,14 +226,6 @@ private struct NextQueueItem: View {
                 }
             }
             .lineLimit(1)
-            if !alarm.label.isEmpty {
-                Text(alarm.label)
-                    .font(.system(size: timeSize))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
             HStack(spacing: 3) {
                 Text("in")
                     .font(.system(size: timeSize))
@@ -243,6 +235,14 @@ private struct NextQueueItem: View {
                     .foregroundColor(.moondialAccent)
             }
             .lineLimit(1)
+            if !alarm.label.isEmpty {
+                Text(alarm.label)
+                    .font(.system(size: timeSize))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
