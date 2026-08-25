@@ -447,7 +447,7 @@ struct LargeWidgetView: View {
                 .cornerRadius(12)
 
             if !savedLocations.isEmpty {
-                SavedSection(locations: savedLocations, limit: 5)
+                SavedSection(locations: savedLocations, limit: 4)
                     .padding(.top, 6)
             }
 
