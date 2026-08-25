@@ -342,7 +342,7 @@ struct MediumWidgetView: View {
                 CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 46)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if !saved.isEmpty {
-                    SavedSection(locations: saved, limit: 3)
+                    SavedSection(locations: saved, limit: 2)
                         .frame(width: 130, alignment: .leading)
                 }
             }
