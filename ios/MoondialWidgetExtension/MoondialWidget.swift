@@ -173,9 +173,10 @@ struct MoondialEntry: TimelineEntry {
 private struct CurrentHeader: View {
     var locationName: String
     var timeSize: CGFloat
+    var alignment: HorizontalAlignment = .leading
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: alignment, spacing: 2) {
             Text(Date(), style: .time)
                 .font(.system(size: timeSize, weight: .thin, design: .rounded))
                 .foregroundColor(.primary)
@@ -268,7 +269,7 @@ private struct NextQueueItem: View {
                     .font(.system(size: timeSize))
                     .foregroundColor(.moondialAccent)
                 Text(alarm.fireDate, style: .timer)
-                    .font(.system(size: timeSize, weight: .semibold).monospacedDigit())
+                    .font(.system(size: timeSize).monospacedDigit())
                     .foregroundColor(.moondialAccent)
             }
             .lineLimit(1)
@@ -403,15 +404,14 @@ struct LargeWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 5) {
-                Text("Moondial")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
+            Text("Moondial")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
 
-            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52)
+            CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 52, alignment: .center)
+                .frame(maxWidth: .infinity, alignment: .center)
 
             NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13)
                 .padding(12)
@@ -421,6 +421,7 @@ struct LargeWidgetView: View {
 
             if !savedLocations.isEmpty {
                 SavedSection(locations: savedLocations, limit: 5)
+                    .padding(.top, 6)
             }
 
             Spacer(minLength: 0)
