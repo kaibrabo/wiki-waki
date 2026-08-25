@@ -41,13 +41,41 @@ export function notificationSoundName(sound: AlarmSound | undefined): string {
 }
 
 let previewPlayer: AudioPlayer | null = null;
+let previewTimeout: ReturnType<typeof setTimeout> | null = null;
 let audioModeSet = false;
 
-/** Play a short preview of the given sound (no-op for the OS default or when audio isn't linked). */
+// Previews are capped so tapping through the list is quick; Reveille (a real
+// ~21s bugle call) is exempt and plays to the end.
+const PREVIEW_MAX_MS = 5000;
+
+/** Immediately stop and release any currently-playing preview. */
+function releasePreview(): void {
+  if (previewTimeout) {
+    clearTimeout(previewTimeout);
+    previewTimeout = null;
+  }
+  if (previewPlayer) {
+    try {
+      previewPlayer.pause();
+    } catch {
+      // ignore
+    }
+    try {
+      previewPlayer.remove();
+    } catch {
+      // ignore
+    }
+    previewPlayer = null;
+  }
+}
+
+/** Play a short preview of the given sound (no-op when audio isn't linked). */
 export function previewSound(sound: AlarmSound): void {
   if (!HAS_AUDIO) return;
   const option = SOUND_OPTIONS.find((o) => o.id === sound);
   if (!option) return;
+  // Stop whatever is currently previewing, immediately.
+  releasePreview();
   try {
     const expoAudio = require('expo-audio') as typeof import('expo-audio');
     const { createAudioPlayer, setAudioModeAsync } = expoAudio;
@@ -56,16 +84,12 @@ export function previewSound(sound: AlarmSound): void {
       audioModeSet = true;
       setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
     }
-    // Fresh one-shot player each tap — avoids reuse/seek edge cases.
-    if (previewPlayer) {
-      try {
-        previewPlayer.remove();
-      } catch {
-        // ignore
-      }
-    }
     previewPlayer = createAudioPlayer(option.module);
     previewPlayer.play();
+    // Cap every sound except Reveille at 5s.
+    if (sound !== 'reveille') {
+      previewTimeout = setTimeout(releasePreview, PREVIEW_MAX_MS);
+    }
   } catch (e) {
     console.warn('Failed to preview sound:', e);
   }
@@ -73,10 +97,5 @@ export function previewSound(sound: AlarmSound): void {
 
 /** Release the shared preview player (call when the editor closes). */
 export function stopPreview(): void {
-  try {
-    previewPlayer?.remove();
-  } catch {
-    // ignore
-  }
-  previewPlayer = null;
+  releasePreview();
 }
