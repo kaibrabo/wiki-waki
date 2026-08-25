@@ -217,13 +217,12 @@ private struct NextQueueItem: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
-            HStack(spacing: 2) {
+            HStack(spacing: 3) {
                 Text("in")
-                    .font(.caption2)
+                    .font(.system(size: 13))
                     .foregroundColor(.moondialAccent)
                 Text(alarm.fireDate, style: .timer)
-                    .font(.caption2.monospacedDigit())
-                    .fontWeight(.semibold)
+                    .font(.system(size: 15, weight: .semibold).monospacedDigit())
                     .foregroundColor(.moondialAccent)
             }
             .lineLimit(1)
@@ -305,11 +304,11 @@ struct MediumWidgetView: View {
     let entry: MoondialEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 40)
-            Spacer(minLength: 4)
             Divider()
             NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 18)
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 10))
@@ -325,7 +324,7 @@ struct LargeWidgetView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 5) {
                 Image(systemName: "moon.stars.fill")
                     .font(.caption2)
