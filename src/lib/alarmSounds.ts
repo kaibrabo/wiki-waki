@@ -2,15 +2,20 @@
 // notification sound name. The .wav files are bundled via the expo-notifications
 // `sounds` config plugin (see app.json) so iOS can play them when an alarm fires.
 //
-// expo-audio and expo-haptics are native modules. They're loaded lazily and
-// defensively here: if the running binary predates their install (a native
-// rebuild is needed) or on web, preview/haptics degrade to no-ops instead of
-// crashing the app. The actual alarm sound is played by iOS from the bundled
-// .wav, so it works regardless of expo-audio.
+// expo-audio and expo-haptics are NATIVE modules: they only exist in a binary
+// that was rebuilt after they were added (a Metro JS reload is not enough). We
+// gate every use on `requireOptionalNativeModule`, which returns null instead of
+// throwing when the native side is absent, so a not-yet-rebuilt binary (or web)
+// silently no-ops instead of crashing. The actual alarm sound is played by iOS
+// from the bundled .wav via the notification, so it works without expo-audio.
 
-import { Platform } from 'react-native';
+import { requireOptionalNativeModule } from 'expo';
 import type { AudioPlayer } from 'expo-audio';
 import type { AlarmSound, AlarmHaptic } from '../types';
+
+// Presence checks — evaluated once, never throw.
+const HAS_AUDIO = requireOptionalNativeModule('ExpoAudio') != null;
+const HAS_HAPTICS = requireOptionalNativeModule('ExpoHaptics') != null;
 
 type SoundOption = {
   id: AlarmSound;
@@ -38,25 +43,6 @@ export const HAPTIC_OPTIONS: { id: AlarmHaptic; label: string }[] = [
 export const DEFAULT_SOUND: AlarmSound = 'default';
 export const DEFAULT_HAPTIC: AlarmHaptic = 'medium';
 
-// Lazy, guarded native-module access — never throws at import time.
-function getAudio(): typeof import('expo-audio') | null {
-  if (Platform.OS === 'web') return null;
-  try {
-    return require('expo-audio');
-  } catch {
-    return null;
-  }
-}
-
-function getHaptics(): typeof import('expo-haptics') | null {
-  if (Platform.OS === 'web') return null;
-  try {
-    return require('expo-haptics');
-  } catch {
-    return null;
-  }
-}
-
 /**
  * The value to pass to expo-notifications `content.sound`. The OS default is the
  * string 'default'; bundled sounds are referenced by their base filename.
@@ -68,17 +54,18 @@ export function notificationSoundName(sound: AlarmSound | undefined): string {
 
 let previewPlayer: AudioPlayer | null = null;
 
-/** Play a short preview of the given sound (no-op for the OS default or if audio is unavailable). */
+/** Play a short preview of the given sound (no-op for the OS default or when audio isn't linked). */
 export function previewSound(sound: AlarmSound): void {
+  if (!HAS_AUDIO) return;
   const option = SOUND_OPTIONS.find((o) => o.id === sound);
   if (!option || option.module == null) return;
-  const audio = getAudio();
-  if (!audio) return;
   try {
+    // Safe to require now that the native module is present.
+    const { createAudioPlayer } = require('expo-audio') as typeof import('expo-audio');
     if (previewPlayer) {
       previewPlayer.replace(option.module);
     } else {
-      previewPlayer = audio.createAudioPlayer(option.module);
+      previewPlayer = createAudioPlayer(option.module);
     }
     previewPlayer.seekTo(0);
     previewPlayer.play();
@@ -97,24 +84,27 @@ export function stopPreview(): void {
   previewPlayer = null;
 }
 
-/** Fire the given haptic once (used for both preview and foreground delivery). */
+/** Fire the given haptic once (used for both preview and foreground delivery). No-op when haptics aren't linked. */
 export function playHaptic(haptic: AlarmHaptic): void {
-  if (haptic === 'none') return;
-  const H = getHaptics();
-  if (!H) return;
+  if (!HAS_HAPTICS || haptic === 'none') return;
   try {
+    const Haptics = require('expo-haptics') as typeof import('expo-haptics');
+    // impactAsync/notificationAsync return promises that reject if the native
+    // side is missing — swallow both the sync throw (try/catch) and the async
+    // rejection (.catch) so nothing leaks as an unhandled rejection.
+    const swallow = () => {};
     switch (haptic) {
       case 'light':
-        H.impactAsync(H.ImpactFeedbackStyle.Light);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(swallow);
         break;
       case 'medium':
-        H.impactAsync(H.ImpactFeedbackStyle.Medium);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(swallow);
         break;
       case 'heavy':
-        H.impactAsync(H.ImpactFeedbackStyle.Heavy);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(swallow);
         break;
       case 'success':
-        H.notificationAsync(H.NotificationFeedbackType.Success);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(swallow);
         break;
     }
   } catch (e) {
