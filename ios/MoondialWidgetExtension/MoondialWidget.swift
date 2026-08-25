@@ -175,10 +175,15 @@ private struct NextAlarm: View {
                             .lineLimit(1)
                     }
                 }
-                Text(alarm.fireDate, style: .timer)
-                    .font(.caption2.monospacedDigit())
-                    .fontWeight(.semibold)
-                    .foregroundColor(.moondialAccent)
+                HStack(spacing: 3) {
+                    Text("in")
+                        .font(.caption2)
+                        .foregroundColor(.moondialAccent)
+                    Text(alarm.fireDate, style: .timer)
+                        .font(.caption2.monospacedDigit())
+                        .fontWeight(.semibold)
+                        .foregroundColor(.moondialAccent)
+                }
             } else {
                 Text("No upcoming alarms")
                     .font(.subheadline)
