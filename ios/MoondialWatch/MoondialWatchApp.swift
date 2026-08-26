@@ -114,7 +114,7 @@ private struct CurrentHeader: View {
                 .environment(\.locale, clockLocale)
             if !date.isEmpty {
                 Text(date)
-                    .font(.system(size: 13))
+                    .font(.system(size: 16))
                     .foregroundColor(.moondialSecondaryText(isDark))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
