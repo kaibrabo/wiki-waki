@@ -209,7 +209,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                 <XStack items="center" gap="$3" shrink={1}>
                   <MaterialCommunityIcons name="calendar" size={22} color="#888" />
                   <Text fontSize={16} color="$color12">
-                    Date Format
+                    {t.dateFormat}
                   </Text>
                 </XStack>
                 <XStack gap="$2" accessibilityRole="radiogroup">

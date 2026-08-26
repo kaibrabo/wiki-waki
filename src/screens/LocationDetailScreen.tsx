@@ -8,7 +8,7 @@ import { AppSwitch } from '../components/AppSwitch';
 import { AlarmEditor } from '../components/AlarmEditor';
 import { nextFireInstant, displayInZone, recurrenceLabel } from '../lib/schedule';
 import { formatLocationName } from '../lib/zones';
-import { getTranslations, translateLabel, type Language } from '../lib/i18n';
+import { getTranslations, translateLabel, luxonLocale, type Language } from '../lib/i18n';
 import type { Alarm } from '../types';
 
 export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () => void }) {
@@ -36,6 +36,7 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
   }
 
   const local = now.setZone(location.ianaZone);
+  const localizedDate = local.setLocale(luxonLocale(language));
 
   const owned = alarms
     .filter((a) => a.locationId === location.id)
@@ -108,9 +109,9 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
           mt="$2" 
           mb="$6"
           accessible={true}
-          accessibilityLabel={`${local.toFormat('cccc, LLLL d')}, timezone ${local.toFormat('ZZZZ')}`}
+          accessibilityLabel={`${localizedDate.toFormat('cccc, LLLL d')}, timezone ${local.toFormat('ZZZZ')}`}
         >
-          {local.toFormat('cccc, LLLL d')} - {local.toFormat('ZZZZ')}
+          {localizedDate.toFormat('cccc, LLLL d')} - {local.toFormat('ZZZZ')}
         </Text>
 
         <XStack gap="$3" mb="$6">

@@ -81,6 +81,7 @@ type TranslationKeys = {
   done: string;
   darkMode: string;
   time24Hour: string;
+  dateFormat: string;
   language: string;
   alarmSound: string;
 };
@@ -135,6 +136,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'Done',
     darkMode: 'Dark Mode',
     time24Hour: '24-Hour Time',
+    dateFormat: 'Date Format',
     language: 'Language',
     alarmSound: 'Alarm Sound',
   },
@@ -187,6 +189,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'Listo',
     darkMode: 'Modo Oscuro',
     time24Hour: 'Formato 24 Horas',
+    dateFormat: 'Formato de Fecha',
     language: 'Idioma',
     alarmSound: 'Sonido de Alarma',
   },
@@ -239,6 +242,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'Terminé',
     darkMode: 'Mode Sombre',
     time24Hour: 'Format 24 Heures',
+    dateFormat: 'Format de Date',
     language: 'Langue',
     alarmSound: 'Son d\'Alarme',
   },
@@ -291,6 +295,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'Fertig',
     darkMode: 'Dunkelmodus',
     time24Hour: '24-Stunden-Format',
+    dateFormat: 'Datumsformat',
     language: 'Sprache',
     alarmSound: 'Weckton',
   },
@@ -343,6 +348,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: '完成',
     darkMode: '深色模式',
     time24Hour: '24小时制',
+    dateFormat: '日期格式',
     language: '语言',
     alarmSound: '闹钟铃声',
   },
@@ -395,6 +401,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: '完成',
     darkMode: '深色模式',
     time24Hour: '24小時制',
+    dateFormat: '日期格式',
     language: '語言',
     alarmSound: '鬧鐘鈴聲',
   },
@@ -447,6 +454,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'Tapos',
     darkMode: 'Dark Mode',
     time24Hour: '24 na Oras',
+    dateFormat: 'Format ng Petsa',
     language: 'Wika',
     alarmSound: 'Tunog ng Alarma',
   },
@@ -499,6 +507,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'تم',
     darkMode: 'الوضع الداكن',
     time24Hour: 'نظام 24 ساعة',
+    dateFormat: 'تنسيق التاريخ',
     language: 'اللغة',
     alarmSound: 'صوت المنبه',
   },
@@ -551,6 +560,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'Pau',
     darkMode: 'ʻAno Pōʻeleʻele',
     time24Hour: '24 Hola',
+    dateFormat: 'Format Lā',
     language: 'ʻŌlelo',
     alarmSound: 'Leo Alama',
   },
@@ -603,6 +613,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: '完了',
     darkMode: 'ダークモード',
     time24Hour: '24時間表示',
+    dateFormat: '日付形式',
     language: '言語',
     alarmSound: 'アラーム音',
   },
@@ -655,6 +666,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: '완료',
     darkMode: '다크 모드',
     time24Hour: '24시간 형식',
+    dateFormat: '날짜 형식',
     language: '언어',
     alarmSound: '알람 소리',
   },
@@ -707,6 +719,7 @@ const translations: Record<Language, TranslationKeys> = {
     done: 'Selesai',
     darkMode: 'Mode Gelap',
     time24Hour: 'Format 24 Jam',
+    dateFormat: 'Format Tanggal',
     language: 'Bahasa',
     alarmSound: 'Suara Alarm',
   },
@@ -718,6 +731,28 @@ export function getTranslations(lang: Language): TranslationKeys {
 
 export function useTranslations(lang: Language) {
   return getTranslations(lang);
+}
+
+// BCP-47 locale for each app language, used to localize Luxon date/time output
+// (weekday and month names). Tagalog maps to Filipino; Hawaiian falls back to
+// English since Intl rarely carries an 'haw' calendar.
+const LUXON_LOCALES: Record<Language, string> = {
+  en: 'en',
+  es: 'es',
+  fr: 'fr',
+  de: 'de',
+  'zh-CN': 'zh-CN',
+  'zh-HK': 'zh-HK',
+  ja: 'ja',
+  ko: 'ko',
+  id: 'id',
+  tl: 'fil',
+  ar: 'ar',
+  haw: 'en',
+};
+
+export function luxonLocale(lang: Language): string {
+  return LUXON_LOCALES[lang] || 'en';
 }
 
 // Languages that commonly use 12-hour (AM/PM) time format

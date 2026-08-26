@@ -9,7 +9,7 @@ import { SettingsButton } from '../components/SettingsButton';
 import { SettingsModal } from '../components/SettingsModal';
 import { AddLocationModal } from '../components/AddLocationModal';
 import { scheduler } from '../lib/scheduler';
-import { getTranslations, translateLabel } from '../lib/i18n';
+import { getTranslations, translateLabel, luxonLocale } from '../lib/i18n';
 import {
   currentZone,
   nextUpcoming,
@@ -342,12 +342,13 @@ function LocationCard({
   t: ReturnType<typeof getTranslations>;
 }) {
   const use24Hour = useStore((s) => s.use24Hour);
+  const language = useStore((s) => s.language);
   const local = now.setZone(loc.ianaZone);
   const isEnabled = !loc.disabled;
   const displayName = formatLocationName(loc.name, loc.ianaZone);
   const timeFormat = use24Hour ? 'HH:mm' : 'h:mm a';
   const timeString = local.toFormat(timeFormat);
-  const dateString = local.toFormat('cccc, LLL d');
+  const dateString = local.setLocale(luxonLocale(language)).toFormat('cccc, LLL d');
   
   const accessibilityLabel = [
     displayName,
