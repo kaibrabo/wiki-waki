@@ -22,7 +22,9 @@
 		8B3E8D6E303CF1D1009B769D /* MoondialWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8B3E8D5D303CF1CF009B769D /* MoondialWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9A534C2CDEDC38FC87E67B94 /* WatchData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2514C8E5CC965BFF73121DC /* WatchData.swift */; };
 		AC22FEE0772919EC07AE93DA /* reveille.wav in Resources */ = {isa = PBXBuildFile; fileRef = B2237E0D5E97476BB4DD48E5 /* reveille.wav */; };
+		B3B007F6FDC9BB5555C378DC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = EAB593A2FF0498092F2BF606 /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		CD982AC6C252396750940C2E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 0FA38839AF762D2940D1B0C2 /* PrivacyInfo.xcprivacy */; };
 		D5BBAA0925DCEC51199C7754 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9237AB97F4D8490267EDA51F /* Foundation.framework */; };
 		DAE5604AD66FDCB7BE886729 /* MoondialWatchComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30E5DC239E0BC1FBF14A374 /* MoondialWatchComplication.swift */; };
 		DF69483A0FE0926172DF3E04 /* MoondialWatchComplication.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2F5CC8341C821413C8A2AC15 /* MoondialWatchComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -95,6 +97,7 @@
 /* Begin PBXFileReference section */
 		004A738730103328B4366A71 /* libPods-Moondial.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Moondial.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		006517A7B687D940325FC8D4 /* Pods-Moondial.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Moondial.debug.xcconfig"; path = "Target Support Files/Pods-Moondial/Pods-Moondial.debug.xcconfig"; sourceTree = "<group>"; };
+		0FA38839AF762D2940D1B0C2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Moondial.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Moondial.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Moondial/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Moondial/Info.plist; sourceTree = "<group>"; };
@@ -116,6 +119,7 @@
 		D36AC495B629AB4A3C1E48E2 /* MoondialWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoondialWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D41F8ACB8E47AEF0E6FBE8AB /* Pods-Moondial.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Moondial.release.xcconfig"; path = "Target Support Files/Pods-Moondial/Pods-Moondial.release.xcconfig"; sourceTree = "<group>"; };
 		E2514C8E5CC965BFF73121DC /* WatchData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchData.swift; sourceTree = "<group>"; };
+		EAB593A2FF0498092F2BF606 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Moondial/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Moondial-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Moondial-Bridging-Header.h"; path = "Moondial/Moondial-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -256,6 +260,7 @@
 				CC84A425CFCE1EFFF3CCE483 /* MoondialWatchApp.swift */,
 				E2514C8E5CC965BFF73121DC /* WatchData.swift */,
 				857AE562B76A7161EEA177D7 /* Assets.xcassets */,
+				0FA38839AF762D2940D1B0C2 /* PrivacyInfo.xcprivacy */,
 			);
 			name = MoondialWatch;
 			path = MoondialWatch;
@@ -303,6 +308,7 @@
 			isa = PBXGroup;
 			children = (
 				F30E5DC239E0BC1FBF14A374 /* MoondialWatchComplication.swift */,
+				EAB593A2FF0498092F2BF606 /* PrivacyInfo.xcprivacy */,
 			);
 			name = MoondialWatchComplication;
 			path = MoondialWatchComplication;
@@ -469,6 +475,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3B007F6FDC9BB5555C378DC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -477,6 +484,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7FC3A9377A9E67B9394A9DA9 /* Assets.xcassets in Resources */,
+				CD982AC6C252396750940C2E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
