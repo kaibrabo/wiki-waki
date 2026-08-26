@@ -1,49 +1,14 @@
 {
-  "images" : [
+  "images": [
     {
-      "idiom" : "watch",
-      "scale" : "2x",
-      "screen-width" : "<=145",
-      "size" : "24x24"
-    },
-    {
-      "idiom" : "watch",
-      "scale" : "2x",
-      "screen-width" : ">161",
-      "size" : "27.5x27.5"
-    },
-    {
-      "idiom" : "watch",
-      "scale" : "2x",
-      "screen-width" : ">145",
-      "size" : "29x29"
-    },
-    {
-      "idiom" : "watch",
-      "scale" : "2x",
-      "screen-width" : "<=145",
-      "size" : "40x40"
-    },
-    {
-      "idiom" : "watch",
-      "scale" : "2x",
-      "screen-width" : ">161",
-      "size" : "44x44"
-    },
-    {
-      "idiom" : "watch",
-      "scale" : "2x",
-      "screen-width" : ">145",
-      "size" : "46x46"
-    },
-    {
-      "idiom" : "watch-marketing",
-      "scale" : "1x",
-      "size" : "1024x1024"
+      "idiom": "universal",
+      "platform": "watchos",
+      "size": "1024x1024",
+      "filename": "icon-1024.png"
     }
   ],
-  "info" : {
-    "author" : "xcode",
-    "version" : 1
+  "info": {
+    "author": "moondial",
+    "version": 1
   }
 }
