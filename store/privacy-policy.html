@@ -1,0 +1,204 @@
+<title>Moondial Privacy Policy</title>
+<style>
+  :root {
+    /* Light — a cool paper ground with slate ink and the app's blue accent */
+    --ground: #f4f6f9;
+    --surface: #ffffff;
+    --ink: #0f172a;
+    --muted: #59637a;
+    --accent: #2f6bed;
+    --accent-soft: #eaf1fe;
+    --hairline: #e3e7ee;
+    --shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 30px rgba(15, 23, 42, .06);
+    --glow: radial-gradient(60% 80% at 50% 0%, rgba(47, 107, 237, .10), transparent 70%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0a0f1c;
+      --surface: #111a2e;
+      --ink: #e7ecf5;
+      --muted: #9aa7bd;
+      --accent: #6ea0ff;
+      --accent-soft: #16233d;
+      --hairline: rgba(255, 255, 255, .08);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 40px rgba(0, 0, 0, .35);
+      --glow: radial-gradient(60% 80% at 50% 0%, rgba(110, 160, 255, .14), transparent 70%);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0a0f1c;
+    --surface: #111a2e;
+    --ink: #e7ecf5;
+    --muted: #9aa7bd;
+    --accent: #6ea0ff;
+    --accent-soft: #16233d;
+    --hairline: rgba(255, 255, 255, .08);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 40px rgba(0, 0, 0, .35);
+    --glow: radial-gradient(60% 80% at 50% 0%, rgba(110, 160, 255, .14), transparent 70%);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.65;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+  /* Header */
+  header {
+    background-image: var(--glow);
+    padding: 4.5rem 0 2.5rem;
+    text-align: center;
+  }
+  .mark {
+    width: 44px; height: 44px; margin: 0 auto 1.25rem;
+    display: grid; place-items: center;
+    border-radius: 13px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    box-shadow: var(--shadow);
+  }
+  .mark svg { display: block; }
+  .brand {
+    font-size: .82rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin: 0 0 .35rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 6vw, 2.7rem); line-height: 1.08;
+    margin: 0 0 1rem; letter-spacing: -.02em; text-wrap: balance; font-weight: 800;
+  }
+  .stamp {
+    display: inline-block; font-size: .8rem; color: var(--muted);
+    border: 1px solid var(--hairline); border-radius: 999px;
+    padding: .3rem .8rem; font-variant-numeric: tabular-nums;
+  }
+
+  /* Summary card */
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.6rem;
+    margin: 2.5rem 0 3rem;
+  }
+  .summary h2 {
+    margin: 0 0 .9rem; font-size: .8rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted); font-weight: 700;
+  }
+  .summary ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .7rem; }
+  .summary li { position: relative; padding-left: 1.9rem; }
+  .summary li::before {
+    content: ""; position: absolute; left: 0; top: .58em;
+    width: 12px; height: 12px; border-radius: 4px;
+    background: var(--accent-soft);
+    border: 2px solid var(--accent);
+  }
+
+  /* Body sections */
+  main { color: var(--ink); }
+  section + section { margin-top: 2.4rem; }
+  h2.section { font-size: 1.3rem; letter-spacing: -.01em; margin: 0 0 .5rem; font-weight: 700; }
+  h3 { font-size: 1.02rem; margin: 1.4rem 0 .3rem; font-weight: 700; color: var(--ink); }
+  p { margin: .6rem 0; color: var(--ink); }
+  section p { color: color-mix(in srgb, var(--ink) 88%, var(--muted)); }
+  a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+  .rule { height: 1px; background: var(--hairline); border: 0; margin: 3rem 0 0; }
+
+  footer { padding-top: 1.6rem; color: var(--muted); font-size: .95rem; }
+  footer .mail { font-size: 1.05rem; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a { transition: color .15s ease; }
+  }
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="mark" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M20 14.5A8 8 0 1 1 10.2 4a6.4 6.4 0 0 0 9.8 10.5Z"
+              fill="var(--accent)"/>
+      </svg>
+    </div>
+    <p class="brand">Moondial</p>
+    <h1>Privacy Policy</h1>
+    <span class="stamp">Effective August 25, 2026</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="summary">
+    <h2>The short version</h2>
+    <ul>
+      <li>We do not collect, sell, or share your personal data.</li>
+      <li>No analytics, no advertising, no third-party trackers.</li>
+      <li>Your alarms, locations, and settings live on your device.</li>
+      <li>Location is used only to find your time zone, and it stays on your device and paired Apple Watch.</li>
+    </ul>
+  </div>
+
+  <main>
+    <p>Moondial (&ldquo;the app&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is an alarm and world-clock app. This policy explains what the app does and does not do with your information. In short: Moondial keeps your data on your device, does not require an account, and does not track you.</p>
+
+    <section>
+      <h2 class="section">Information the app uses</h2>
+
+      <h3>Alarms, locations, and settings</h3>
+      <p>The alarms you create, the places you save, and your preferences (such as language, time format, and theme) are stored locally on your device using the operating system&rsquo;s standard on-device storage. This information is not transmitted to us or to any third party. If you delete the app, this information is removed with it.</p>
+
+      <h3>Location</h3>
+      <p>With your permission, Moondial uses your device&rsquo;s location to determine your current time zone and to show your current place (for example, the city name) in the app, its widgets, and the Apple Watch app. This happens on your device. Your location and the place name derived from it are not sent to us or to any third party. They may be shared between your iPhone and your paired Apple Watch so the watch can display the same information, and that transfer happens directly between your own devices.</p>
+      <p>You can grant or revoke location access at any time in your device settings. If you decline location access, alarms still work; the app simply will not auto-detect your current time zone or show your current place.</p>
+
+      <h3>Notifications and alarms</h3>
+      <p>Moondial schedules alarms and reminders so they ring or appear at the times you set. On supported devices these are delivered as system alarms; on others they are delivered as local notifications. Scheduling happens on your device. You can manage notification permissions in your device settings.</p>
+    </section>
+
+    <section>
+      <h2 class="section">Information we do not collect</h2>
+      <p>Moondial does not collect names, email addresses, contacts, health data, browsing history, advertising identifiers, or usage analytics. There are no user accounts and no login. We have no servers that receive your personal data.</p>
+    </section>
+
+    <section>
+      <h2 class="section">Third parties</h2>
+      <p>Moondial does not integrate advertising networks or analytics services and does not share data with third parties for their own purposes. The app runs on Apple&rsquo;s operating systems and uses Apple frameworks (such as those for alarms, notifications, widgets, and the Apple Watch); your use of those features is also governed by Apple&rsquo;s own privacy policy.</p>
+    </section>
+
+    <section>
+      <h2 class="section">Children</h2>
+      <p>Moondial does not knowingly collect any personal information from anyone, including children. The app is suitable for all ages.</p>
+    </section>
+
+    <section>
+      <h2 class="section">Data security</h2>
+      <p>Because your information stays on your device, its security is protected by your device&rsquo;s own protections, such as your passcode and device encryption. We recommend keeping your device software up to date.</p>
+    </section>
+
+    <section>
+      <h2 class="section">Changes to this policy</h2>
+      <p>We may update this policy from time to time. When we do, we will revise the effective date above and post the updated policy at the same location. Continued use of the app after an update means you accept the revised policy.</p>
+    </section>
+
+    <section>
+      <h2 class="section">Contact</h2>
+      <p>If you have questions about this policy or the app&rsquo;s privacy practices, reach us at:</p>
+      <p class="mail"><a href="mailto:kaibrabo@gmail.com">kaibrabo@gmail.com</a></p>
+    </section>
+
+    <hr class="rule" />
+    <footer>
+      <p>Moondial &middot; Alarms anchored to the time zone you meant.</p>
+    </footer>
+  </main>
+</div>
