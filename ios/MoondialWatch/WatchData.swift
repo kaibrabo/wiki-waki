@@ -1,5 +1,6 @@
 import Foundation
 import WatchConnectivity
+import WidgetKit
 
 // MARK: - Shared payload
 //
@@ -55,11 +56,18 @@ struct WatchPayload: Codable {
 final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
     @Published var payload: WatchPayload?
 
-    private static let key = "widgetData"
+    static let key = "widgetData"
+    // Shared with the complication extension via the watch's App Group container,
+    // so the same snapshot the app receives drives the watch-face complications.
+    static let appGroup = "group.com.kaibrabo.moondial"
+
+    private var defaults: UserDefaults {
+        UserDefaults(suiteName: WatchStore.appGroup) ?? .standard
+    }
 
     override init() {
         super.init()
-        payload = decode(UserDefaults.standard.string(forKey: WatchStore.key))
+        payload = decode(defaults.string(forKey: WatchStore.key))
         if WCSession.isSupported() {
             let session = WCSession.default
             session.delegate = self
@@ -74,9 +82,11 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
 
     private func ingest(_ context: [String: Any]) {
         guard let json = context[WatchStore.key] as? String else { return }
-        UserDefaults.standard.set(json, forKey: WatchStore.key)
+        defaults.set(json, forKey: WatchStore.key)
         let decoded = decode(json)
         DispatchQueue.main.async { self.payload = decoded }
+        // Refresh the watch-face complications with the new snapshot.
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// Pull the latest stored application context. `didReceiveApplicationContext`
