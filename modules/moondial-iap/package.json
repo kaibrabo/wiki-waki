@@ -1,0 +1,6 @@
+{
+  "name": "moondial-iap",
+  "version": "1.0.0",
+  "description": "StoreKit 2 bridge for Moondial/KTMPO - Pro unlock (lifetime + subscription), on-device, no backend.",
+  "main": "index.ts"
+}

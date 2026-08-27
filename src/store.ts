@@ -95,6 +95,7 @@ type State = {
   currentPlace: Place | null;
   language: Language;
   notificationPromptDismissed: boolean;
+  isPro: boolean; // KTMPO Pro entitlement (derived from StoreKit, not persisted)
   lastAlarmSettings: LastAlarmSettings;
   locations: Location[];
   alarms: Alarm[];
@@ -106,6 +107,7 @@ type State = {
   setCurrentPlace: (place: Place | null) => void;
   setLanguage: (lang: Language) => void;
   dismissNotificationPrompt: () => void;
+  setPro: (pro: boolean) => void;
   setLastAlarmSettings: (settings: Partial<LastAlarmSettings>) => void;
 
   addLocation: (name: string, ianaZone: string) => void;
@@ -132,6 +134,7 @@ export const useStore = create<State>()(
       currentPlace: null,
       language: 'en' as Language,
       notificationPromptDismissed: false,
+      isPro: false,
       lastAlarmSettings: {
         label: 'Wake',
         time: '09:00',
@@ -152,6 +155,7 @@ export const useStore = create<State>()(
         use24Hour: s.use24HourManuallySet ? s.use24Hour : shouldUse24Hour(lang) 
       })),
       dismissNotificationPrompt: () => set({ notificationPromptDismissed: true }),
+      setPro: (pro) => set({ isPro: pro }),
       setLastAlarmSettings: (settings) => set((s) => ({ 
         lastAlarmSettings: { ...s.lastAlarmSettings, ...settings } 
       })),
