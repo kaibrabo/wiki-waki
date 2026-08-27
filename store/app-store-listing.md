@@ -1,4 +1,4 @@
-# Moondial - App Store Listing
+# KTMPO - App Store Listing
 
 Draft copy for App Store Connect. Character limits noted in parentheses.
 
@@ -6,7 +6,7 @@ Draft copy for App Store Connect. Character limits noted in parentheses.
 
 ## App Name (30)
 
-Moondial
+KTMPO
 
 ## Subtitle (30)
 
@@ -25,13 +25,13 @@ Set an alarm in one time zone and it rings at that local time no matter where yo
 
 ## Description (4000)
 
-Moondial is an alarm app for people who live across time zones.
+KTMPO is an alarm app for people who live across time zones.
 
 Every alarm you create is anchored to a place and its time zone. Set a 9:00 AM alarm in San Francisco and it will ring at San Francisco's 9:00 AM, whether you are home, in Tokyo, or on a red-eye somewhere over the Pacific. No more mental math, no more alarms that drift when you cross a border.
 
-WHY MOONDIAL
+WHY KTMPO
 
-Regular alarm apps fire at whatever the clock on your phone says. That breaks the moment you travel: your "wake at 7" becomes 7 in the wrong zone. Moondial fixes this by pinning each alarm to the time zone you meant, so your morning routine, your medication reminders, and your meeting nudges all stay put.
+Regular alarm apps fire at whatever the clock on your phone says. That breaks the moment you travel: your "wake at 7" becomes 7 in the wrong zone. KTMPO fixes this by pinning each alarm to the time zone you meant, so your morning routine, your medication reminders, and your meeting nudges all stay put.
 
 FEATURES
 
@@ -46,7 +46,7 @@ FEATURES
 
 PRIVATE BY DESIGN
 
-Moondial keeps your data on your device. There are no accounts, no ads, and no tracking. Location is used only to detect your current time zone, and it never leaves your phone and paired Apple Watch. See our privacy policy for details.
+KTMPO keeps your data on your device. There are no accounts, no ads, and no tracking. Location is used only to detect your current time zone, and it never leaves your phone and paired Apple Watch. See our privacy policy for details.
 
 Set it once, travel anywhere, and wake up on time.
 
@@ -56,14 +56,14 @@ Set it once, travel anywhere, and wake up on time.
 
 world clock,jet lag,travel,time zone,clock,reminder,widget,countdown,remote work,wake up,meeting,sleep
 
-> Note: the app name (Moondial) and subtitle (Timezone-anchored alarms) are indexed
+> Note: the app name (KTMPO) and subtitle (Timezone-anchored alarms) are indexed
 > separately, so "timezone" and "alarm" are intentionally not repeated here.
 
 ---
 
 ## What's New (4000) - version 1.0.0
 
-Welcome to Moondial. Set alarms that stay anchored to the time zone you meant, add Home Screen widgets and Apple Watch complications, and keep an eye on your next alarm from anywhere.
+Welcome to KTMPO. Set alarms that stay anchored to the time zone you meant, add Home Screen widgets and Apple Watch complications, and keep an eye on your next alarm from anywhere.
 
 ---
 

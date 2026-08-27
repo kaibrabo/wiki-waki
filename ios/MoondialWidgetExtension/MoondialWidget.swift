@@ -471,7 +471,7 @@ struct LargeWidgetView: View {
     var body: some View {
         let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 8) {
-            Text("Moondial")
+            Text("KTMPO")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
@@ -507,7 +507,7 @@ struct MoondialWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             MoondialWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Moondial")
+        .configurationDisplayName("KTMPO")
         .description("Your current time and location, and your next alarm with a live countdown.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .contentMarginsDisabled()

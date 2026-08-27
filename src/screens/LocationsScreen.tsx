@@ -88,7 +88,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
           color="$color12"
           accessibilityRole="header"
         >
-          Moondial
+          {t.appName}
         </Text>
         <XStack items="center" gap="$2.5">
           <SettingsButton onPress={() => setSettingsOpen(true)} />

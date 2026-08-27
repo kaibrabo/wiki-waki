@@ -1,8 +1,8 @@
-# Moondial Privacy Policy
+# KTMPO Privacy Policy
 
 Effective date: August 25, 2026
 
-Moondial ("the app", "we", "us") is an alarm and world-clock app. This policy explains what the app does and does not do with your information. In short: Moondial keeps your data on your device, does not require an account, and does not track you.
+KTMPO ("the app", "we", "us") is an alarm and world-clock app. This policy explains what the app does and does not do with your information. In short: KTMPO keeps your data on your device, does not require an account, and does not track you.
 
 ## Summary
 
@@ -19,25 +19,25 @@ The alarms you create, the places you save, and your preferences (such as langua
 
 ### Location
 
-With your permission, Moondial uses your device's location to determine your current time zone and to show your current place (for example, the city name) in the app, its widgets, and the Apple Watch app. This happens on your device. Your location and the place name derived from it are not sent to us or to any third party. They may be shared between your iPhone and your paired Apple Watch so the watch can display the same information, and that transfer happens directly between your own devices.
+With your permission, KTMPO uses your device's location to determine your current time zone and to show your current place (for example, the city name) in the app, its widgets, and the Apple Watch app. This happens on your device. Your location and the place name derived from it are not sent to us or to any third party. They may be shared between your iPhone and your paired Apple Watch so the watch can display the same information, and that transfer happens directly between your own devices.
 
 You can grant or revoke location access at any time in your device Settings. If you decline location access, alarms still work; the app simply will not auto-detect your current time zone or show your current place.
 
 ### Notifications and alarms
 
-Moondial schedules alarms and reminders so they ring or appear at the times you set. On supported devices these are delivered as system alarms; on others they are delivered as local notifications. Scheduling happens on your device. You can manage notification permissions in your device Settings.
+KTMPO schedules alarms and reminders so they ring or appear at the times you set. On supported devices these are delivered as system alarms; on others they are delivered as local notifications. Scheduling happens on your device. You can manage notification permissions in your device Settings.
 
 ## Information we do not collect
 
-Moondial does not collect names, email addresses, contacts, health data, browsing history, advertising identifiers, or usage analytics. There are no user accounts and no login. We have no servers that receive your personal data.
+KTMPO does not collect names, email addresses, contacts, health data, browsing history, advertising identifiers, or usage analytics. There are no user accounts and no login. We have no servers that receive your personal data.
 
 ## Third parties
 
-Moondial does not integrate advertising networks or analytics services and does not share data with third parties for their own purposes. The app runs on Apple's operating systems and uses Apple frameworks (such as those for alarms, notifications, widgets, and the Apple Watch); your use of those features is also governed by Apple's own privacy policy.
+KTMPO does not integrate advertising networks or analytics services and does not share data with third parties for their own purposes. The app runs on Apple's operating systems and uses Apple frameworks (such as those for alarms, notifications, widgets, and the Apple Watch); your use of those features is also governed by Apple's own privacy policy.
 
 ## Children
 
-Moondial does not knowingly collect any personal information from anyone, including children. The app is suitable for all ages.
+KTMPO does not knowingly collect any personal information from anyone, including children. The app is suitable for all ages.
 
 ## Data security
 
@@ -55,4 +55,4 @@ kaibrabo@gmail.com
 
 ---
 
-_This document is provided as a template for the Moondial app. Update the contact address and effective date as needed before publishing, and host it at a public URL for the App Store listing._
+_This document is provided as a template for the KTMPO app. Update the contact address and effective date as needed before publishing, and host it at a public URL for the App Store listing._

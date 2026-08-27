@@ -88,7 +88,7 @@ type TranslationKeys = {
 
 const translations: Record<Language, TranslationKeys> = {
   en: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'CURRENT',
     saved: 'SAVED',
     noUpcomingAlarms: 'No upcoming alarms',
@@ -141,7 +141,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Alarm Sound',
   },
   es: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'ACTUAL',
     saved: 'GUARDADOS',
     noUpcomingAlarms: 'Sin alarmas próximas',
@@ -194,7 +194,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Sonido de Alarma',
   },
   fr: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'ACTUEL',
     saved: 'ENREGISTRÉS',
     noUpcomingAlarms: 'Aucune alarme à venir',
@@ -247,7 +247,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Son d\'Alarme',
   },
   de: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'AKTUELL',
     saved: 'GESPEICHERT',
     noUpcomingAlarms: 'Keine bevorstehenden Wecker',
@@ -300,7 +300,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Weckton',
   },
   'zh-CN': {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: '当前',
     saved: '已保存',
     noUpcomingAlarms: '没有即将到来的闹钟',
@@ -353,7 +353,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: '闹钟铃声',
   },
   'zh-HK': {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: '目前',
     saved: '已儲存',
     noUpcomingAlarms: '冇即將響嘅鬧鐘',
@@ -406,7 +406,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: '鬧鐘鈴聲',
   },
   tl: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'KASALUKUYAN',
     saved: 'NAKA-SAVE',
     noUpcomingAlarms: 'Walang paparating na alarma',
@@ -459,7 +459,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Tunog ng Alarma',
   },
   ar: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'الحالي',
     saved: 'المحفوظة',
     noUpcomingAlarms: 'لا توجد منبهات قادمة',
@@ -512,7 +512,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'صوت المنبه',
   },
   haw: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'I KĒIA MANAWA',
     saved: 'MĀLAMA ʻIA',
     noUpcomingAlarms: 'ʻAʻohe alama e hiki mai ana',
@@ -565,7 +565,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Leo Alama',
   },
   ja: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: '現在地',
     saved: '保存済み',
     noUpcomingAlarms: '予定のアラームはありません',
@@ -618,7 +618,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'アラーム音',
   },
   ko: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: '현재',
     saved: '저장됨',
     noUpcomingAlarms: '예정된 알람이 없습니다',
@@ -671,7 +671,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: '알람 소리',
   },
   id: {
-    appName: 'Moondial',
+    appName: 'KTMPO',
     current: 'SAAT INI',
     saved: 'TERSIMPAN',
     noUpcomingAlarms: 'Tidak ada alarm mendatang',
