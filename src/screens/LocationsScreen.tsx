@@ -33,7 +33,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
   const [adding, setAdding] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [perm, setPerm] = useState(scheduler.permission());
-  const { geoInfo } = useGeolocation();
+  const { geoInfo, stale } = useGeolocation();
 
   const t = getTranslations(language);
   const active = currentZone();
@@ -124,7 +124,11 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
           accessibilityLabel={`Current location: ${[geoInfo.city, geoInfo.region].filter(Boolean).join(', ')}, ${geoInfo.time}, ${geoInfo.timezone}`}
         >
           <MaterialCommunityIcons name="map-marker" size={14} color="#888" accessibilityElementsHidden />
-          <Text color="$color10" fontSize={13}>
+          <Text
+            color={stale ? '$color11' : '$color10'}
+            fontStyle={stale ? 'italic' : 'normal'}
+            fontSize={13}
+          >
             {[geoInfo.city, geoInfo.region, geoInfo.postalCode].filter(Boolean).join(', ')} {geoInfo.time} {geoInfo.timezone}
           </Text>
         </XStack>

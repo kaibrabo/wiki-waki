@@ -11,10 +11,48 @@ type GeoInfo = {
   timezone: string;
 } | null;
 
-export function useGeolocation(): { geoInfo: GeoInfo; loading: boolean; error: string | null } {
-  const [geoInfo, setGeoInfo] = useState<GeoInfo>(null);
+/** Device wall-clock time and timezone abbreviation — available without location. */
+function liveClock() {
+  const now = DateTime.now();
+  return { time: now.toFormat('h:mm'), timezone: now.toFormat('ZZZZ') };
+}
+
+function fromCache(place: { city: string | null; region: string | null; postalCode?: string | null } | null): GeoInfo {
+  if (!place || (!place.city && !place.region)) return null;
+  return {
+    city: place.city ?? undefined,
+    region: place.region ?? undefined,
+    postalCode: place.postalCode ?? undefined,
+    ...liveClock(),
+  };
+}
+
+/**
+ * Current place for the home header. To avoid the location "popping in" a few
+ * seconds after launch, we seed from the last known place (persisted in the
+ * store) right away and mark it `stale`. Once this session's fresh GPS fix
+ * resolves, `stale` flips to false and the place updates. The header renders the
+ * stale value in italic/dimmed until then.
+ */
+export function useGeolocation(): {
+  geoInfo: GeoInfo;
+  stale: boolean;
+  loading: boolean;
+  error: string | null;
+} {
+  const cachedPlace = useStore((s) => s.currentPlace);
+  const [geoInfo, setGeoInfo] = useState<GeoInfo>(() => fromCache(cachedPlace));
+  const [stale, setStale] = useState(true); // true until this session's fresh fix (or a failure)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Seed from the cached place if it hydrates after mount.
+  useEffect(() => {
+    if (stale && !geoInfo) {
+      const seeded = fromCache(cachedPlace);
+      if (seeded) setGeoInfo(seeded);
+    }
+  }, [cachedPlace, geoInfo, stale]);
 
   useEffect(() => {
     let mounted = true;
@@ -26,6 +64,7 @@ export function useGeolocation(): { geoInfo: GeoInfo; loading: boolean; error: s
           if (mounted) {
             setError('Location permission denied');
             setLoading(false);
+            setStale(false); // no refresh coming — stop showing the stale style
           }
           return;
         }
@@ -39,41 +78,34 @@ export function useGeolocation(): { geoInfo: GeoInfo; loading: boolean; error: s
           longitude: location.coords.longitude,
         });
 
-        console.log('Reverse geocode result:', JSON.stringify(address, null, 2));
-
         if (mounted && address) {
-          const now = DateTime.now();
           const city = address.city ?? address.subregion ?? undefined;
           const region = address.region ?? undefined;
-          setGeoInfo({
-            city,
-            region,
-            postalCode: address.postalCode ?? undefined,
-            time: now.toFormat('h:mm'),
-            timezone: now.toFormat('ZZZZ'),
-          });
-          // Share the exact place so the widget can show it (not the tz city).
-          useStore.getState().setCurrentPlace({ city: city ?? null, region: region ?? null });
+          const postalCode = address.postalCode ?? undefined;
+          setGeoInfo({ city, region, postalCode, ...liveClock() });
+          setStale(false);
           setLoading(false);
+          // Persist the exact place so it's cached for next launch and the widget.
+          useStore.getState().setCurrentPlace({
+            city: city ?? null,
+            region: region ?? null,
+            postalCode: postalCode ?? null,
+          });
         }
       } catch (e) {
         if (mounted) {
           setError('Failed to get location');
           setLoading(false);
+          setStale(false);
         }
       }
     }
 
     fetchLocation();
 
-    // Update time every minute
+    // Keep the displayed time/timezone current.
     const interval = setInterval(() => {
-      if (geoInfo) {
-        const now = DateTime.now();
-        setGeoInfo((prev) =>
-          prev ? { ...prev, time: now.toFormat('h:mm'), timezone: now.toFormat('ZZZZ') } : null
-        );
-      }
+      setGeoInfo((prev) => (prev ? { ...prev, ...liveClock() } : null));
     }, 60000);
 
     return () => {
@@ -82,5 +114,5 @@ export function useGeolocation(): { geoInfo: GeoInfo; loading: boolean; error: s
     };
   }, []);
 
-  return { geoInfo, loading, error };
+  return { geoInfo, stale, loading, error };
 }

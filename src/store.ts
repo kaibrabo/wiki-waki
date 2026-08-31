@@ -76,7 +76,7 @@ export type DateFormat = 'MDY' | 'DMY';
 
 // The device's reverse-geocoded place (from useGeolocation) - the exact city,
 // e.g. "San Rafael", "CA", not the timezone's major city.
-export type Place = { city: string | null; region: string | null };
+export type Place = { city: string | null; region: string | null; postalCode?: string | null };
 
 export type LastAlarmSettings = {
   label: string;
