@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, ScrollView } from 'react-native';
-import { YStack, XStack, Text, Button, Card, Switch } from 'tamagui';
+import { YStack, XStack, Text, Button, Card } from 'tamagui';
+import { AppSwitch } from './AppSwitch';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import { useEffectiveTheme } from '../hooks/useEffectiveTheme';
@@ -148,15 +149,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                     {t.darkMode}
                   </Text>
                 </XStack>
-                <Switch
-                  size="$3"
-                  checked={isDark}
-                  onCheckedChange={(checked) => setThemePref(checked ? 'dark' : 'light')}
-                  backgroundColor={isDark ? '$blue9' : '$color5'}
-                  accessibilityElementsHidden
-                >
-                  <Switch.Thumb backgroundColor="white" />
-                </Switch>
+                <AppSwitch value={isDark} onValueChange={(v) => setThemePref(v ? 'dark' : 'light')} />
               </XStack>
             </Card>
 
@@ -184,15 +177,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
                     {t.time24Hour}
                   </Text>
                 </XStack>
-                <Switch
-                  size="$3"
-                  checked={use24Hour}
-                  onCheckedChange={setUse24Hour}
-                  backgroundColor={use24Hour ? '$blue9' : '$color5'}
-                  accessibilityElementsHidden
-                >
-                  <Switch.Thumb backgroundColor="white" />
-                </Switch>
+                <AppSwitch value={use24Hour} onValueChange={setUse24Hour} />
               </XStack>
             </Card>
 

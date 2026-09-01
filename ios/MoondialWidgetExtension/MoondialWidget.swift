@@ -273,6 +273,12 @@ private struct NextAlarm: View {
                     .font(.system(size: 10))
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
+                if let code = alarm?.code, !code.isEmpty {
+                    Text("(\(code))")
+                        .font(.system(size: 10))
+                        .fontWeight(.bold)
+                        .foregroundColor(.secondary)
+                }
             }
             if let alarm = alarm, alarm.enabled {
                 // Line 1: "XX:XX in (countdown)"
@@ -471,7 +477,7 @@ struct LargeWidgetView: View {
     var body: some View {
         let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 8) {
-            Text("KTMPO")
+            Text("Waimea")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
@@ -507,7 +513,7 @@ struct MoondialWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             MoondialWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("KTMPO")
+        .configurationDisplayName("Waimea")
         .description("Your current time and location, and your next alarm with a live countdown.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .contentMarginsDisabled()

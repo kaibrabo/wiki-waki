@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import { ScrollView, YStack, XStack, Text, Card, Button, Switch } from 'tamagui';
+import { ScrollView, YStack, XStack, Text, Card, Button } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import { useNow } from '../hooks/useNow';

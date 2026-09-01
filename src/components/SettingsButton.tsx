@@ -10,7 +10,7 @@ export function SettingsButton({ onPress }: { onPress: () => void }) {
     <XStack
       width={38}
       height={38}
-      rounded={999}
+      style={{ borderRadius: 19 }}
       items="center"
       justify="center"
       bg="$color3"

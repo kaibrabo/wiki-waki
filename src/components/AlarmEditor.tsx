@@ -299,12 +299,13 @@ export function AlarmEditor({
           <ScrollView keyboardShouldPersistTaps="handled" onScrollBeginDrag={closeKeypad}>
             <YStack pb={32} onPress={closeKeypad}>
               {/* Enabled toggle at top */}
-              <XStack 
-                items="center" 
-                justify="space-between" 
-                px="$4" 
-                pt="$4" 
-                pb="$2" 
+              <XStack
+                items="center"
+                justify="space-between"
+                gap="$3"
+                px="$4"
+                pt="$4"
+                pb="$3"
                 onPress={closeKeypad}
                 accessible={true}
                 accessibilityRole="switch"
