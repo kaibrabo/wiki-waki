@@ -104,7 +104,8 @@ export function useWidgetSync() {
         currentLocationName,
         theme,
         strings: { next: t.next, saved: t.saved, noAlarms: t.noUpcomingAlarms },
-        locations: getLocationTimes(locations, use24Hour, now),
+        // Sorted by the user's drag order so the widget's SAVED list matches the home screen.
+        locations: getLocationTimes([...locations].sort((a, b) => a.order - b.order), use24Hour, now),
       };
 
       updateWidget(widgetData);

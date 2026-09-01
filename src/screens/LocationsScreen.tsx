@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Alert, AccessibilityInfo } from 'react-native';
-import { ScrollView, YStack, XStack, Text, Card, Switch } from 'tamagui';
+import { ScrollView, YStack, XStack, Text, Card } from 'tamagui';
+import { AppSwitch } from '../components/AppSwitch';
+import { DraggableList } from '../components/DraggableList';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import { useNow } from '../hooks/useNow';
@@ -27,6 +29,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
   const addLocation = useStore((s) => s.addLocation);
   const removeLocation = useStore((s) => s.removeLocation);
   const toggleLocationDisabled = useStore((s) => s.toggleLocationDisabled);
+  const reorderSavedLocations = useStore((s) => s.reorderSavedLocations);
   const notificationPromptDismissed = useStore((s) => s.notificationPromptDismissed);
   const dismissNotificationPrompt = useStore((s) => s.dismissNotificationPrompt);
   const language = useStore((s) => s.language);
@@ -95,7 +98,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
           <XStack
             width={38}
             height={38}
-            rounded={999}
+            style={{ borderRadius: 19 }}
             items="center"
             justify="center"
             bg="$blue4"
@@ -267,7 +270,7 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
               <XStack
                 width={36}
                 height={36}
-                rounded={999}
+                style={{ borderRadius: 18 }}
                 items="center"
                 justify="center"
                 bg="$blue9"
@@ -298,22 +301,22 @@ export function LocationsScreen({ onOpen }: { onOpen: (id: string) => void }) {
 
       {/* Scrollable SAVED section */}
       {savedLocations.length > 0 && (
-        <ScrollView flex={1}>
-          <YStack px="$4" pb={40} gap="$3">
-            {savedLocations.map((loc) => (
-              <LocationCard
-                key={loc.id}
-                loc={loc}
-                now={now}
-                nextText={nextText(alarms.filter((a) => a.locationId === loc.id), loc.ianaZone, now, use24Hour)}
-                onPress={() => onOpen(loc.id)}
-                onLongPress={() => handleLongPress(loc)}
-                onToggleDisabled={() => toggleLocationDisabled(loc.id)}
-                t={t}
-              />
-            ))}
-          </YStack>
-        </ScrollView>
+        <DraggableList
+          data={savedLocations}
+          onReorder={reorderSavedLocations}
+          contentStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
+          renderItem={(loc) => (
+            <LocationCard
+              loc={loc}
+              now={now}
+              nextText={nextText(alarms.filter((a) => a.locationId === loc.id), loc.ianaZone, now, use24Hour)}
+              onPress={() => onOpen(loc.id)}
+              onLongPress={() => handleLongPress(loc)}
+              onToggleDisabled={() => toggleLocationDisabled(loc.id)}
+              t={t}
+            />
+          )}
+        />
       )}
 
       <AddLocationModal visible={adding} onClose={() => setAdding(false)} />
@@ -413,20 +416,9 @@ function LocationCard({
           accessibilityRole="switch"
           accessibilityState={{ checked: isEnabled }}
           accessibilityLabel={`${displayName} alarms ${isEnabled ? 'enabled' : 'disabled'}`}
-          onPress={(e) => {
-            e.stopPropagation();
-            onToggleDisabled();
-          }}
+          onPress={(e) => { e.stopPropagation(); onToggleDisabled(); }}
         >
-          <Switch
-            size="$2"
-            checked={isEnabled}
-            onCheckedChange={() => onToggleDisabled()}
-            backgroundColor={isEnabled ? '$blue9' : '$color5'}
-            accessibilityElementsHidden
-          >
-            <Switch.Thumb backgroundColor="white" />
-          </Switch>
+          <AppSwitch value={isEnabled} onValueChange={() => onToggleDisabled()} />
           <Text fontSize={12} fontWeight="600" color={isEnabled ? '$blue10' : '$color10'}>
             {isEnabled ? t.on : t.off}
           </Text>

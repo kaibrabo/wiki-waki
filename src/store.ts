@@ -95,7 +95,7 @@ type State = {
   currentPlace: Place | null;
   language: Language;
   notificationPromptDismissed: boolean;
-  isPro: boolean; // KTMPO Pro entitlement (derived from StoreKit, not persisted)
+  isPro: boolean; // Waimea Pro entitlement (derived from StoreKit, not persisted)
   lastAlarmSettings: LastAlarmSettings;
   locations: Location[];
   alarms: Alarm[];
@@ -114,6 +114,7 @@ type State = {
   removeLocation: (id: string) => void;
   toggleLocationDisabled: (id: string) => void;
   toggleHome: (id: string) => void;
+  reorderSavedLocations: (orderedIds: string[]) => void;
 
   addAlarm: (alarm: Omit<Alarm, 'id'>) => void;
   updateAlarm: (id: string, patch: Partial<Omit<Alarm, 'id'>>) => void;
@@ -178,6 +179,16 @@ export const useStore = create<State>()(
             alarms: s.alarms.filter((a) => a.locationId !== id), // drop its alarms too
           };
         }),
+
+      // Persist a user-chosen order for the saved locations (drag to reorder on
+      // the home screen). Re-numbers `order` to match the given id sequence.
+      reorderSavedLocations: (orderedIds) =>
+        set((s) => ({
+          locations: s.locations.map((l) => {
+            const idx = orderedIds.indexOf(l.id);
+            return idx === -1 ? l : { ...l, order: idx };
+          }),
+        })),
 
       toggleLocationDisabled: (id) =>
         set((s) => ({
