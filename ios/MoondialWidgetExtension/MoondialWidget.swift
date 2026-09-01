@@ -195,6 +195,29 @@ struct MoondialEntry: TimelineEntry {
 
 /// Current location: big live time on top, then the location name — like the
 /// app's CURRENT card.
+/// The device's live wall clock, auto-updating via `.time` style. Forces the
+/// 12/24h format from the app setting rather than the device locale.
+private struct LiveClock: View {
+    var size: CGFloat
+    var use24Hour: Bool
+    var minScale: CGFloat = 0.6
+
+    private var clockLocale: Locale {
+        var comps = Locale.Components(locale: .current)
+        comps.hourCycle = use24Hour ? .zeroToTwentyThree : .oneToTwelve
+        return Locale(components: comps)
+    }
+
+    var body: some View {
+        Text(Date(), style: .time)
+            .font(.system(size: size, weight: .regular, design: .rounded))
+            .foregroundColor(.primary)
+            .lineLimit(1)
+            .minimumScaleFactor(minScale)
+            .environment(\.locale, clockLocale)
+    }
+}
+
 private struct CurrentHeader: View {
     var locationName: String
     var timeSize: CGFloat
@@ -204,21 +227,8 @@ private struct CurrentHeader: View {
     var use24Hour: Bool = false
     var alignment: HorizontalAlignment = .leading
 
-    // Force the live clock's 12/24h formatting from the app setting rather than
-    // the device locale, while keeping the auto-updating .time style.
-    private var clockLocale: Locale {
-        var comps = Locale.Components(locale: .current)
-        comps.hourCycle = use24Hour ? .zeroToTwentyThree : .oneToTwelve
-        return Locale(components: comps)
-    }
-
     private var timeText: some View {
-        Text(Date(), style: .time)
-            .font(.system(size: timeSize, weight: .regular, design: .rounded))
-            .foregroundColor(.primary)
-            .lineLimit(1)
-            .minimumScaleFactor(0.6)
-            .environment(\.locale, clockLocale)
+        LiveClock(size: timeSize, use24Hour: use24Hour)
     }
 
     private var dateText: some View {
@@ -313,7 +323,7 @@ private struct NextAlarm: View {
     }
 }
 
-/// One column in the horizontal upcoming-alarm queue: time / label / countdown.
+/// One card in the horizontal upcoming-alarm queue: time / countdown / label.
 private struct NextQueueItem: View {
     var alarm: AlarmData
     var timeSize: CGFloat
@@ -331,6 +341,7 @@ private struct NextQueueItem: View {
                 }
             }
             .lineLimit(1)
+            .minimumScaleFactor(0.6)
             HStack(spacing: 3) {
                 Text("in")
                     .font(.system(size: timeSize))
@@ -340,6 +351,7 @@ private struct NextQueueItem: View {
                     .foregroundColor(.moondialAccent)
             }
             .lineLimit(1)
+            .minimumScaleFactor(0.6)
             if !alarm.label.isEmpty {
                 Text(alarm.label)
                     .font(.system(size: timeSize))
@@ -353,7 +365,10 @@ private struct NextQueueItem: View {
     }
 }
 
-/// The upcoming-alarm queue (up to `count`), laid out horizontally.
+/// The upcoming-alarm queue (up to `count`), laid out as horizontal cards.
+/// `count` is tuned per family (2 on medium, 3 on large) so the cards fit; each
+/// card's time/countdown scale down (minimumScaleFactor) rather than clip, since
+/// the live `.timer` text can't truncate.
 private struct NextQueue: View {
     var alarms: [AlarmData]
     var count: Int = 3
@@ -392,16 +407,21 @@ private struct NextQueue: View {
 private struct ClockRow: View {
     var location: LocationData
     var body: some View {
-        HStack {
+        HStack(spacing: 4) {
             Text(location.name)
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .lineLimit(1)
-            Spacer(minLength: 6)
+                .truncationMode(.tail)
+            Spacer(minLength: 4)
+            // The time is a static string; pin it so it always shows in full and
+            // the city name truncates instead when the column is narrow.
             Text(location.currentTime)
                 .font(.caption.monospacedDigit())
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
+                .lineLimit(1)
+                .fixedSize()
         }
     }
 }
@@ -450,15 +470,36 @@ struct MediumWidgetView: View {
         let labels = widgetLabels(entry.data)
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .top, spacing: 12) {
-                CurrentHeader(locationName: currentLocationName(entry.data), timeSize: 36, date: entry.data?.currentDate ?? "", dateSize: 15, dateOnRight: true, use24Hour: entry.data?.use24Hour ?? false)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                // Time in its own column, far left.
+                LiveClock(size: 34, use24Hour: entry.data?.use24Hour ?? false, minScale: 0.5)
+                Spacer(minLength: 8)
+                // Date on top, current location below — right-aligned so it sits
+                // against the SAVED column, spaced away from the time.
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text(entry.data?.currentDate ?? "")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    HStack(spacing: 4) {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.moondialAccent)
+                        Text(currentLocationName(entry.data))
+                            .font(.system(size: 13))
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                }
                 if !saved.isEmpty {
                     SavedSection(locations: saved, limit: 2, title: labels.saved)
-                        .frame(width: 108, alignment: .leading)
+                        .frame(width: 90, alignment: .leading)
                 }
             }
             Divider()
-            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 14, nextLabel: labels.next, noAlarmsLabel: labels.noAlarms)
+            NextQueue(alarms: entry.data?.upcomingAlarms ?? [], count: 3, timeSize: 13, nextLabel: labels.next, noAlarmsLabel: labels.noAlarms)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
