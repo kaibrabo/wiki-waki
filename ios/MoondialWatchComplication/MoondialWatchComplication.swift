@@ -194,7 +194,7 @@ struct MoondialComplication: Widget {
             MoondialComplicationEntryView(entry: entry)
         }
         .configurationDisplayName("Next Alarm")
-        .description("Your next KTMPO alarm with a live countdown.")
+        .description("Your next Waimea alarm with a live countdown.")
         .supportedFamilies([.accessoryRectangular, .accessoryCircular, .accessoryInline])
     }
 }

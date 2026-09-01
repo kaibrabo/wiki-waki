@@ -1,4 +1,4 @@
-// KTMPO Pro — purchase config and entitlement logic (StoreKit 2, on-device).
+// Waimea Pro — purchase config and entitlement logic (StoreKit 2, on-device).
 //
 // One Pro entitlement per Apple ID that spans ALL the user's devices (Apple ties
 // purchases to the account, not the device). Monetization ships OFF in v1.0 (free

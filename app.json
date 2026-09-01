@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "KTMPO",
+    "name": "Waimea",
     "slug": "moondial",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,8 +16,8 @@
       "bundleIdentifier": "com.kaibrabo.moondial",
       "buildNumber": "1",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "KTMPO uses your location to detect your current timezone for setting alarms.",
-        "NSAlarmKitUsageDescription": "KTMPO schedules alarms so they ring at the right time, wherever you are.",
+        "NSLocationWhenInUseUsageDescription": "Waimea uses your location to detect your current timezone for setting alarms.",
+        "NSAlarmKitUsageDescription": "Waimea schedules alarms so they ring at the right time, wherever you are.",
         "UIBackgroundModes": [
           "audio",
           "fetch",

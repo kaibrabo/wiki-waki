@@ -1,4 +1,4 @@
-# KTMPO Monetization — StoreKit 2 layer
+# Waimea Monetization — StoreKit 2 layer
 
 Status: **built, dormant, staged for v1.1.** v1.0 ships free. None of this is in the
 1.0 binary until you run `pod install` (autolinking picks up `modules/moondial-iap`).
@@ -19,7 +19,7 @@ Status: **built, dormant, staged for v1.1.** v1.0 ships free. None of this is in
 - `src/components/Paywall.tsx` — paywall UI (lifetime + subscription states, restore,
   Terms/Privacy links, "Works on all your devices").
 - `src/store.ts` — `isPro` state (not persisted; StoreKit is the source of truth).
-- `ios/KTMPO.storekit` — StoreKit test config for the simulator (attach it to the Run
+- `ios/Waimea.storekit` — StoreKit test config for the simulator (attach it to the Run
   scheme: Scheme ▸ Run ▸ Options ▸ StoreKit Configuration).
 - `kainoabrabo.com/ktmpo/config.json` — remote flag: `{"offer": "off" | "lifetime" | "sub"}`.
 

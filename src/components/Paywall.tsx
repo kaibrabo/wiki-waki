@@ -93,7 +93,7 @@ export function Paywall({ visible, offer, onClose, onPurchased }: Props) {
           <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 8 }}>
             <YStack gap="$2" items="center" mb="$4">
               <Text fontSize={28} fontWeight="800" color="$color12">
-                KTMPO Pro
+                Waimea Pro
               </Text>
               <Text fontSize={15} color="$color10" text="center">
                 Alarms anchored to any time zone, everywhere you go.

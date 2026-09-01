@@ -1,7 +1,7 @@
 import ExpoModulesCore
 import StoreKit
 
-// StoreKit 2 bridge for KTMPO's Pro unlock. Everything runs on-device with no
+// StoreKit 2 bridge for Waimea's Pro unlock. Everything runs on-device with no
 // backend: purchases and entitlements are validated by StoreKit against the
 // user's Apple ID, so a single Pro purchase automatically works on ALL of the
 // user's devices (iPhone, iPad, Apple Watch) — Apple ties entitlements to the

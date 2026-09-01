@@ -88,7 +88,7 @@ type TranslationKeys = {
 
 const translations: Record<Language, TranslationKeys> = {
   en: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'CURRENT',
     saved: 'SAVED',
     noUpcomingAlarms: 'No upcoming alarms',
@@ -141,7 +141,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Alarm Sound',
   },
   es: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'ACTUAL',
     saved: 'GUARDADOS',
     noUpcomingAlarms: 'Sin alarmas próximas',
@@ -194,7 +194,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Sonido de Alarma',
   },
   fr: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'ACTUEL',
     saved: 'ENREGISTRÉS',
     noUpcomingAlarms: 'Aucune alarme à venir',
@@ -247,7 +247,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Son d\'Alarme',
   },
   de: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'AKTUELL',
     saved: 'GESPEICHERT',
     noUpcomingAlarms: 'Keine bevorstehenden Wecker',
@@ -300,7 +300,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Weckton',
   },
   'zh-CN': {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: '当前',
     saved: '已保存',
     noUpcomingAlarms: '没有即将到来的闹钟',
@@ -353,7 +353,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: '闹钟铃声',
   },
   'zh-HK': {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: '目前',
     saved: '已儲存',
     noUpcomingAlarms: '冇即將響嘅鬧鐘',
@@ -406,7 +406,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: '鬧鐘鈴聲',
   },
   tl: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'KASALUKUYAN',
     saved: 'NAKA-SAVE',
     noUpcomingAlarms: 'Walang paparating na alarma',
@@ -459,7 +459,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Tunog ng Alarma',
   },
   ar: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'الحالي',
     saved: 'المحفوظة',
     noUpcomingAlarms: 'لا توجد منبهات قادمة',
@@ -512,7 +512,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'صوت المنبه',
   },
   haw: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'I KĒIA MANAWA',
     saved: 'MĀLAMA ʻIA',
     noUpcomingAlarms: 'ʻAʻohe alama e hiki mai ana',
@@ -565,7 +565,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'Leo Alama',
   },
   ja: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: '現在地',
     saved: '保存済み',
     noUpcomingAlarms: '予定のアラームはありません',
@@ -618,7 +618,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: 'アラーム音',
   },
   ko: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: '현재',
     saved: '저장됨',
     noUpcomingAlarms: '예정된 알람이 없습니다',
@@ -671,7 +671,7 @@ const translations: Record<Language, TranslationKeys> = {
     alarmSound: '알람 소리',
   },
   id: {
-    appName: 'KTMPO',
+    appName: 'Waimea',
     current: 'SAAT INI',
     saved: 'TERSIMPAN',
     noUpcomingAlarms: 'Tidak ada alarm mendatang',

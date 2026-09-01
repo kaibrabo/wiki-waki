@@ -1,13 +1,13 @@
-# App Review Notes - KTMPO
+# App Review Notes - Waimea
 
 Paste this into App Store Connect → your version → "Notes for Review."
 Sign-In required: No.
 
 ---
 
-Thank you for reviewing KTMPO.
+Thank you for reviewing Waimea.
 
-KTMPO is an alarm and world-clock app. Each alarm is anchored to a specific time zone, so it rings at that location's local wall-clock time no matter where the user currently is (useful for travel and remote/global teams).
+Waimea is an alarm and world-clock app. Each alarm is anchored to a specific time zone, so it rings at that location's local wall-clock time no matter where the user currently is (useful for travel and remote/global teams).
 
 NO ACCOUNT NEEDED
 There is no login or sign-up. No credentials are required and no content is gated behind an account.
@@ -20,8 +20,8 @@ HOW TO TEST
 3. Tap a city card to open it and add an alarm. Set it 1-2 minutes ahead, then lock the device to see it ring.
 
 ALARMS AND iOS VERSION (important)
-- On iOS 26 and later, KTMPO uses Apple's AlarmKit to schedule real system alarms - they ring with a full-screen Stop/Snooze and sound through silent mode and Focus. This is why the app requests the "schedule alarms and timers" permission on first launch.
-- On earlier iOS versions, or if that permission is declined, KTMPO falls back to standard local notifications for the same alarms. Both paths are expected behavior.
+- On iOS 26 and later, Waimea uses Apple's AlarmKit to schedule real system alarms - they ring with a full-screen Stop/Snooze and sound through silent mode and Focus. This is why the app requests the "schedule alarms and timers" permission on first launch.
+- On earlier iOS versions, or if that permission is declined, Waimea falls back to standard local notifications for the same alarms. Both paths are expected behavior.
 
 WIDGETS AND APPLE WATCH
 - Home Screen widgets (small, medium, large) show the current time and location, the next alarm with a live countdown, and world clocks for saved cities.
