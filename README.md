@@ -1,8 +1,8 @@
-# Moondial
+# Waimea
 
 **Your alarms, pinned to the places that matter.**
 
-Moondial is an alarm app for people who live across timezones. Set an alarm for "9am in San Francisco" and it rings at the right moment wherever you are - whether you're home, in Tokyo, or somewhere over the Pacific.
+Waimea is an alarm app for people who live across timezones. Set an alarm for "9am in San Francisco" and it rings at the right moment wherever you are - whether you're home, in Tokyo, or somewhere over the Pacific.
 
 ---
 
@@ -14,7 +14,7 @@ Remote workers, frequent travelers, and globally distributed teams deal with thi
 
 ## The Solution
 
-Moondial pins each alarm to a specific timezone. Your "Start work" alarm stays anchored to San Francisco time. Your "Call with Tokyo office" alarm stays anchored to Tokyo time. They fire at the correct instant, automatically adjusting for where you physically are.
+Waimea pins each alarm to a specific timezone. Your "Start work" alarm stays anchored to San Francisco time. Your "Call with Tokyo office" alarm stays anchored to Tokyo time. They fire at the correct instant, automatically adjusting for where you physically are.
 
 No math. No mistakes. Just alarms that work the way you think.
 
@@ -65,4 +65,4 @@ React Native + Expo, Tamagui, Luxon, Zustand
 
 ---
 
-*Moondial - because your schedule shouldn't depend on where you sleep.*
+*Waimea - because your schedule shouldn't depend on where you sleep.*

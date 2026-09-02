@@ -1,8 +1,8 @@
-# Moondial - Resume Guide
+# Waimea - Resume Guide
 
 Last updated: 2026-08-05. Working notes for picking this project back up.
 
-## What Moondial is
+## What Waimea is
 
 Alarm app where every alarm carries a **pinned timezone** (`time + IANA zone + recurrence`), so it rings at the correct local wall-clock time wherever you are. Weather-app-style location cards; tap a card for its iOS-Clock-style alarm list.
 
@@ -20,7 +20,7 @@ Alarm app where every alarm carries a **pinned timezone** (`time + IANA zone + r
 ## Run the web app
 
 ```bash
-cd ~/LocalDocuments/Development/moondial
+cd ~/LocalDocuments/Development/waimea
 npx expo start --web      # serves on http://localhost:8081
 ```
 Tests: `bun run test` (Jest 29). Typecheck: `bunx tsc --noEmit`.
@@ -32,7 +32,7 @@ The Gradle build got through config + NDK install, then failed because a depende
 ```bash
 export ANDROID_HOME=~/Library/Android/sdk
 sdkmanager "build-tools;35.0.0"
-cd ~/LocalDocuments/Development/moondial
+cd ~/LocalDocuments/Development/waimea
 npx expo run:android
 # or, for streaming logs:  cd android && ./gradlew :app:assembleDebug --console=plain
 ```
