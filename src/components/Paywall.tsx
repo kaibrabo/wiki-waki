@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { PRODUCT_IDS, refreshPro, IAP, type Offer } from '../lib/iap';
 import type { IapProduct } from '../../modules/moondial-iap';
 
-const PRIVACY_URL = 'https://kainoabrabo.com/ktmpo/privacy/';
+const PRIVACY_URL = 'https://kainoabrabo.com/waimea/privacy/';
 // Apple's standard EULA — swap for a custom Terms URL if you host one.
 const TERMS_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 

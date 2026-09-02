@@ -37,6 +37,7 @@ FEATURES
 
 - Timezone-anchored alarms. Each alarm carries its own time zone and rings at that exact local time, anywhere in the world.
 - Location cards. See your saved places as clean cards with live local times, like a world clock that also holds your alarms.
+- Reorder your world. Drag saved locations into the order you want; the arrangement carries through to your Home Screen widgets.
 - Real ringing alarms. On supported devices, alarms ring loudly with a full-screen Stop and Snooze, even through silent mode and Focus. On other devices they arrive as notifications.
 - Per-alarm sounds. Choose from several distinct tones, including a classic bugle Reveille.
 - Flexible repeats. Daily, weekdays, custom days, monthly, or one-time.
@@ -63,7 +64,7 @@ world clock,jet lag,travel,time zone,clock,reminder,widget,countdown,remote work
 
 ## What's New (4000) - version 1.0.0
 
-Welcome to Waimea. Set alarms that stay anchored to the time zone you meant, add Home Screen widgets and Apple Watch complications, and keep an eye on your next alarm from anywhere.
+Welcome to Waimea. Set alarms that stay anchored to the time zone you meant, drag your saved locations into the order you like, add Home Screen widgets and Apple Watch complications, and keep an eye on your next alarm from anywhere.
 
 ---
 
@@ -71,8 +72,8 @@ Welcome to Waimea. Set alarms that stay anchored to the time zone you meant, add
 
 - Primary category: Utilities (alternate: Productivity)
 - Age rating: 4+ (no objectionable content)
-- Support URL: (needed - a simple page or email link)
-- Marketing URL: (optional)
-- Privacy Policy URL: (required - host store/privacy-policy.md)
+- Support URL: https://kainoabrabo.com/waimea/support/ (or mailto:kaibrabo@gmail.com)
+- Marketing URL: https://kainoabrabo.com/waimea/ (optional)
+- Privacy Policy URL: https://kainoabrabo.com/waimea/privacy/ (host store/privacy-policy.html here)
 - App Privacy questionnaire: Data Not Collected. Location is used on-device
   for app functionality (time zone) and not linked to the user or tracked.

@@ -52,7 +52,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Moondial uses your location to detect your current timezone for setting alarms."
+          "locationWhenInUsePermission": "Waimea uses your location to detect your current timezone for setting alarms."
         }
       ],
       [

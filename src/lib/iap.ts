@@ -22,7 +22,7 @@ const PRO_IDS = new Set<string>(Object.values(PRODUCT_IDS));
 
 /** Which paywall to show, controlled remotely so it can switch without a release. */
 export type Offer = 'lifetime' | 'sub' | 'off';
-const OFFER_CONFIG_URL = 'https://kainoabrabo.com/ktmpo/config.json';
+const OFFER_CONFIG_URL = 'https://kainoabrabo.com/waimea/config.json';
 
 /** Pro if the user owns the lifetime unlock OR has an active subscription. */
 export function isProFromEntitlements(ids: string[]): boolean {

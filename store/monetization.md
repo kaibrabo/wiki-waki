@@ -21,7 +21,7 @@ Status: **built, dormant, staged for v1.1.** v1.0 ships free. None of this is in
 - `src/store.ts` — `isPro` state (not persisted; StoreKit is the source of truth).
 - `ios/Waimea.storekit` — StoreKit test config for the simulator (attach it to the Run
   scheme: Scheme ▸ Run ▸ Options ▸ StoreKit Configuration).
-- `kainoabrabo.com/ktmpo/config.json` — remote flag: `{"offer": "off" | "lifetime" | "sub"}`.
+- `kainoabrabo.com/waimea/config.json` — remote flag: `{"offer": "off" | "lifetime" | "sub"}`.
 
 ## Product IDs (create in App Store Connect)
 - `com.kaibrabo.moondial.pro.lifetime` — Non-Consumable ($9.99 founder)
