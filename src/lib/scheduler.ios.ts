@@ -15,6 +15,7 @@ import type { AlarmScheduler } from './alarm';
 import { nextFireInstant, upcomingFireInstants, displayInZone, currentZone } from './schedule';
 import { labelForZone } from './zones';
 import { notificationSoundName } from './alarmSounds';
+import { logError } from './log';
 import * as AlarmKit from '../../modules/moondial-alarmkit';
 
 // Rolling window: how many future occurrences of each alarm to pre-schedule, and
@@ -48,8 +49,9 @@ class IOSScheduler implements AlarmScheduler {
         const state = await AlarmKit.requestAuthorization();
         if (state === 'authorized') return true;
       }
-    } catch {
+    } catch (e) {
       // fall through to notifications
+      logError(e, { tag: 'scheduler', extra: { at: 'requestPermission:alarmkit' } });
     }
     const { status: existing } = await Notifications.getPermissionsAsync();
     if (existing === 'granted') return true;
@@ -67,8 +69,9 @@ class IOSScheduler implements AlarmScheduler {
     const reconcileAlarmKit = async () => {
       try {
         await AlarmKit.cancelAll();
-      } catch {
-        // ignore
+      } catch (e) {
+        // Non-fatal: stale alarms may linger, but the reschedule below still runs.
+        logError(e, { tag: 'scheduler', extra: { at: 'reconcile:cancelAll' } });
       }
       const now = DateTime.now();
       let total = 0;
@@ -85,8 +88,13 @@ class IOSScheduler implements AlarmScheduler {
               notificationSoundName(alarm.sound)
             );
             total += 1;
-          } catch {
-            // one failure shouldn't stop the rest
+          } catch (e) {
+            // One failure shouldn't stop the rest - but a silently dropped alarm
+            // means it won't ring, so record which one and when.
+            logError(e, {
+              tag: 'scheduler',
+              extra: { at: 'scheduleFixed', alarmId: alarm.id, fireEpoch: Math.round(instant.toSeconds()) },
+            });
           }
         }
       }
@@ -125,8 +133,9 @@ class IOSScheduler implements AlarmScheduler {
           if (state === 'notDetermined') state = await AlarmKit.requestAuthorization();
           useAK = state === 'authorized';
         }
-      } catch {
+      } catch (e) {
         useAK = false;
+        logError(e, { tag: 'scheduler', extra: { at: 'init:authCheck' } });
       }
       if (stopped) return;
       this.usingAlarmKit = useAK;
@@ -135,8 +144,8 @@ class IOSScheduler implements AlarmScheduler {
         // Don't double up with notifications.
         try {
           await Notifications.cancelAllScheduledNotificationsAsync();
-        } catch {
-          // ignore
+        } catch (e) {
+          logError(e, { tag: 'scheduler', extra: { at: 'init:cancelNotifications' } });
         }
       }
 

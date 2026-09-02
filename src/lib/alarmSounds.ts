@@ -10,6 +10,7 @@
 import { requireOptionalNativeModule } from 'expo';
 import type { AudioPlayer } from 'expo-audio';
 import type { AlarmSound } from '../types';
+import { logError } from './log';
 
 const HAS_AUDIO = requireOptionalNativeModule('ExpoAudio') != null;
 
@@ -131,7 +132,7 @@ export function previewSound(sound: AlarmSound): void {
       });
     }
   } catch (e) {
-    console.warn('Failed to preview sound:', e);
+    logError(e, { tag: 'alarmSounds', extra: { at: 'preview' } });
   }
 }
 

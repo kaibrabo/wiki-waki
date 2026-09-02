@@ -9,10 +9,11 @@ import { useEffectiveTheme } from './src/hooks/useEffectiveTheme';
 import { useWidgetSync } from './src/hooks/useWidgetSync';
 import { LocationsScreen } from './src/screens/LocationsScreen';
 import { LocationDetailScreen } from './src/screens/LocationDetailScreen';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 type Route = { name: 'locations' } | { name: 'detail'; id: string };
 
-export default function App() {
+function AppInner() {
   const [route, setRoute] = useState<Route>({ name: 'locations' });
   const hasHydrated = useStore((s) => s.hasHydrated);
   const theme = useEffectiveTheme();
@@ -69,5 +70,13 @@ export default function App() {
         </Theme>
       </TamaguiProvider>
     </SafeAreaProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <AppInner />
+    </ErrorBoundary>
   );
 }

@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { setWidgetData, reloadAllTimelines } from '../../modules/moondial-widget';
+import { logError } from './log';
 
 // Type definitions for widget data. These mirror the Codable structs in
 // ios/MoondialWidgetExtension/MoondialWidget.swift — keep the two in sync.
@@ -50,7 +51,7 @@ export function updateWidget(data: WidgetData): void {
     setWidgetData(JSON.stringify(data));
     reloadAllTimelines();
   } catch (error) {
-    console.warn('Failed to update widget:', error);
+    logError(error, { tag: 'widget', extra: { at: 'updateWidget' } });
   }
 }
 
@@ -60,6 +61,6 @@ export function reloadWidgets(): void {
   try {
     reloadAllTimelines();
   } catch (error) {
-    console.warn('Failed to reload widgets:', error);
+    logError(error, { tag: 'widget', extra: { at: 'reloadWidgets' } });
   }
 }

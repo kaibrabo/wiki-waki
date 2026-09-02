@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
 import { DateTime } from 'luxon';
 import { useStore } from '../store';
+import { logError } from '../lib/log';
 
 type GeoInfo = {
   city?: string;
@@ -93,6 +94,7 @@ export function useGeolocation(): {
           });
         }
       } catch (e) {
+        logError(e, { tag: 'geolocation' });
         if (mounted) {
           setError('Failed to get location');
           setLoading(false);
