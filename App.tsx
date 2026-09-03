@@ -48,7 +48,7 @@ function AppInner() {
               {!hasHydrated ? (
                 <YStack flex={1} items="center" justify="center">
                   <Text color="$color10" fontSize={22}>
-                    Moondial
+                    Waimea
                   </Text>
                 </YStack>
               ) : (
