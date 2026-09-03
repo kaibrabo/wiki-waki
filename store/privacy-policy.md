@@ -51,7 +51,7 @@ We may update this policy from time to time. When we do, we will revise the effe
 
 If you have questions about this policy or the app's privacy practices, contact:
 
-kaibrabo@gmail.com
+brabo.kainoa@gmail.com
 
 ---
 

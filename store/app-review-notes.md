@@ -32,4 +32,4 @@ PRIVACY
 - Location and the city name derived from it are used only on the device to determine the time zone, and are shared only directly between the user's own iPhone and paired Apple Watch.
 - Privacy policy: https://kainoabrabo.com/waimea/privacy/
 
-Questions during review: kaibrabo@gmail.com
+Questions during review: brabo.kainoa@gmail.com

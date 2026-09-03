@@ -72,7 +72,7 @@ Welcome to Waimea. Set alarms that stay anchored to the time zone you meant, dra
 
 - Primary category: Utilities (alternate: Productivity)
 - Age rating: 4+ (no objectionable content)
-- Support URL: https://kainoabrabo.com/waimea/support/ (or mailto:kaibrabo@gmail.com)
+- Support URL: https://kainoabrabo.com/waimea/support/ (or mailto:brabo.kainoa@gmail.com)
 - Marketing URL: https://kainoabrabo.com/waimea/ (optional)
 - Privacy Policy URL: https://kainoabrabo.com/waimea/privacy/ (host store/privacy-policy.html here)
 - App Privacy questionnaire: Data Not Collected. Location is used on-device
