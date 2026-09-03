@@ -251,6 +251,14 @@ export function AlarmEditor({
     setCustomLabelText('');
   };
 
+  // Show the current label as a temporary selected chip when it isn't one of the
+  // saved options - covers a just-added custom label and an existing alarm whose
+  // label is custom. This chip lives only in `label` state; it is never persisted
+  // to labelOptions, so it disappears once a different label is chosen.
+  const labelChips = label && !labelOptions.includes(label)
+    ? [...labelOptions, label]
+    : labelOptions;
+
   return (
     <Modal 
       visible={visible} 
@@ -332,7 +340,7 @@ export function AlarmEditor({
               {/* Label Picker */}
               <Field label={t.label} onPress={closeKeypad}>
                 <XStack flexWrap="wrap" gap="$2" accessibilityRole="radiogroup">
-                  {labelOptions.map((opt) => (
+                  {labelChips.map((opt) => (
                     <Button
                       key={opt}
                       size="$3"
@@ -737,7 +745,15 @@ function TimeInput({
                     else handleKeyPress(String(key));
                   }}
                 >
-                  <Text fontSize={24} fontWeight="500" color={key === '✕' ? '$red10' : '$color12'}>
+                  <Text
+                    fontSize={24}
+                    fontWeight="500"
+                    color={key === '✕' ? '$red10' : '$color12'}
+                    flex={1}
+                    text="center"
+                    lineHeight={50}
+                    fontVariant={['tabular-nums']}
+                  >
                     {key}
                   </Text>
                 </XStack>
