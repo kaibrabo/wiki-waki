@@ -228,3 +228,26 @@ export function allUpcomingAlarms(
   }
   return upcoming.sort((a, b) => a.instant.toMillis() - b.instant.toMillis());
 }
+
+/**
+ * A merged, time-sorted list of upcoming *occurrences* across all enabled alarms
+ * - unlike allUpcomingAlarms (one entry per alarm), this includes several future
+ * occurrences of each alarm. It powers the widget queue so that as alarms fire,
+ * the queue refills from later occurrences (including tomorrow's recurrences)
+ * instead of shrinking. `perAlarm` bounds how many occurrences of each alarm to
+ * consider before merging.
+ */
+export function allUpcomingOccurrences(
+  alarms: Alarm[],
+  now: DateTime = DateTime.now(),
+  perAlarm = 5,
+): { alarm: Alarm; instant: DateTime }[] {
+  const out: { alarm: Alarm; instant: DateTime }[] = [];
+  for (const alarm of alarms) {
+    if (!alarm.enabled) continue;
+    for (const instant of upcomingFireInstants(alarm, now, perAlarm)) {
+      out.push({ alarm, instant });
+    }
+  }
+  return out.sort((a, b) => a.instant.toMillis() - b.instant.toMillis());
+}

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { DateTime } from 'luxon';
 import { useStore } from '../store';
 import { updateWidget, WidgetData, WidgetAlarmData, WidgetLocationData } from '../lib/widget';
-import { allUpcomingAlarms } from '../lib/schedule';
+import { allUpcomingOccurrences } from '../lib/schedule';
 import { codeForLocation } from '../lib/zones';
 import { getTranslations } from '../lib/i18n';
 import { useEffectiveTheme } from './useEffectiveTheme';
@@ -19,13 +19,16 @@ function getUpcomingAlarms(
   locations: Location[],
   use24Hour: boolean,
   now: DateTime,
-  count = 3,
+  count = 8,
 ): WidgetAlarmData[] {
   const enabledLocationIds = new Set(locations.filter((l) => !l.disabled).map((l) => l.id));
   const activeAlarms = alarms.filter((a) => a.enabled && enabledLocationIds.has(a.locationId));
   const timeFormat = use24Hour ? 'HH:mm' : 'h:mm a';
 
-  return allUpcomingAlarms(activeAlarms, now)
+  // Send a deeper queue than the widget shows (it displays 3): as alarms fire,
+  // the widget's futureOnly filter drops past ones and the next occurrences keep
+  // the queue at 3 instead of shrinking.
+  return allUpcomingOccurrences(activeAlarms, now)
     .slice(0, count)
     .map(({ alarm, instant }) => {
       const location = locations.find((l) => l.id === alarm.locationId);
@@ -89,7 +92,7 @@ export function useWidgetSync() {
           ? currentLoc.name.split(',')[0]
           : (activeZone.split('/').pop() || activeZone).replace(/_/g, ' '));
 
-      const upcomingAlarms = getUpcomingAlarms(alarms, locations, use24Hour, now, 3);
+      const upcomingAlarms = getUpcomingAlarms(alarms, locations, use24Hour, now);
 
       const currentDate = now.toFormat(dateFormat === 'DMY' ? 'dd/MM/yyyy' : 'MM/dd/yyyy');
       const t = getTranslations(language);
