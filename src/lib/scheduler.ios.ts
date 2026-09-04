@@ -12,11 +12,38 @@ import * as Notifications from 'expo-notifications';
 import { DateTime } from 'luxon';
 import type { Alarm } from '../types';
 import type { AlarmScheduler } from './alarm';
-import { nextFireInstant, upcomingFireInstants, displayInZone, currentZone } from './schedule';
-import { labelForZone } from './zones';
+import { nextFireInstant, upcomingFireInstants } from './schedule';
+import { codeForLocation, formatLocationName } from './zones';
 import { notificationSoundName } from './alarmSounds';
 import { logError } from './log';
+import { useStore } from '../store';
 import * as AlarmKit from '../../modules/moondial-alarmkit';
+
+/**
+ * The single-line text shown when an alarm fires - the SAME string on the
+ * AlarmKit full-screen alert, the notification banner, and the lock screen.
+ * Format: "Work (SFO) 9/4/26" (label, location code, date in the pinned zone).
+ *
+ * Wrapped in try/catch and returning a plain string so it can NEVER throw into
+ * the scheduler - a failure here just falls back to the bare label, and alarms
+ * keep scheduling.
+ */
+function alarmText(alarm: Alarm, instant: DateTime): string {
+  try {
+    const loc = useStore.getState().locations.find((l) => l.id === alarm.locationId);
+    const code = loc ? codeForLocation(loc.name, loc.ianaZone) : null;
+    const locPart = code
+      ? `(${code})`
+      : loc
+        ? formatLocationName(loc.name, loc.ianaZone)
+        : '';
+    const dateStr = instant.setZone(alarm.pinnedZone).toFormat('M/d/yy'); // "9/4/26"
+    const text = [alarm.label.trim(), locPart, dateStr].filter(Boolean).join(' ');
+    return text || alarm.label;
+  } catch {
+    return alarm.label;
+  }
+}
 
 // Rolling window: how many future occurrences of each alarm to pre-schedule, and
 // a safety cap on the total (AlarmKit is a finite system resource).
@@ -92,7 +119,7 @@ class IOSScheduler implements AlarmScheduler {
             await AlarmKit.scheduleFixed(
               `${alarm.id}#${instant.toMillis()}`,
               Math.round(instant.toSeconds()),
-              alarm.label,
+              alarmText(alarm, instant),
               notificationSoundName(alarm.sound)
             );
             total += 1;
@@ -116,14 +143,11 @@ class IOSScheduler implements AlarmScheduler {
         if (!alarm.enabled) continue;
         const instant = nextFireInstant(alarm, now);
         if (!instant) continue;
-        const local = displayInZone(instant, currentZone());
-        const pinned = `${labelForZone(alarm.pinnedZone)} ${alarm.time}`;
         const trigger = instant.toJSDate();
         if (trigger > new Date()) {
           await Notifications.scheduleNotificationAsync({
             content: {
-              title: alarm.label,
-              body: `${local} here (${pinned})`,
+              title: alarmText(alarm, instant),
               sound: notificationSoundName(alarm.sound),
               data: { alarmId: alarm.id },
             },
