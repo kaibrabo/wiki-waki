@@ -32,6 +32,9 @@ class WebReminders implements AlarmScheduler {
     return Notification.permission as 'granted' | 'denied' | 'default';
   }
 
+  // Web polls live each tick, so there's nothing to reschedule on demand.
+  reschedule(): void {}
+
   async requestPermission(): Promise<boolean> {
     if (!hasNotif) return false;
     if (Notification.permission === 'granted') return true;

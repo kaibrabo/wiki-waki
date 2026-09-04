@@ -16,6 +16,8 @@ type Route = { name: 'locations' } | { name: 'detail'; id: string };
 function AppInner() {
   const [route, setRoute] = useState<Route>({ name: 'locations' });
   const hasHydrated = useStore((s) => s.hasHydrated);
+  const alarms = useStore((s) => s.alarms);
+  const locations = useStore((s) => s.locations);
   const theme = useEffectiveTheme();
 
   // Sync widget data whenever alarms or locations change
@@ -38,6 +40,14 @@ function AppInner() {
     });
     return stop;
   }, []);
+
+  // Reschedule immediately when alarms or locations change so an alarm set to
+  // fire within the next minute isn't missed while waiting for the periodic
+  // reconcile tick. Runs once on mount too (harmless - the scheduler's own init
+  // already reconciled).
+  useEffect(() => {
+    scheduler.reschedule();
+  }, [alarms, locations]);
 
   return (
     <SafeAreaProvider>

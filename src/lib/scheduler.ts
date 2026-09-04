@@ -18,6 +18,7 @@ class NoopScheduler implements AlarmScheduler {
   start() {
     return () => {};
   }
+  reschedule() {}
 }
 
 export const scheduler: AlarmScheduler = new NoopScheduler();

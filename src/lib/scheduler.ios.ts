@@ -37,9 +37,17 @@ class IOSScheduler implements AlarmScheduler {
   readonly canRingLoud = true;
   private stopFn: (() => void) | null = null;
   private usingAlarmKit = false;
+  // The active reconcile fn (AlarmKit or notifications), set once init() picks a
+  // path. reschedule() calls this so a just-added alarm is handed to the OS
+  // immediately instead of waiting up to RECONCILE_MS for the next tick.
+  private reconcileNow: (() => void) | null = null;
 
   permission(): 'granted' | 'denied' | 'default' | 'unsupported' {
     return 'default';
+  }
+
+  reschedule(): void {
+    this.reconcileNow?.();
   }
 
   async requestPermission(): Promise<boolean> {
@@ -150,6 +158,9 @@ class IOSScheduler implements AlarmScheduler {
       }
 
       const reconcile = useAK ? reconcileAlarmKit : reconcileNotifications;
+      this.reconcileNow = () => {
+        void reconcile();
+      };
       await reconcile();
       if (!stopped) interval = setInterval(reconcile, RECONCILE_MS);
     };
@@ -158,6 +169,7 @@ class IOSScheduler implements AlarmScheduler {
 
     this.stopFn = () => {
       stopped = true;
+      this.reconcileNow = null;
       if (interval) clearInterval(interval);
       if (this.usingAlarmKit) {
         AlarmKit.cancelAll().catch(() => {});

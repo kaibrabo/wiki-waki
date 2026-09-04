@@ -14,9 +14,11 @@ module.exports = function (api) {
         },
       ],
       // Dev-only call tracer. Injects a __DEV__/__TRACE__-guarded console.log at
-      // the top of every function in src/; compiled out of production. Toggle via
-      // setTrace() in src/lib/trace.ts.
-      './babel-plugin-trace-calls.js',
+      // the top of every function in src/. DISABLED: it mis-transforms some
+      // functions (arrow bodies / object returns), producing broken code that
+      // failed the dev bundle and is suspected of corrupting the Release build
+      // (alarms stopped scheduling). Re-enable only after fixing the plugin.
+      // './babel-plugin-trace-calls.js',
     ],
   };
 };

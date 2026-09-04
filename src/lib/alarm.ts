@@ -13,4 +13,10 @@ export interface AlarmScheduler {
   permission(): 'granted' | 'denied' | 'default' | 'unsupported';
   /** Start delivering reminders for the given alarms; returns a stop fn. */
   start(getAlarms: () => Alarm[]): () => void;
+  /**
+   * Reschedule right now instead of waiting for the next periodic reconcile.
+   * Call after alarms change so an alarm due within the next minute isn't
+   * missed. No-op if the scheduler hasn't started.
+   */
+  reschedule(): void;
 }

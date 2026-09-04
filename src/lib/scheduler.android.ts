@@ -23,10 +23,15 @@ Notifications.setNotificationHandler({
 class AndroidScheduler implements AlarmScheduler {
   readonly canRingLoud = true;
   private stopFn: (() => void) | null = null;
+  private reconcileNow: (() => void) | null = null;
 
   permission(): 'granted' | 'denied' | 'default' | 'unsupported' {
     // We check this synchronously from cached state; actual check is async
     return 'default';
+  }
+
+  reschedule(): void {
+    this.reconcileNow?.();
   }
 
   async requestPermission(): Promise<boolean> {
@@ -78,15 +83,20 @@ class AndroidScheduler implements AlarmScheduler {
       }
     };
     
+    this.reconcileNow = () => {
+      void scheduleAlarms();
+    };
+
     // Initial schedule
     scheduleAlarms();
-    
+
     // Re-schedule every minute to handle recurring alarms
     const interval = setInterval(() => {
       scheduleAlarms();
     }, 60000);
-    
+
     this.stopFn = () => {
+      this.reconcileNow = null;
       clearInterval(interval);
       Notifications.cancelAllScheduledNotificationsAsync();
     };
