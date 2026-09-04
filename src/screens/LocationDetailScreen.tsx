@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
-import { ScrollView, YStack, XStack, Text, Card, Button } from 'tamagui';
+import { Alert, ScrollView } from 'react-native';
+import { YStack, XStack, Text, Card, Button } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import { useNow } from '../hooks/useNow';
@@ -59,6 +59,29 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
   const displayName = formatLocationName(location.name, location.ianaZone);
   const timeFormat = use24Hour ? 'HH:mm' : 'h:mm';
 
+  // Reliable per-zone UTC offset, e.g. "GMT-7" / "GMT+5:30".
+  const offMin = local.offset;
+  const offAbs = Math.abs(offMin);
+  const gmtLabel = `GMT${offMin >= 0 ? '+' : '-'}${Math.floor(offAbs / 60)}${
+    offAbs % 60 ? ':' + String(offAbs % 60).padStart(2, '0') : ''
+  }`;
+
+  // Zone abbreviation (HST, PST/PDT) via Intl - honors daylight saving. iOS backs
+  // Intl with Apple's data so this resolves real names; if the platform returns
+  // an offset-style name ("GMT-7", "UTC") we drop it and show just the offset.
+  let tzAbbr = '';
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: location.ianaZone,
+      timeZoneName: 'short',
+    }).formatToParts(local.toJSDate());
+    const name = parts.find((p) => p.type === 'timeZoneName')?.value ?? '';
+    if (name && !/^(GMT|UTC)/i.test(name)) tzAbbr = name;
+  } catch {
+    // Intl unavailable for this zone - fall back to the offset alone.
+  }
+  const tzLabel = tzAbbr ? `${tzAbbr} (${gmtLabel})` : gmtLabel;
+
   return (
     <YStack flex={1}>
       <TopBar
@@ -83,11 +106,11 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
       />
 
       <ScrollView>
-        <YStack px="$4" pb={40}>
-        <XStack 
-          items="flex-end" 
-          justify="center" 
-          mt="$4" 
+        <YStack px="$4" pb={40} width="100%">
+        <XStack
+          width="100%"
+          style={{ alignItems: 'flex-end', justifyContent: 'center' }}
+          mt="$4"
           gap="$2"
           accessible={true}
           accessibilityLabel={`Current time: ${local.toFormat(use24Hour ? 'HH:mm' : 'h:mm a')}`}
@@ -101,17 +124,18 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             </Text>
           )}
         </XStack>
-        <Text 
-          color="$color10" 
-          fontSize={14} 
-          lineHeight={20} 
-          text="center" 
-          mt="$2" 
+        <Text
+          width="100%"
+          color="$color10"
+          fontSize={14}
+          lineHeight={20}
+          style={{ textAlign: 'center' }}
+          mt="$2"
           mb="$6"
           accessible={true}
-          accessibilityLabel={`${localizedDate.toFormat('cccc, LLLL d')}, timezone ${local.toFormat('ZZZZ')}`}
+          accessibilityLabel={`${localizedDate.toFormat('cccc, LLLL d')}, timezone ${tzLabel}`}
         >
-          {localizedDate.toFormat('cccc, LLLL d')} - {local.toFormat('ZZZZ')}
+          {localizedDate.toFormat('cccc, LLLL d')} - {tzLabel}
         </Text>
 
         <XStack gap="$3" mb="$6">
@@ -198,11 +222,12 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
         </Text>
 
         {owned.length === 0 && (
-          <Text 
-            color="$color10" 
-            fontSize={14} 
-            py="$5" 
-            text="center"
+          <Text
+            width="100%"
+            color="$color10"
+            fontSize={14}
+            py="$5"
+            style={{ textAlign: 'center' }}
             onPress={openNew}
             accessible={true}
             accessibilityRole="button"
