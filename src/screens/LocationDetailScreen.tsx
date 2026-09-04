@@ -109,7 +109,8 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
         <YStack px="$4" pb={40} width="100%">
         <XStack
           width="100%"
-          style={{ alignItems: 'flex-end', justifyContent: 'center' }}
+          items="flex-end"
+          justify="center"
           mt="$4"
           gap="$2"
           accessible={true}
@@ -129,7 +130,7 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
           color="$color10"
           fontSize={14}
           lineHeight={20}
-          style={{ textAlign: 'center' }}
+          text="center"
           mt="$2"
           mb="$6"
           accessible={true}
@@ -227,7 +228,7 @@ export function LocationDetailScreen({ id, onBack }: { id: string; onBack: () =>
             color="$color10"
             fontSize={14}
             py="$5"
-            style={{ textAlign: 'center' }}
+            text="center"
             onPress={openNew}
             accessible={true}
             accessibilityRole="button"

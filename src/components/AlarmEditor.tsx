@@ -734,7 +734,7 @@ function TimeInput({
       {showKeypad && (
         <YStack gap="$2" mt="$2">
           {[[1, 2, 3], [4, 5, 6], [7, 8, 9], ['✕', 0, '⌫']].map((row, i) => (
-            <XStack key={i} gap="$2" style={{ justifyContent: 'center' }}>
+            <XStack key={i} gap="$2" justify="center">
               {row.map((key, j) => (
                 <XStack
                   key={`${i}-${j}`}
@@ -742,7 +742,8 @@ function TimeInput({
                   height={50}
                   rounded="$4"
                   bg="$color3"
-                  style={{ alignItems: 'center', justifyContent: 'center' }}
+                  items="center"
+                  justify="center"
                   pressStyle={{ bg: '$color5' }}
                   onPress={() => {
                     if (key === '⌫') handleKeyPress('backspace');
@@ -757,7 +758,7 @@ function TimeInput({
                     flex={1}
                     lineHeight={50}
                     fontVariant={['tabular-nums']}
-                    style={{ textAlign: 'center' }}
+                    text="center"
                   >
                     {key}
                   </Text>
