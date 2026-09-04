@@ -136,8 +136,15 @@ export function AlarmEditor({
       setEnabled(editing.enabled);
       setSound(coerceSound(editing.sound));
     } else {
-      // Use last saved settings for new alarms
-      setLabel(lastAlarmSettings.label);
+      // Use last saved settings for new alarms - but only carry over the label
+      // when it's a saved preset. A one-off custom label (e.g. "test", meant for
+      // a single alarm) must not become the default; fall back to the first
+      // preset ("Wake").
+      setLabel(
+        labelOptions.includes(lastAlarmSettings.label)
+          ? lastAlarmSettings.label
+          : labelOptions[0] ?? 'Wake',
+      );
       setTimeValue(lastAlarmSettings.time);
       setRecType(lastAlarmSettings.recType as RecType);
       setSelectedDays(lastAlarmSettings.selectedDays);
@@ -153,7 +160,7 @@ export function AlarmEditor({
     setAddingCustomLabel(false);
     setCustomLabelText('');
     setShowDatePicker(false);
-  }, [visible, editing, lastAlarmSettings]);
+  }, [visible, editing, lastAlarmSettings, labelOptions]);
 
   const save = () => {
     // Validate the time. A valid 24h time (00:00-23:59) also covers the 12h
@@ -205,9 +212,11 @@ export function AlarmEditor({
       recurrence = { type: recType };
     }
     
-    // Save settings for next alarm
+    // Save settings for next alarm. Only remember the label when it's a saved
+    // preset - a one-off custom label shouldn't become the default; keep the
+    // previous preset instead.
     setLastAlarmSettings({
-      label: label.trim(),
+      label: labelOptions.includes(label.trim()) ? label.trim() : lastAlarmSettings.label,
       time: timeValue,
       recType,
       selectedDays,
