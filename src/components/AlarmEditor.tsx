@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Modal, Alert, TextInput } from 'react-native';
+import { DateTime } from 'luxon';
 import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../store';
@@ -192,9 +193,14 @@ export function AlarmEditor({
         recurrence = { type: 'weekly', days: selectedDays };
       }
     } else if (recType === 'none') {
-      // "None" = once with today's date, effectively a one-time alarm
-      const today = new Date().toISOString().split('T')[0];
-      recurrence = { type: 'once', date: today };
+      // "None" = a one-time alarm that fires at the next occurrence of this time
+      // in the alarm's zone. If today's time has already passed (e.g. a 00:00
+      // midnight alarm set during the day), roll to tomorrow so it still fires.
+      const [hh, mm] = timeValue.split(':').map((s) => parseInt(s, 10));
+      const nowZ = DateTime.now().setZone(zone);
+      let target = nowZ.set({ hour: hh, minute: mm, second: 0, millisecond: 0 });
+      if (target <= nowZ) target = target.plus({ days: 1 });
+      recurrence = { type: 'once', date: target.toFormat('yyyy-MM-dd') };
     } else {
       recurrence = { type: recType };
     }
@@ -728,7 +734,7 @@ function TimeInput({
       {showKeypad && (
         <YStack gap="$2" mt="$2">
           {[[1, 2, 3], [4, 5, 6], [7, 8, 9], ['✕', 0, '⌫']].map((row, i) => (
-            <XStack key={i} gap="$2" justify="center">
+            <XStack key={i} gap="$2" style={{ justifyContent: 'center' }}>
               {row.map((key, j) => (
                 <XStack
                   key={`${i}-${j}`}
@@ -736,8 +742,7 @@ function TimeInput({
                   height={50}
                   rounded="$4"
                   bg="$color3"
-                  items="center"
-                  justify="center"
+                  style={{ alignItems: 'center', justifyContent: 'center' }}
                   pressStyle={{ bg: '$color5' }}
                   onPress={() => {
                     if (key === '⌫') handleKeyPress('backspace');
@@ -750,9 +755,9 @@ function TimeInput({
                     fontWeight="500"
                     color={key === '✕' ? '$red10' : '$color12'}
                     flex={1}
-                    text="center"
                     lineHeight={50}
                     fontVariant={['tabular-nums']}
+                    style={{ textAlign: 'center' }}
                   >
                     {key}
                   </Text>
