@@ -82,7 +82,7 @@ export function Paywall({ visible, offer, onClose, onPurchased }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
+      <YStack flex={1} bg="rgba(0,0,0,0.25)" justify="flex-end">
         <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" pb="$6" height="88%">
           <XStack justify="flex-end" px="$4">
             <Button size="$2" circular chromeless onPress={onClose} accessibilityLabel="Close">

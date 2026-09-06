@@ -29,7 +29,7 @@ export function AddLocationModal({ visible, onClose }: { visible: boolean; onClo
       onRequestClose={onClose}
       accessibilityViewIsModal={true}
     >
-      <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
+      <YStack flex={1} bg="rgba(0,0,0,0.25)" justify="flex-end">
         <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" height="85%">
           <XStack items="center" justify="space-between" px="$4" pb="$3">
             <Text fontSize={20} fontWeight="800" color="$color12" accessibilityRole="header">
@@ -62,7 +62,7 @@ export function AddLocationModal({ visible, onClose }: { visible: boolean; onClo
             accessibilityHint="Type a city name, zip code, or airport code to find locations"
           />
 
-          <ScrollView flex={1} keyboardShouldPersistTaps="handled">
+          <ScrollView flex={1} keyboardShouldPersistTaps="always">
             {options.map((z) => {
               const timeStr = now.setZone(z.zone).toFormat(use24Hour ? 'HH:mm' : 'h:mm a');
               const codesStr = z.codes?.join(', ') || '';
