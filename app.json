@@ -17,12 +17,7 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Waimea uses your location to detect your current timezone for setting alarms.",
-        "NSAlarmKitUsageDescription": "Waimea schedules alarms so they ring at the right time, wherever you are.",
-        "UIBackgroundModes": [
-          "audio",
-          "fetch",
-          "remote-notification"
-        ]
+        "NSAlarmKitUsageDescription": "Waimea schedules alarms so they ring at the right time, wherever you are."
       },
       "config": {
         "usesNonExemptEncryption": false
