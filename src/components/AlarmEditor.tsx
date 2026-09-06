@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Modal, Alert, TextInput } from 'react-native';
+import { Modal, Alert, TextInput, Keyboard } from 'react-native';
 import { DateTime } from 'luxon';
 import { ScrollView, YStack, XStack, Text, Input, Button, Card } from 'tamagui';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -63,7 +63,6 @@ export function AlarmEditor({
   const [error, setError] = useState<string | null>(null);
   const [addingCustomLabel, setAddingCustomLabel] = useState(false);
   const [customLabelText, setCustomLabelText] = useState('');
-  const [showKeypad, setShowKeypad] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [timeError, setTimeError] = useState(false);
   const customLabelRef = useRef<TextInput>(null);
@@ -76,17 +75,12 @@ export function AlarmEditor({
   }, [addingCustomLabel]);
   const [sound, setSound] = useState<AlarmSound>(DEFAULT_SOUND);
 
+  // Dismiss the numeric keyboard when the user interacts with other fields or
+  // scrolls. The time fields keep the value normalized to HH:mm on every edit,
+  // so there's nothing to clean up here. (Named closeKeypad for its call sites.)
   const closeKeypad = useCallback(() => {
-    if (showKeypad) {
-      // Normalize to 2-digit HH:mm (no clamping — an out-of-range value is
-      // caught on save with a warning so the user can adjust it).
-      const [h, m] = timeValue.split(':').map(s => parseInt(s, 10));
-      const hh = isNaN(h) ? 0 : h;
-      const mm = isNaN(m) ? 0 : m;
-      setTimeValue(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`);
-      setShowKeypad(false);
-    }
-  }, [showKeypad, timeValue]);
+    Keyboard.dismiss();
+  }, []);
 
   // Pick a sound and immediately preview it.
   const selectSound = useCallback((next: AlarmSound) => {
@@ -170,7 +164,6 @@ export function AlarmEditor({
       !isNaN(hh) && !isNaN(mm) && hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
     if (!timeValid) {
       setTimeError(true);
-      setShowKeypad(true);
       Alert.alert(
         'Invalid time',
         use24Hour
@@ -282,7 +275,7 @@ export function AlarmEditor({
       onRequestClose={onClose}
       accessibilityViewIsModal={true}
     >
-      <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
+      <YStack flex={1} bg="rgba(0,0,0,0.25)" justify="flex-end">
         <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" height="92%">
           <XStack items="center" justify="space-between" px="$4" pb="$3" borderBottomWidth={1} borderColor="$borderColor">
             <Button 
@@ -346,10 +339,7 @@ export function AlarmEditor({
                 value={timeValue}
                 onChange={(v) => { setTimeError(false); setTimeValue(v); }}
                 use24Hour={use24Hour}
-                showKeypad={showKeypad}
                 error={timeError}
-                onShowKeypad={() => { setTimeError(false); setShowKeypad(true); }}
-                onCloseKeypad={closeKeypad}
               />
 
               {/* Label Picker */}
@@ -643,140 +633,139 @@ function Field({ label, children, onPress }: { label: string; children: React.Re
   );
 }
 
+/**
+ * Material 3 "time input" variant: two number fields (hour, minute) separated by
+ * a colon, with an AM/PM toggle in 12-hour mode. Uses the system numeric keyboard
+ * (no custom keypad). The stored value is always 24h "HH:mm"; the fields display
+ * 24h or 12h per `use24Hour`, and every edit re-normalizes the value.
+ */
 function TimeInput({
   value,
   onChange,
   use24Hour,
-  showKeypad,
   error,
-  onShowKeypad,
-  onCloseKeypad,
 }: {
   value: string;
   onChange: (v: string) => void;
   use24Hour: boolean;
-  showKeypad: boolean;
   error?: boolean;
-  onShowKeypad: () => void;
-  onCloseKeypad: () => void;
 }) {
-  // Parse current value into digits (4 digits: HHMM)
   const [h1, h2, m1, m2] = value.replace(':', '').padStart(4, '0').split('');
-  const digits = [h1, h2, m1, m2];
-  
-  // Convert to 12-hour display if needed
-  const hours24 = parseInt(h1 + h2, 10);
-  const isPM = hours24 >= 12;
-  const hours12 = hours24 % 12 || 12;
-  const displayHours = use24Hour ? (h1 + h2) : String(hours12).padStart(2, '0');
-  
-  const handleKeyPress = (key: string) => {
-    if (key === 'backspace') {
-      // Shift digits right (clear leftmost)
-      const newDigits = ['0', digits[0], digits[1], digits[2]];
-      const newValue = `${newDigits[0]}${newDigits[1]}:${newDigits[2]}${newDigits[3]}`;
-      onChange(newValue);
-    } else if (/^[0-9]$/.test(key)) {
-      // Shift digits left and add new digit on right (no clamping during input)
-      const newDigits = [digits[1], digits[2], digits[3], key];
-      const newValue = `${newDigits[0]}${newDigits[1]}:${newDigits[2]}${newDigits[3]}`;
-      onChange(newValue);
+  const h24 = parseInt(`${h1}${h2}`, 10) || 0;
+  const minute = parseInt(`${m1}${m2}`, 10) || 0;
+  const isPM = h24 >= 12;
+  const hours12 = h24 % 12 || 12;
+  const hourText = use24Hour ? String(h24).padStart(2, '0') : String(hours12).padStart(2, '0');
+  const minuteText = String(minute).padStart(2, '0');
+
+  const commitHour = (raw: string) => {
+    const parsed = parseInt(raw.replace(/[^0-9]/g, ''), 10);
+    const n = isNaN(parsed) ? 0 : parsed;
+    if (use24Hour) {
+      const h = Math.max(0, Math.min(23, n));
+      onChange(`${String(h).padStart(2, '0')}:${minuteText}`);
+    } else {
+      const h12 = Math.max(1, Math.min(12, n || 12));
+      const h = (h12 % 12) + (isPM ? 12 : 0);
+      onChange(`${String(h).padStart(2, '0')}:${minuteText}`);
     }
   };
 
-  const toggleAMPM = () => {
-    let hh = parseInt(h1 + h2, 10);
-    if (hh < 12) {
-      hh += 12;
-    } else {
-      hh -= 12;
-    }
-    const newValue = `${String(hh).padStart(2, '0')}:${m1}${m2}`;
-    onChange(newValue);
+  const commitMinute = (raw: string) => {
+    const parsed = parseInt(raw.replace(/[^0-9]/g, ''), 10);
+    const mm = Math.max(0, Math.min(59, isNaN(parsed) ? 0 : parsed));
+    onChange(`${String(h24).padStart(2, '0')}:${String(mm).padStart(2, '0')}`);
+  };
+
+  const setMeridiem = (pm: boolean) => {
+    const h = (h24 % 12) + (pm ? 12 : 0);
+    onChange(`${String(h).padStart(2, '0')}:${minuteText}`);
   };
 
   return (
     <YStack items="center" gap="$3" px="$4" pt="$4">
-      {/* Time Display */}
-      <XStack items="center" gap="$2">
-        {/* Single fixed-size time container: HH : MM, colon centered between two
-            fixed-width digit groups so it never shifts as the numbers change. */}
-        <XStack
-          bg="$color2"
-          rounded="$4"
-          px="$4"
-          py="$3"
-          items="center"
-          borderWidth={error ? 2 : 1}
-          borderColor={error ? '$red9' : showKeypad ? '$blue8' : '$borderColor'}
-          pressStyle={{ bg: '$color3' }}
-          onPress={onShowKeypad}
-        >
-          <Text fontSize={48} fontWeight="200" color="$color12" width={64} text="center" fontVariant={['tabular-nums']}>
-            {displayHours}
-          </Text>
-          <Text fontSize={48} fontWeight="200" color="$color10" width={18} text="center">
-            :
-          </Text>
-          <Text fontSize={48} fontWeight="200" color="$color12" width={64} text="center" fontVariant={['tabular-nums']}>
-            {m1}{m2}
-          </Text>
-        </XStack>
-        {!use24Hour && (
-          <XStack
-            bg="$color3"
+      <XStack items="flex-start" justify="center" gap="$2">
+        {/* Hour field */}
+        <YStack items="center" gap="$1.5">
+          <Input
+            width={104}
+            height={80}
             rounded="$4"
-            px="$3"
-            py="$2"
-            ml="$2"
-            pressStyle={{ bg: '$color4' }}
-            onPress={toggleAMPM}
-          >
-            <Text fontSize={20} fontWeight="600" color="$color12">
-              {isPM ? 'PM' : 'AM'}
-            </Text>
-          </XStack>
-        )}
-      </XStack>
+            bg="$color2"
+            borderWidth={2}
+            borderColor={error ? '$red9' : '$borderColor'}
+            focusStyle={{ borderColor: error ? '$red9' : '$blue9', bg: '$blue3' }}
+            color={error ? '$red10' : '$color12'}
+            fontSize={40}
+            fontWeight="300"
+            text="center"
+            value={hourText}
+            onChangeText={commitHour}
+            keyboardType="number-pad"
+            selectTextOnFocus
+            returnKeyType="done"
+            accessibilityLabel="Hour"
+          />
+          <Text fontSize={12} color="$color10">Hour</Text>
+        </YStack>
 
-      {/* Numeric Keypad */}
-      {showKeypad && (
-        <YStack gap="$2" mt="$2">
-          {[[1, 2, 3], [4, 5, 6], [7, 8, 9], ['✕', 0, '⌫']].map((row, i) => (
-            <XStack key={i} gap="$2" justify="center">
-              {row.map((key, j) => (
+        {/* Colon */}
+        <YStack height={80} justify="center">
+          <Text fontSize={40} fontWeight="300" color="$color10">:</Text>
+        </YStack>
+
+        {/* Minute field */}
+        <YStack items="center" gap="$1.5">
+          <Input
+            width={104}
+            height={80}
+            rounded="$4"
+            bg="$color2"
+            borderWidth={2}
+            borderColor={error ? '$red9' : '$borderColor'}
+            focusStyle={{ borderColor: error ? '$red9' : '$blue9', bg: '$blue3' }}
+            color={error ? '$red10' : '$color12'}
+            fontSize={40}
+            fontWeight="300"
+            text="center"
+            value={minuteText}
+            onChangeText={commitMinute}
+            keyboardType="number-pad"
+            selectTextOnFocus
+            returnKeyType="done"
+            accessibilityLabel="Minute"
+          />
+          <Text fontSize={12} color="$color10">Minute</Text>
+        </YStack>
+
+        {/* AM/PM toggle (12-hour only) */}
+        {!use24Hour && (
+          <YStack height={80} ml="$2" rounded="$4" borderWidth={1} borderColor="$borderColor" overflow="hidden">
+            {[false, true].map((pm) => {
+              const active = pm ? isPM : !isPM;
+              return (
                 <XStack
-                  key={`${i}-${j}`}
-                  width={70}
-                  height={50}
-                  rounded="$4"
-                  bg="$color3"
+                  key={pm ? 'PM' : 'AM'}
+                  flex={1}
+                  width={52}
                   items="center"
                   justify="center"
-                  pressStyle={{ bg: '$color5' }}
-                  onPress={() => {
-                    if (key === '⌫') handleKeyPress('backspace');
-                    else if (key === '✕') onCloseKeypad();
-                    else handleKeyPress(String(key));
-                  }}
+                  bg={active ? '$blue9' : 'transparent'}
+                  pressStyle={{ bg: active ? '$blue10' : '$color3' }}
+                  onPress={() => setMeridiem(pm)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  accessibilityLabel={pm ? 'PM' : 'AM'}
                 >
-                  <Text
-                    fontSize={24}
-                    fontWeight="500"
-                    color={key === '✕' ? '$red10' : '$color12'}
-                    flex={1}
-                    lineHeight={50}
-                    fontVariant={['tabular-nums']}
-                    text="center"
-                  >
-                    {key}
+                  <Text fontSize={15} fontWeight="600" color={active ? 'white' : '$color12'}>
+                    {pm ? 'PM' : 'AM'}
                   </Text>
                 </XStack>
-              ))}
-            </XStack>
-          ))}
-        </YStack>
-      )}
+              );
+            })}
+          </YStack>
+        )}
+      </XStack>
     </YStack>
   );
 }
