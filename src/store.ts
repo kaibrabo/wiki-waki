@@ -7,7 +7,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Alarm, Location, Recurrence, AlarmSound } from './types';
 import type { Language } from './lib/i18n';
-import { shouldUse24Hour } from './lib/i18n';
+import { shouldUse24Hour, LANGUAGE_OPTIONS } from './lib/i18n';
 
 const OLD_STORE_KEY = 'anchor-store-v2';
 const NEW_STORE_KEY = 'moondial-store-v1';
@@ -51,6 +51,10 @@ export async function migrateFromAnchorStore(): Promise<void> {
 function uid(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
+
+// Monotonic id so the Toast re-shows even when the same message fires twice.
+let toastSeq = 0;
+const mkToast = (message: string) => ({ toast: { id: ++toastSeq, message } });
 
 const HOME_ZONE = 'America/Los_Angeles';
 
@@ -100,6 +104,11 @@ type State = {
   locations: Location[];
   alarms: Alarm[];
   labelOptions: string[];
+  // Transient confirmation toast (not persisted). `id` changes on each show.
+  toast: { id: number; message: string } | null;
+
+  showToast: (message: string) => void;
+  clearToast: () => void;
 
   setThemePref: (pref: ThemePref) => void;
   setUse24Hour: (use24: boolean) => void;
@@ -146,14 +155,29 @@ export const useStore = create<State>()(
       locations: SEED_LOCATIONS,
       alarms: SEED_ALARMS,
       labelOptions: DEFAULT_LABEL_OPTIONS,
+      toast: null,
 
-      setThemePref: (pref) => set({ themePref: pref }),
-      setUse24Hour: (use24) => set({ use24Hour: use24, use24HourManuallySet: true }),
-      setDateFormat: (format) => set({ dateFormat: format }),
+      showToast: (message) => set(mkToast(message)),
+      clearToast: () => set({ toast: null }),
+
+      setThemePref: (pref) =>
+        set({
+          themePref: pref,
+          ...mkToast(pref === 'dark' ? 'Dark mode on' : pref === 'light' ? 'Dark mode off' : 'Theme: system'),
+        }),
+      setUse24Hour: (use24) =>
+        set({
+          use24Hour: use24,
+          use24HourManuallySet: true,
+          ...mkToast(use24 ? '24-hour time on' : '24-hour time off'),
+        }),
+      setDateFormat: (format) =>
+        set({ dateFormat: format, ...mkToast(format === 'MDY' ? 'MM/DD' : 'DD/MM') }),
       setCurrentPlace: (place) => set({ currentPlace: place }),
-      setLanguage: (lang) => set((s) => ({ 
-        language: lang, 
-        use24Hour: s.use24HourManuallySet ? s.use24Hour : shouldUse24Hour(lang) 
+      setLanguage: (lang) => set((s) => ({
+        language: lang,
+        use24Hour: s.use24HourManuallySet ? s.use24Hour : shouldUse24Hour(lang),
+        ...mkToast(LANGUAGE_OPTIONS.find((l) => l.value === lang)?.nativeLabel ?? 'Language updated'),
       })),
       dismissNotificationPrompt: () => set({ notificationPromptDismissed: true }),
       setPro: (pro) => set({ isPro: pro }),
@@ -167,6 +191,7 @@ export const useStore = create<State>()(
           const order = s.locations.reduce((m, l) => Math.max(m, l.order), -1) + 1;
           return {
             locations: [...s.locations, { id: uid(), name, ianaZone, isHome: false, order }],
+            ...mkToast(`${name.split(',')[0]} added`),
           };
         }),
 
@@ -177,6 +202,7 @@ export const useStore = create<State>()(
           return {
             locations: s.locations.filter((l) => l.id !== id),
             alarms: s.alarms.filter((a) => a.locationId !== id), // drop its alarms too
+            ...mkToast(`${loc.name.split(',')[0]} removed`),
           };
         }),
 
@@ -191,28 +217,45 @@ export const useStore = create<State>()(
         })),
 
       toggleLocationDisabled: (id) =>
-        set((s) => ({
-          locations: s.locations.map((l) =>
-            l.id === id ? { ...l, disabled: !l.disabled } : l
-          ),
-        })),
+        set((s) => {
+          const loc = s.locations.find((l) => l.id === id);
+          const willDisable = loc ? !loc.disabled : false;
+          return {
+            locations: s.locations.map((l) =>
+              l.id === id ? { ...l, disabled: !l.disabled } : l
+            ),
+            ...mkToast(willDisable ? 'Location silenced' : 'Location enabled'),
+          };
+        }),
 
       toggleHome: (id) =>
         set((s) => ({
           locations: s.locations.map((l) =>
             l.id === id ? { ...l, isHome: !l.isHome } : l
           ),
+          ...mkToast('Home updated'),
         })),
 
-      addAlarm: (alarm) => set((s) => ({ alarms: [...s.alarms, { ...alarm, id: uid() }] })),
+      addAlarm: (alarm) =>
+        set((s) => ({ alarms: [...s.alarms, { ...alarm, id: uid() }], ...mkToast('Alarm set') })),
 
       updateAlarm: (id, patch) =>
-        set((s) => ({ alarms: s.alarms.map((a) => (a.id === id ? { ...a, ...patch } : a)) })),
+        set((s) => ({
+          alarms: s.alarms.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+          ...mkToast('Alarm updated'),
+        })),
 
       toggleAlarm: (id) =>
-        set((s) => ({ alarms: s.alarms.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a)) })),
+        set((s) => {
+          const alarm = s.alarms.find((a) => a.id === id);
+          const willEnable = alarm ? !alarm.enabled : false;
+          return {
+            alarms: s.alarms.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a)),
+            ...mkToast(willEnable ? 'Alarm on' : 'Alarm off'),
+          };
+        }),
 
-      removeAlarm: (id) => set((s) => ({ alarms: s.alarms.filter((a) => a.id !== id) })),
+      removeAlarm: (id) => set((s) => ({ alarms: s.alarms.filter((a) => a.id !== id), ...mkToast('Alarm deleted') })),
 
       addLabelOption: (label) =>
         set((s) => {

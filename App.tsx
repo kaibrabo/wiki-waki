@@ -10,6 +10,7 @@ import { useWidgetSync } from './src/hooks/useWidgetSync';
 import { LocationsScreen } from './src/screens/LocationsScreen';
 import { LocationDetailScreen } from './src/screens/LocationDetailScreen';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { Toast } from './src/components/Toast';
 
 type Route = { name: 'locations' } | { name: 'detail'; id: string };
 
@@ -74,6 +75,7 @@ function AppInner() {
                   )}
                 </>
               )}
+              <Toast />
             </YStack>
             <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
           </SafeAreaView>
