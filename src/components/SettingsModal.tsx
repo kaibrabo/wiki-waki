@@ -7,6 +7,7 @@ import { useStore } from '../store';
 import { useEffectiveTheme } from '../hooks/useEffectiveTheme';
 import { LANGUAGE_OPTIONS, getTranslations } from '../lib/i18n';
 import type { Language } from '../lib/i18n';
+import { Toast } from './Toast';
 
 export function SettingsModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const themePref = useStore((s) => s.themePref);
@@ -33,7 +34,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
         onRequestClose={() => setShowLanguagePicker(false)}
         accessibilityViewIsModal={true}
       >
-        <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
+        <YStack flex={1} bg="rgba(0,0,0,0.25)" justify="flex-end">
           <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" pb="$6" height="70%">
             <XStack items="center" justify="space-between" px="$4" pb="$3" borderBottomWidth={1} borderColor="$borderColor">
               <Text fontSize={20} fontWeight="700" color="$color12" accessibilityRole="header">
@@ -91,6 +92,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
             </YStack>
           </ScrollView>
         </YStack>
+        <Toast />
       </YStack>
     </Modal>
   );
@@ -104,7 +106,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
       onRequestClose={onClose}
       accessibilityViewIsModal={true}
     >
-      <YStack flex={1} bg="rgba(0,0,0,0.5)" justify="flex-end">
+      <YStack flex={1} bg="rgba(0,0,0,0.25)" justify="flex-end">
         <YStack bg="$background" borderTopLeftRadius={24} borderTopRightRadius={24} pt="$3" pb="$6">
           <XStack items="center" justify="space-between" px="$4" pb="$3" borderBottomWidth={1} borderColor="$borderColor">
             <Text fontSize={20} fontWeight="700" color="$color12" accessibilityRole="header">
@@ -258,6 +260,7 @@ export function SettingsModal({ visible, onClose }: { visible: boolean; onClose:
             </Card>
           </YStack>
         </YStack>
+        <Toast />
       </YStack>
     </Modal>
   );
